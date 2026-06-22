@@ -12,6 +12,7 @@ export class OfficeScene extends Phaser.Scene {
   private messagePanel!: Phaser.GameObjects.Rectangle;
   private objectiveText!: Phaser.GameObjects.Text;
   private wireDisconnected = false;
+  private panelOpen = false;
   private hasFunnyDisc = false;
   private catShown = false;
   private onUpperPlatform = false;
@@ -21,6 +22,8 @@ export class OfficeScene extends Phaser.Scene {
   private executives: Phaser.GameObjects.Container[] = [];
   private rocketScreen!: Phaser.GameObjects.Container;
   private panelWire!: Phaser.GameObjects.Arc;
+  private panelDoor!: Phaser.GameObjects.Container;
+  private treeSwitch!: Phaser.GameObjects.Container;
   private projectorImage!: Phaser.GameObjects.Container;
   private officeCat!: Phaser.GameObjects.Container;
   private monkey?: Phaser.GameObjects.Container;
@@ -217,6 +220,36 @@ export class OfficeScene extends Phaser.Scene {
     this.add.container(0, 0, [panel, ...lights]);
     this.add.text(220, 516, "ALIMENTATION", { fontSize: "8px", color: "#9fb4d3", letterSpacing: 1 }).setOrigin(0.5);
 
+    const doorShadow = this.add.rectangle(4, 5, 100, 116, 0x302844, 0.22);
+    const door = this.add.rectangle(0, 0, 100, 116, 0xe5e0d8).setStrokeStyle(4, 0x302844);
+    const inset = this.add.rectangle(0, 0, 79, 94, 0xf7f2e8).setStrokeStyle(2, 0x746b83, 0.5);
+    const warning = this.add.triangle(0, -9, -20, 24, 20, 24, 0, -24, 0xffd45f).setStrokeStyle(3, 0x302844);
+    const bolt = this.add.text(0, -6, "⚡", { fontSize: "22px", color: "#302844" }).setOrigin(0.5);
+    const handle = this.add.rectangle(33, 25, 8, 28, 0x8c819c).setStrokeStyle(2, 0x302844);
+    this.panelDoor = this.add
+      .container(220, 455, [doorShadow, door, inset, warning, bolt, handle])
+      .setDepth(18);
+
+    const switchShadow = this.add.rectangle(4, 5, 46, 48, 0x302844, 0.2);
+    const switchSticker = this.add.rectangle(0, 0, 52, 54, 0xffffff);
+    const switchBox = this.add.rectangle(0, 0, 44, 46, 0xff8cae).setStrokeStyle(3, 0x302844);
+    const switchButton = this.add.circle(0, -3, 11, 0xffd45f).setStrokeStyle(3, 0x302844);
+    const switchLabel = this.add.text(0, 18, "OPEN", {
+      fontSize: "7px",
+      color: "#302844",
+      fontStyle: "bold",
+    }).setOrigin(0.5);
+    this.treeSwitch = this.add
+      .container(115, 505, [switchShadow, switchSticker, switchBox, switchButton, switchLabel])
+      .setDepth(13);
+    this.tweens.add({
+      targets: this.treeSwitch,
+      scale: { from: 0.96, to: 1.04 },
+      duration: 750,
+      yoyo: true,
+      repeat: -1,
+    });
+
     const rocket = this.add.triangle(0, -8, -16, 24, 16, 24, 0, -30, 0xeef3ff);
     const flame = this.add.triangle(0, 25, -8, 0, 8, 0, 0, 25, 0xff815f);
     const status = this.add.text(0, 48, "LANCEMENT", { fontSize: "10px", color: "#ff7185" }).setOrigin(0.5);
@@ -238,25 +271,29 @@ export class OfficeScene extends Phaser.Scene {
     this.add.container(0, 0, [screen]);
 
     const catShadow = this.add.ellipse(0, 30, 58, 12, 0x080e1b, 0.28);
-    const catStickerBody = this.add.ellipse(0, 12, 58, 46, 0xffffff);
-    const catStickerHead = this.add.circle(0, -13, 29, 0xffffff);
-    const catStickerEar1 = this.add.triangle(-16, -32, -12, 5, 12, 5, 0, -18, 0xffffff);
-    const catStickerEar2 = this.add.triangle(16, -32, -12, 5, 12, 5, 0, -18, 0xffffff);
-    const catBody = this.add.ellipse(0, 12, 48, 36, 0xe7934f);
-    const catHead = this.add.circle(0, -13, 23, 0xf3ad63);
-    const ear1 = this.add.triangle(-14, -31, -9, 4, 9, 4, 0, -15, 0xf0a05c);
-    const ear2 = this.add.triangle(14, -31, -9, 4, 9, 4, 0, -15, 0xf0a05c);
-    const eye1 = this.add.circle(-8, -15, 3, 0x25304a);
-    const eye2 = this.add.circle(8, -15, 3, 0x25304a);
-    const mouth = this.add.text(0, -4, "ω", { fontSize: "15px", color: "#6d4430" }).setOrigin(0.5);
-    const tail = this.add.arc(25, 9, 18, 230, 75, false, 0xe7934f).setStrokeStyle(7, 0xe7934f);
+    const catStickerBody = this.add.ellipse(0, 12, 46, 35, 0xffffff);
+    const catStickerHead = this.add.circle(0, -11, 25, 0xffffff);
+    const catStickerEar1 = this.add.triangle(-14, -28, -10, 4, 10, 4, 0, -16, 0xffffff);
+    const catStickerEar2 = this.add.triangle(14, -28, -10, 4, 10, 4, 0, -16, 0xffffff);
+    const catBody = this.add.ellipse(0, 12, 36, 25, 0xf0a05c).setStrokeStyle(2, 0x302844);
+    const catHead = this.add.circle(0, -11, 19, 0xffb86f).setStrokeStyle(2, 0x302844);
+    const ear1 = this.add.triangle(-12, -27, -8, 4, 8, 4, 0, -13, 0xffb86f).setStrokeStyle(2, 0x302844);
+    const ear2 = this.add.triangle(12, -27, -8, 4, 8, 4, 0, -13, 0xffb86f).setStrokeStyle(2, 0x302844);
+    const eye1 = this.add.arc(-7, -13, 4, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
+    const eye2 = this.add.arc(7, -13, 4, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
+    const blush1 = this.add.ellipse(-12, -7, 6, 3, 0xff7298, 0.65);
+    const blush2 = this.add.ellipse(12, -7, 6, 3, 0xff7298, 0.65);
+    const mouth = this.add.text(0, -5, "ω", { fontSize: "12px", color: "#6d4430" }).setOrigin(0.5);
+    const paw1 = this.add.ellipse(-9, 21, 10, 7, 0xffb86f).setStrokeStyle(2, 0x302844);
+    const paw2 = this.add.ellipse(9, 21, 10, 7, 0xffb86f).setStrokeStyle(2, 0x302844);
+    const tail = this.add.arc(19, 10, 14, 230, 75, false, 0xe7934f).setStrokeStyle(5, 0xe7934f);
     const catLabel = this.add.text(0, 42, "TOUCHE-MOI", {
       fontSize: "9px",
       color: "#ffd36a",
       fontStyle: "bold",
     }).setOrigin(0.5);
     this.officeCat = this.add
-      .container(610, 505, [
+      .container(610, 515, [
         catShadow,
         catStickerBody,
         catStickerHead,
@@ -269,9 +306,14 @@ export class OfficeScene extends Phaser.Scene {
         ear2,
         eye1,
         eye2,
+        blush1,
+        blush2,
         mouth,
+        paw1,
+        paw2,
         catLabel,
       ])
+      .setScale(0.82)
       .setDepth(12);
     this.tweens.add({
       targets: this.officeCat,
@@ -350,6 +392,13 @@ export class OfficeScene extends Phaser.Scene {
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
     audio.play("tap");
     if (
+      !this.panelOpen &&
+      Phaser.Math.Distance.Between(world.x, world.y, this.treeSwitch.x, this.treeSwitch.y) < 65
+    ) {
+      this.openElectricalPanel();
+      return;
+    }
+    if (
       this.wireDisconnected &&
       !this.hasFunnyDisc &&
       Phaser.Math.Distance.Between(world.x, world.y, this.officeCat.x, this.officeCat.y) < 70
@@ -371,6 +420,10 @@ export class OfficeScene extends Phaser.Scene {
   private handleDoubleTap(screenX: number, screenY: number): void {
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
     if (!this.wireDisconnected && Phaser.Math.Distance.Between(world.x, world.y, 220, 455) < 85) {
+      if (!this.panelOpen) {
+        this.showMessage("Le panneau est fermé.\nTouche la petite boîte près de l’arbre", 1900);
+        return;
+      }
       this.disconnectWire();
       return;
     }
@@ -400,6 +453,28 @@ export class OfficeScene extends Phaser.Scene {
     this.rocketScreen.setAlpha(0.35);
     this.objectiveText.setText("🐱 CHAT");
     this.showMessage("Fusée débranchée !\nLe chat a quelque chose pour toi", 2200);
+  }
+
+  private openElectricalPanel(): void {
+    if (this.panelOpen) return;
+    this.panelOpen = true;
+    audio.play("confirm");
+    this.tweens.add({
+      targets: this.panelDoor,
+      x: 145,
+      angle: -8,
+      scaleX: 0.35,
+      duration: 620,
+      ease: "Back.inOut",
+    });
+    this.tweens.add({
+      targets: this.treeSwitch,
+      scale: 0.84,
+      duration: 130,
+      yoyo: true,
+    });
+    this.objectiveText.setText("⚡ FIL");
+    this.showMessage("Le panneau électrique s’ouvre !\nDouble tape sur le fil rouge", 2200);
   }
 
   private receiveFunnyDisc(): void {
