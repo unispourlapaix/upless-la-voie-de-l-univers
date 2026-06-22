@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#10162f" />
+    <title>Upless — La voie de l’univers</title>
+  </head>
+  <body>
+    <main id="game">
+      <div id="boot-screen">
+        <strong>UPLESS</strong>
+        <span>Chargement de l’univers…</span>
+      </div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
