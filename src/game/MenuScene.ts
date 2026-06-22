@@ -9,8 +9,25 @@ export class MenuScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setBackgroundColor("#10162f");
-    this.add.circle(180, 210, 112, 0x6574d9, 0.12);
-    this.add.circle(180, 210, 72, 0xffd36a, 0.08);
+    this.add.circle(180, 205, 150, 0x6574d9, 0.08);
+    this.add.circle(180, 205, 105, 0x8b78df, 0.1);
+    this.add.circle(180, 205, 68, 0xffd36a, 0.1);
+    for (let i = 0; i < 28; i += 1) {
+      const star = this.add.circle(
+        Phaser.Math.Between(20, 340),
+        Phaser.Math.Between(40, 560),
+        Phaser.Math.Between(1, 3),
+        0xdce4ff,
+        Phaser.Math.FloatBetween(0.15, 0.6),
+      );
+      this.tweens.add({
+        targets: star,
+        alpha: 0.05,
+        duration: Phaser.Math.Between(900, 2000),
+        yoyo: true,
+        repeat: -1,
+      });
+    }
 
     const orbit = this.add.graphics();
     orbit.lineStyle(2, 0x8da2ff, 0.4).strokeEllipse(180, 210, 240, 92);
@@ -41,7 +58,8 @@ export class MenuScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const hero = this.add.image(180, 365, "hero").setScale(1.5);
+    this.add.ellipse(180, 389, 70, 15, 0x050916, 0.4);
+    const hero = this.add.image(180, 360, "hero").setScale(1.65);
     this.tweens.add({ targets: hero, y: 354, duration: 850, yoyo: true, repeat: -1, ease: "Sine.inOut" });
 
     const start = this.add
