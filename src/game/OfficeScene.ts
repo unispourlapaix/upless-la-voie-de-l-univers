@@ -11,6 +11,7 @@ export class OfficeScene extends Phaser.Scene {
   private messageText!: Phaser.GameObjects.Text;
   private objectiveText!: Phaser.GameObjects.Text;
   private wireDisconnected = false;
+  private hasFunnyDisc = false;
   private catShown = false;
   private onUpperPlatform = false;
   private flowers = 0;
@@ -20,6 +21,7 @@ export class OfficeScene extends Phaser.Scene {
   private rocketScreen!: Phaser.GameObjects.Container;
   private panelWire!: Phaser.GameObjects.Arc;
   private projectorImage!: Phaser.GameObjects.Container;
+  private officeCat!: Phaser.GameObjects.Container;
   private monkey?: Phaser.GameObjects.Container;
   private rope?: Phaser.GameObjects.Container;
   private messageTimer?: Phaser.Time.TimerEvent;
@@ -153,11 +155,30 @@ export class OfficeScene extends Phaser.Scene {
     this.projectorImage = this.add.container(660, 305, [rocket, moon, label]).setDepth(6);
     this.add.container(0, 0, [screen]);
 
-    const cassette = this.add.rectangle(610, 500, 40, 25, 0x4f5d7c).setStrokeStyle(3, 0xb7c3dc);
-    this.add.circle(600, 500, 6, 0x20283b);
-    this.add.circle(620, 500, 6, 0x20283b);
-    this.add.text(610, 522, "CHAT", { fontSize: "9px", color: "#ffd36a" }).setOrigin(0.5);
-    this.tweens.add({ targets: cassette, y: 495, duration: 850, yoyo: true, repeat: -1 });
+    const catBody = this.add.ellipse(0, 12, 45, 35, 0xf0a05c);
+    const catHead = this.add.circle(0, -13, 22, 0xf0a05c);
+    const ear1 = this.add.triangle(-14, -31, -9, 4, 9, 4, 0, -15, 0xf0a05c);
+    const ear2 = this.add.triangle(14, -31, -9, 4, 9, 4, 0, -15, 0xf0a05c);
+    const eye1 = this.add.circle(-8, -15, 3, 0x25304a);
+    const eye2 = this.add.circle(8, -15, 3, 0x25304a);
+    const mouth = this.add.text(0, -4, "ω", { fontSize: "15px", color: "#6d4430" }).setOrigin(0.5);
+    const tail = this.add.arc(25, 9, 18, 230, 75, false, 0xf0a05c).setStrokeStyle(7, 0xf0a05c);
+    const catLabel = this.add.text(0, 42, "TOUCHE-MOI", {
+      fontSize: "9px",
+      color: "#ffd36a",
+      fontStyle: "bold",
+    }).setOrigin(0.5);
+    this.officeCat = this.add
+      .container(610, 505, [tail, catBody, catHead, ear1, ear2, eye1, eye2, mouth, catLabel])
+      .setDepth(12);
+    this.tweens.add({
+      targets: this.officeCat,
+      y: 498,
+      angle: { from: -2, to: 2 },
+      duration: 850,
+      yoyo: true,
+      repeat: -1,
+    });
   }
 
   private createUpperGarden(): void {
@@ -217,6 +238,14 @@ export class OfficeScene extends Phaser.Scene {
     if (this.climbing) return;
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
     audio.play("tap");
+    if (
+      this.wireDisconnected &&
+      !this.hasFunnyDisc &&
+      Phaser.Math.Distance.Between(world.x, world.y, this.officeCat.x, this.officeCat.y) < 70
+    ) {
+      this.receiveFunnyDisc();
+      return;
+    }
     if (this.ropeReady && world.x > 1270) {
       this.climbRope();
       return;
@@ -239,6 +268,10 @@ export class OfficeScene extends Phaser.Scene {
       !this.catShown &&
       Phaser.Math.Distance.Between(world.x, world.y, 660, 310) < 115
     ) {
+      if (!this.hasFunnyDisc) {
+        this.showMessage("Le rétroprojecteur attend un CD…\nTouche le chat", 1700);
+        return;
+      }
       this.showCatCassette();
       return;
     }
@@ -254,8 +287,44 @@ export class OfficeScene extends Phaser.Scene {
     audio.play("wire");
     this.tweens.add({ targets: this.panelWire, y: 492, angle: 35, duration: 350, ease: "Back.out" });
     this.rocketScreen.setAlpha(0.35);
-    this.objectiveText.setText("▣ CASSETTE");
-    this.showMessage("Fusée débranchée !\nChange maintenant l’image", 2100);
+    this.objectiveText.setText("🐱 CHAT");
+    this.showMessage("Fusée débranchée !\nLe chat a quelque chose pour toi", 2200);
+  }
+
+  private receiveFunnyDisc(): void {
+    if (this.player.sprite.x < 500) {
+      this.showMessage("Approche-toi du chat", 1300);
+      return;
+    }
+    this.hasFunnyDisc = true;
+    audio.play("cat");
+    const disc = this.add.circle(this.officeCat.x, this.officeCat.y - 18, 16, 0x8ee7ff)
+      .setStrokeStyle(4, 0xe8fbff)
+      .setDepth(30);
+    this.add.circle(disc.x, disc.y, 4, 0x27334c).setDepth(31);
+    const label = this.add
+      .text(disc.x, disc.y + 27, "CD IMAGE DRÔLE", {
+        fontSize: "9px",
+        color: "#fff",
+        backgroundColor: "#27334c",
+        padding: { x: 5, y: 3 },
+      })
+      .setOrigin(0.5)
+      .setDepth(31);
+    this.tweens.add({
+      targets: [disc, label],
+      x: this.player.sprite.x,
+      y: this.player.sprite.y - 35,
+      duration: 600,
+      ease: "Back.out",
+      onComplete: () => {
+        disc.destroy();
+        label.destroy();
+      },
+    });
+    this.tweens.add({ targets: this.officeCat, scaleY: 1.18, duration: 150, yoyo: true });
+    this.objectiveText.setText("💿 IMAGE");
+    this.showMessage("Le chat te donne le CD « Image drôle » !\nDouble tape le rétroprojecteur", 2500);
   }
 
   private showCatCassette(): void {
@@ -264,6 +333,7 @@ export class OfficeScene extends Phaser.Scene {
       return;
     }
     this.catShown = true;
+    this.hasFunnyDisc = false;
     audio.play("cat");
     this.projectorImage.removeAll(true);
     const head = this.add.circle(0, -5, 34, 0xf3a45f);
