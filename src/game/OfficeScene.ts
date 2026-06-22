@@ -10,9 +10,12 @@ export class OfficeScene extends Phaser.Scene {
   private inputController?: TouchInput;
   private messageText!: Phaser.GameObjects.Text;
   private messagePanel!: Phaser.GameObjects.Rectangle;
+  private dialogueBox!: Phaser.GameObjects.Container;
+  private dialogueText!: Phaser.GameObjects.Text;
   private objectiveText!: Phaser.GameObjects.Text;
   private wireDisconnected = false;
   private panelOpen = false;
+  private catHintReceived = false;
   private hasFunnyDisc = false;
   private catShown = false;
   private onUpperPlatform = false;
@@ -31,6 +34,8 @@ export class OfficeScene extends Phaser.Scene {
   private monkey?: Phaser.GameObjects.Container;
   private rope?: Phaser.GameObjects.Container;
   private messageTimer?: Phaser.Time.TimerEvent;
+  private dialogueTimer?: Phaser.Time.TimerEvent;
+  private dialogueOpen = false;
 
   constructor() {
     super("OfficeScene");
@@ -53,6 +58,7 @@ export class OfficeScene extends Phaser.Scene {
     this.cameras.main.setDeadzone(90, 180);
 
     this.createHud();
+    this.createDialogueBox();
     this.inputController = new TouchInput(this, {
       onTap: (x, y) => this.handleTap(x, y),
       onDoubleTap: (x, y) => this.handleDoubleTap(x, y),
@@ -442,7 +448,7 @@ export class OfficeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(101);
     this.objectiveText = this.add
-      .text(330, 18, "⚡ FIL", { fontSize: "14px", color: "#ffd36a", fontStyle: "bold" })
+      .text(330, 18, "🐱 PARLER", { fontSize: "13px", color: "#ff4f8b", fontStyle: "bold" })
       .setOrigin(1, 0)
       .setScrollFactor(0)
       .setDepth(101);
@@ -474,14 +480,75 @@ export class OfficeScene extends Phaser.Scene {
       .setAlpha(0);
   }
 
+  private createDialogueBox(): void {
+    const shadow = this.add.rectangle(4, 6, 332, 126, 0x302844, 0.25);
+    const paper = this.add.rectangle(0, 0, 332, 126, 0xfffcf5).setStrokeStyle(4, 0x302844);
+    const portraitSticker = this.add.circle(-128, -17, 35, 0xffffff).setStrokeStyle(2, 0x302844);
+    const portraitHead = this.add.circle(-128, -17, 27, 0xffb86f).setStrokeStyle(3, 0x302844);
+    const ear1 = this.add.triangle(-145, -41, -9, 5, 9, 5, 0, -15, 0xffb86f).setStrokeStyle(2, 0x302844);
+    const ear2 = this.add.triangle(-111, -41, -9, 5, 9, 5, 0, -15, 0xffb86f).setStrokeStyle(2, 0x302844);
+    const eye1 = this.add.arc(-137, -19, 5, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
+    const eye2 = this.add.arc(-119, -19, 5, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
+    const nameTag = this.add.rectangle(-82, -55, 76, 24, 0xff4f8b).setStrokeStyle(3, 0x302844);
+    const name = this.add
+      .text(-82, -55, "MIMI", { fontSize: "11px", color: "#ffffff", fontStyle: "bold" })
+      .setOrigin(0.5);
+    this.dialogueText = this.add.text(-82, -29, "", {
+      fontFamily: "system-ui",
+      fontSize: "13px",
+      color: "#302844",
+      wordWrap: { width: 208 },
+      lineSpacing: 5,
+    });
+    const continueMark = this.add.text(145, 47, "▼", {
+      fontSize: "13px",
+      color: "#ff4f8b",
+      fontStyle: "bold",
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: continueMark, y: 52, duration: 450, yoyo: true, repeat: -1 });
+    this.dialogueBox = this.add
+      .container(180, 555, [
+        shadow,
+        paper,
+        portraitSticker,
+        portraitHead,
+        ear1,
+        ear2,
+        eye1,
+        eye2,
+        nameTag,
+        name,
+        this.dialogueText,
+        continueMark,
+      ])
+      .setScrollFactor(0)
+      .setDepth(180)
+      .setVisible(false);
+  }
+
   private handleTap(screenX: number, screenY: number): void {
+    if (this.dialogueOpen) {
+      this.closeDialogue();
+      return;
+    }
     if (this.climbing) return;
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
     audio.play("tap");
     if (
+      !this.catHintReceived &&
+      Phaser.Math.Distance.Between(world.x, world.y, this.officeCat.x, this.officeCat.y) < 70
+    ) {
+      this.giveCatHint();
+      return;
+    }
+    if (
       !this.panelOpen &&
       Phaser.Math.Distance.Between(world.x, world.y, this.treeSwitch.x, this.treeSwitch.y) < 65
     ) {
+      if (!this.catHintReceived) {
+        this.showMessage("Cette petite boîte semble verrouillée…", 1300);
+        return;
+      }
       this.openElectricalPanel();
       return;
     }
@@ -508,7 +575,7 @@ export class OfficeScene extends Phaser.Scene {
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
     if (!this.wireDisconnected && Phaser.Math.Distance.Between(world.x, world.y, 220, 455) < 85) {
       if (!this.panelOpen) {
-        this.showMessage("Le panneau est fermé.\nTouche la petite boîte près de l’arbre", 1900);
+        this.showMessage("Le panneau est fermé.\nLe chat connaît peut-être le mécanisme", 1900);
         return;
       }
       this.disconnectWire();
@@ -562,6 +629,50 @@ export class OfficeScene extends Phaser.Scene {
     });
     this.objectiveText.setText("⚡ FIL");
     this.showMessage("Le panneau électrique s’ouvre !\nDouble tape sur le fil rouge", 2200);
+  }
+
+  private giveCatHint(): void {
+    if (this.player.sprite.x < 500) {
+      this.showMessage("Un petit chat t’observe près de la table", 1400);
+      return;
+    }
+    this.catHintReceived = true;
+    audio.play("cat");
+    this.player.stop();
+    this.objectiveText.setText("▣ BOÎTE");
+    this.openDialogue(
+      "Miaou ! Tu vois la petite boîte rose près de l’arbre ? Touche-la : elle ouvre le panneau électrique.",
+    );
+    this.tweens.add({ targets: this.officeCat, scaleY: 0.76, scaleX: 0.9, duration: 150, yoyo: true });
+  }
+
+  private openDialogue(text: string): void {
+    this.dialogueTimer?.remove(false);
+    this.dialogueOpen = true;
+    this.dialogueBox.setVisible(true).setScale(0.94).setAlpha(0);
+    this.dialogueText.setText("");
+    this.tweens.add({ targets: this.dialogueBox, alpha: 1, scale: 1, duration: 180, ease: "Back.out" });
+    let index = 0;
+    this.dialogueTimer = this.time.addEvent({
+      delay: 23,
+      repeat: text.length - 1,
+      callback: () => {
+        index += 1;
+        this.dialogueText.setText(text.slice(0, index));
+      },
+    });
+  }
+
+  private closeDialogue(): void {
+    this.dialogueTimer?.remove(false);
+    this.dialogueOpen = false;
+    this.tweens.add({
+      targets: this.dialogueBox,
+      alpha: 0,
+      scale: 0.96,
+      duration: 130,
+      onComplete: () => this.dialogueBox.setVisible(false),
+    });
   }
 
   private receiveFunnyDisc(): void {
