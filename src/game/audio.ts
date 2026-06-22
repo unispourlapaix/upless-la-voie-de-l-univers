@@ -61,7 +61,10 @@ class UplessAudio {
       | "ogre"
       | "portal"
       | "danger"
-      | "confirm",
+      | "confirm"
+      | "wire"
+      | "cat"
+      | "monkey",
   ): void {
     if (!loadSave().sound) return;
     this.ensureContext();
@@ -114,6 +117,20 @@ class UplessAudio {
       case "confirm":
         this.tone(659.25, now, 0.16, 0.06, "sine", effectsBus);
         this.tone(987.77, now + 0.07, 0.2, 0.05, "sine", effectsBus);
+        break;
+      case "wire":
+        this.pitchDrop(480, 90, now, 0.28, 0.07);
+        this.tone(110, now + 0.24, 0.18, 0.035, "square", effectsBus);
+        break;
+      case "cat":
+        [523.25, 659.25, 783.99, 1046.5].forEach((frequency, index) =>
+          this.tone(frequency, now + index * 0.065, 0.24, 0.055, "triangle", effectsBus),
+        );
+        break;
+      case "monkey":
+        [220, 277.18, 329.63, 277.18].forEach((frequency, index) =>
+          this.tone(frequency, now + index * 0.09, 0.2, 0.05, "square", effectsBus),
+        );
         break;
     }
   }
