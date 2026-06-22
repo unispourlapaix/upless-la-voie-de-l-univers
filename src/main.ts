@@ -3,6 +3,7 @@ import "./style.css";
 import { GameScene } from "./game/GameScene";
 import { LevelCompleteScene } from "./game/LevelCompleteScene";
 import { MenuScene } from "./game/MenuScene";
+import { OfficeScene } from "./game/OfficeScene";
 import { PreloadScene } from "./game/PreloadScene";
 
 const bootScreen = document.querySelector<HTMLDivElement>("#boot-screen");
@@ -28,7 +29,7 @@ try {
       width: 360,
       height: 640,
     },
-    scene: [PreloadScene, MenuScene, GameScene, LevelCompleteScene],
+    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, LevelCompleteScene],
     render: {
       antialias: true,
       pixelArt: false,
