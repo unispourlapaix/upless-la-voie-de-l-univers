@@ -404,11 +404,11 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     const save = loadSave();
-    writeSave({ ...save, lastLevel: 1, unlockedLevel: Math.max(save.unlockedLevel, 1) });
+    writeSave({ ...save, lastLevel: 1, unlockedLevel: Math.max(save.unlockedLevel, 2) });
     this.player.stop();
     audio.play("portal");
     this.cameras.main.flash(600, 255, 230, 150);
-    this.time.delayedCall(500, () => this.scene.start("LevelCompleteScene"));
+    this.time.delayedCall(500, () => this.scene.start("LevelCompleteScene", { completedLevel: 1 }));
   }
 
   private updateObjective(): void {
