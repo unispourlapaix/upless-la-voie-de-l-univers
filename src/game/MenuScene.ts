@@ -8,10 +8,22 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.cameras.main.setBackgroundColor("#10162f");
-    this.add.circle(180, 205, 150, 0x6574d9, 0.08);
-    this.add.circle(180, 205, 105, 0x8b78df, 0.1);
-    this.add.circle(180, 205, 68, 0xffd36a, 0.1);
+    this.cameras.main.setBackgroundColor("#f4f0e8");
+    this.add.rectangle(180, 320, 360, 640, 0xf4f0e8);
+    this.add.circle(180, 202, 145, 0xff4f8b, 0.16);
+    this.add.circle(180, 202, 104, 0x6949d7, 0.12);
+    this.add.circle(180, 202, 66, 0xffd45f, 0.24);
+    const burst = this.add.graphics();
+    burst.lineStyle(2, 0x2a2440, 0.12);
+    for (let i = 0; i < 42; i += 1) {
+      const angle = (Math.PI * 2 * i) / 42;
+      burst.lineBetween(180 + Math.cos(angle) * 105, 202 + Math.sin(angle) * 105, 180 + Math.cos(angle) * 245, 202 + Math.sin(angle) * 245);
+    }
+    const dots = this.add.graphics();
+    dots.fillStyle(0x342d4f, 0.13);
+    for (let y = 330; y < 620; y += 13) {
+      for (let x = (y / 13) % 2 ? 8 : 14; x < 360; x += 14) dots.fillCircle(x, y, 1.5);
+    }
     for (let i = 0; i < 28; i += 1) {
       const star = this.add.circle(
         Phaser.Math.Between(20, 340),
@@ -37,7 +49,9 @@ export class MenuScene extends Phaser.Scene {
       .text(180, 190, "UPLESS", {
         fontFamily: "Arial Rounded MT Bold, system-ui",
         fontSize: "48px",
-        color: "#ffffff",
+        color: "#211b38",
+        stroke: "#ffffff",
+        strokeThickness: 7,
         letterSpacing: 5,
       })
       .setOrigin(0.5);
@@ -45,7 +59,7 @@ export class MenuScene extends Phaser.Scene {
       .text(180, 236, "LA VOIE DE L’UNIVERS", {
         fontFamily: "system-ui",
         fontSize: "13px",
-        color: "#b8c5ff",
+        color: "#5d43c2",
         letterSpacing: 2,
       })
       .setOrigin(0.5);
@@ -53,12 +67,12 @@ export class MenuScene extends Phaser.Scene {
       .text(180, 278, "♫  POP POLYPHONIQUE SYNTHÉTISÉE", {
         fontFamily: "system-ui",
         fontSize: "10px",
-        color: "#8799dc",
+        color: "#7e6d91",
         letterSpacing: 1,
       })
       .setOrigin(0.5);
 
-    this.add.ellipse(180, 389, 70, 15, 0x050916, 0.4);
+    this.add.ellipse(180, 389, 76, 15, 0x2a2440, 0.22);
     const hero = this.add.image(180, 360, "hero").setScale(1.65);
     this.tweens.add({ targets: hero, y: 354, duration: 850, yoyo: true, repeat: -1, ease: "Sine.inOut" });
 
@@ -67,8 +81,10 @@ export class MenuScene extends Phaser.Scene {
         fontFamily: "system-ui",
         fontStyle: "bold",
         fontSize: "15px",
-        color: "#17203c",
-        backgroundColor: "#ffd36a",
+        color: "#ffffff",
+        backgroundColor: "#ff4f8b",
+        stroke: "#2a2440",
+        strokeThickness: 2,
         padding: { x: 22, y: 14 },
       })
       .setOrigin(0.5)
