@@ -9,6 +9,7 @@ export class OfficeScene extends Phaser.Scene {
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
   private inputController?: TouchInput;
   private messageText!: Phaser.GameObjects.Text;
+  private messagePanel!: Phaser.GameObjects.Rectangle;
   private objectiveText!: Phaser.GameObjects.Text;
   private wireDisconnected = false;
   private hasFunnyDisc = false;
@@ -62,43 +63,79 @@ export class OfficeScene extends Phaser.Scene {
 
   private drawOffice(): void {
     const background = this.add.graphics().setScrollFactor(0);
-    background.fillGradientStyle(0x243153, 0x243153, 0x121a31, 0x121a31, 1);
+    background.fillGradientStyle(0x162747, 0x162747, 0x273b62, 0x273b62, 1);
     background.fillRect(0, 0, 360, 640);
 
-    for (let x = 40; x < 1540; x += 180) {
-      this.add.rectangle(x, 155, 125, 170, 0x24365a).setStrokeStyle(5, 0x8ca8d8, 0.28);
-      this.add.rectangle(x, 155, 4, 170, 0xa7b8d8, 0.2);
-      this.add.rectangle(x, 155, 125, 4, 0xa7b8d8, 0.2);
+    for (let x = 60; x < 1540; x += 210) {
+      this.add.rectangle(x + 8, 176, 158, 190, 0x07142b, 0.42);
+      this.add.rectangle(x, 168, 158, 190, 0x1a3155).setStrokeStyle(7, 0x6987b5, 0.45);
+      this.add.rectangle(x, 168, 142, 174, 0x0c1b35);
+      this.add.circle(x - 42, 132, 20, 0xeabf7b, 0.25);
+      this.add.rectangle(x - 36, 196, 3, 166, 0x8ba5ca, 0.28);
+      this.add.rectangle(x + 36, 196, 3, 166, 0x8ba5ca, 0.28);
+      this.add.rectangle(x, 163, 140, 3, 0x8ba5ca, 0.2);
     }
 
-    this.add.text(42, 85, "UPLESS AEROSPACE", {
+    this.add.rectangle(186, 76, 306, 54, 0x0d1830, 0.76).setStrokeStyle(2, 0x7492ca, 0.28);
+    this.add.circle(51, 76, 18, 0xffc665, 0.18);
+    this.add.text(51, 76, "U", {
       fontFamily: "system-ui",
       fontStyle: "bold",
-      fontSize: "20px",
-      color: "#d9e2ff",
-      letterSpacing: 2,
+      fontSize: "17px",
+      color: "#ffd987",
+    }).setOrigin(0.5);
+    this.add.text(78, 63, "UPLESS AEROSPACE", {
+      fontFamily: "system-ui",
+      fontStyle: "bold",
+      fontSize: "15px",
+      color: "#eef4ff",
+      letterSpacing: 1,
+    });
+    this.add.text(78, 84, "CONSEIL DU PROGRAMME ORBITE", {
+      fontFamily: "system-ui",
+      fontSize: "8px",
+      color: "#8299bf",
+      letterSpacing: 1,
     });
 
-    this.add.rectangle(500, 450, 360, 90, 0x5a402f).setStrokeStyle(5, 0xb7885d, 0.8);
-    this.add.ellipse(500, 425, 350, 82, 0x79583f).setStrokeStyle(4, 0xd3a477, 0.7);
-    this.add.text(430, 400, "PROJET ORBITE", {
-      fontSize: "14px",
-      color: "#f2d7ad",
+    for (let x = 0; x < 1540; x += 95) {
+      this.add.rectangle(x, 551, 93, 4, x % 190 === 0 ? 0x7a8caf : 0x5e7197, 0.28);
+    }
+
+    this.add.ellipse(500, 480, 374, 104, 0x0e1628, 0.3);
+    this.add.rectangle(500, 462, 366, 82, 0x523c34).setStrokeStyle(4, 0x1d263b, 0.7);
+    this.add.ellipse(500, 433, 366, 88, 0xb67e52).setStrokeStyle(5, 0xf0bb7a, 0.68);
+    this.add.ellipse(500, 426, 340, 66, 0xd69a61, 0.72);
+    this.add.rectangle(500, 480, 250, 16, 0x332b2d, 0.5);
+    this.add.text(500, 426, "PROJET ORBITE", {
+      fontSize: "13px",
+      color: "#4a2e2a",
       fontStyle: "bold",
-    });
+      letterSpacing: 2,
+    }).setOrigin(0.5);
+
+    for (let x = 115; x < 1450; x += 320) {
+      this.add.ellipse(x, 550, 100, 14, 0x0b1325, 0.28);
+      this.add.rectangle(x, 515, 45, 70, 0x314765).setStrokeStyle(2, 0x637da2, 0.4);
+      this.add.circle(x - 14, 475, 23, 0x4d8c76);
+      this.add.circle(x + 10, 468, 27, 0x67a87f);
+      this.add.circle(x + 24, 486, 19, 0x3f7b68);
+    }
   }
 
   private createPlatforms(): void {
     this.platforms = this.physics.add.staticGroup();
-    const ground = this.add.rectangle(770, 575, 1540, 50, 0x455376).setStrokeStyle(3, 0x9aa9d0, 0.25);
+    const ground = this.add.rectangle(770, 580, 1540, 60, 0x263653).setStrokeStyle(3, 0x6f86ad, 0.4);
     const upper = this.add
-      .rectangle(1080, 430, 560, 30, 0x66865f)
-      .setStrokeStyle(3, 0xb9dda9, 0.55);
+      .rectangle(1080, 430, 560, 30, 0x446e68)
+      .setStrokeStyle(4, 0xa9d6b1, 0.65);
     this.platforms.add(ground);
     this.platforms.add(upper);
 
-    this.add.rectangle(790, 505, 70, 140, 0x8ca0bf, 0.32).setStrokeStyle(3, 0xcad6eb, 0.5);
-    this.add.text(790, 494, "⇧", { fontSize: "28px", color: "#dce7ff" }).setOrigin(0.5);
+    this.add.rectangle(790, 510, 78, 128, 0x17243c, 0.92).setStrokeStyle(4, 0x7897c7, 0.65);
+    this.add.rectangle(790, 510, 58, 102, 0x274263, 0.76).setStrokeStyle(2, 0xb6c7e3, 0.34);
+    this.add.circle(790, 476, 20, 0xffd36a, 0.12);
+    this.add.text(790, 494, "↑", { fontSize: "29px", color: "#ffd36a", fontStyle: "bold" }).setOrigin(0.5);
   }
 
   private createExecutives(): void {
@@ -108,12 +145,21 @@ export class OfficeScene extends Phaser.Scene {
       { x: 580, tie: 0xe6b85e },
       { x: 690, tie: 0x9c6ee6 },
     ].forEach(({ x, tie }, index) => {
-      const head = this.add.circle(0, -44, 14, index % 2 ? 0xd5a77f : 0xb97f5d);
-      const hair = this.add.arc(0, -49, 14, 180, 360, false, index % 2 ? 0x413329 : 0x2e2521);
-      const suit = this.add.rectangle(0, 0, 38, 55, 0x303a52).setStrokeStyle(2, 0x77839f);
-      const shirt = this.add.triangle(0, -16, -9, 0, 9, 0, 0, 18, 0xf3f4f7);
-      const necktie = this.add.triangle(0, 0, -5, -10, 5, -10, 0, 16, tie);
-      const man = this.add.container(x, 480, [suit, shirt, necktie, head, hair]).setDepth(9);
+      const shadow = this.add.ellipse(0, 28, 48, 11, 0x0a1020, 0.28);
+      const suit = this.add.rectangle(0, 0, 42, 58, index % 2 ? 0x273b5e : 0x36445e).setStrokeStyle(2, 0x8594b0);
+      const shoulder = this.add.ellipse(0, -16, 48, 23, index % 2 ? 0x273b5e : 0x36445e);
+      const shirt = this.add.triangle(0, -18, -10, 0, 10, 0, 0, 20, 0xf3f4f7);
+      const necktie = this.add.triangle(0, 0, -5, -12, 5, -12, 0, 19, tie);
+      const neck = this.add.rectangle(0, -35, 13, 14, index % 2 ? 0xd5a77f : 0xb97f5d);
+      const head = this.add.ellipse(0, -50, 31, 37, index % 2 ? 0xd5a77f : 0xb97f5d);
+      const ear1 = this.add.circle(-16, -49, 4, index % 2 ? 0xd5a77f : 0xb97f5d);
+      const ear2 = this.add.circle(16, -49, 4, index % 2 ? 0xd5a77f : 0xb97f5d);
+      const hair = this.add.arc(0, -56, 16, 180, 360, false, index % 2 ? 0x413329 : 0x2e2521);
+      const eye1 = this.add.circle(-6, -50, 1.5, 0x27222a);
+      const eye2 = this.add.circle(6, -50, 1.5, 0x27222a);
+      const man = this.add
+        .container(x, 486, [shadow, suit, shoulder, shirt, necktie, neck, head, ear1, ear2, hair, eye1, eye2])
+        .setDepth(9);
       this.executives.push(man);
       this.tweens.add({
         targets: man,
@@ -126,15 +172,19 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private createControlPanel(): void {
-    const panel = this.add.rectangle(220, 455, 90, 105, 0x27334c).setStrokeStyle(4, 0x8ca8d8);
+    this.add.rectangle(224, 462, 104, 122, 0x091224, 0.38);
+    const panel = this.add.rectangle(220, 455, 100, 116, 0x1a2943).setStrokeStyle(4, 0x7193c4);
+    this.add.rectangle(220, 455, 82, 96, 0x223957).setStrokeStyle(2, 0xa9bad5, 0.25);
     const lights = [
       this.add.circle(198, 427, 6, 0x71e69b),
       this.add.circle(220, 427, 6, 0xffd36a),
       this.add.circle(242, 427, 6, 0xff7185),
     ];
-    this.panelWire = this.add.circle(220, 468, 13, 0xff4f68).setStrokeStyle(5, 0x572535);
+    this.add.rectangle(220, 475, 48, 28, 0x111b30).setStrokeStyle(2, 0x536c94);
+    this.panelWire = this.add.circle(220, 468, 12, 0xff5d76).setStrokeStyle(4, 0x7d2941);
+    this.add.circle(220, 468, 4, 0xffd9df);
     this.add.container(0, 0, [panel, ...lights]);
-    this.add.text(220, 515, "PANNEAU", { fontSize: "10px", color: "#b8c8e6" }).setOrigin(0.5);
+    this.add.text(220, 516, "ALIMENTATION", { fontSize: "8px", color: "#9fb4d3", letterSpacing: 1 }).setOrigin(0.5);
 
     const rocket = this.add.triangle(0, -8, -16, 24, 16, 24, 0, -30, 0xeef3ff);
     const flame = this.add.triangle(0, 25, -8, 0, 8, 0, 0, 25, 0xff815f);
@@ -144,7 +194,8 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private createProjector(): void {
-    const screen = this.add.rectangle(660, 310, 170, 120, 0xe7ecf5).setStrokeStyle(7, 0x43506b);
+    this.add.rectangle(668, 320, 188, 138, 0x08101f, 0.38);
+    const screen = this.add.rectangle(660, 310, 180, 130, 0xf5f0df).setStrokeStyle(8, 0x2d3b58);
     const rocket = this.add.triangle(0, -8, -25, 35, 25, 35, 0, -48, 0x697997);
     const moon = this.add.circle(45, -35, 15, 0xffd36a);
     const label = this.add.text(0, 48, "DÉPART IMMÉDIAT", {
@@ -155,21 +206,22 @@ export class OfficeScene extends Phaser.Scene {
     this.projectorImage = this.add.container(660, 305, [rocket, moon, label]).setDepth(6);
     this.add.container(0, 0, [screen]);
 
-    const catBody = this.add.ellipse(0, 12, 45, 35, 0xf0a05c);
-    const catHead = this.add.circle(0, -13, 22, 0xf0a05c);
+    const catShadow = this.add.ellipse(0, 30, 58, 12, 0x080e1b, 0.28);
+    const catBody = this.add.ellipse(0, 12, 48, 36, 0xe7934f);
+    const catHead = this.add.circle(0, -13, 23, 0xf3ad63);
     const ear1 = this.add.triangle(-14, -31, -9, 4, 9, 4, 0, -15, 0xf0a05c);
     const ear2 = this.add.triangle(14, -31, -9, 4, 9, 4, 0, -15, 0xf0a05c);
     const eye1 = this.add.circle(-8, -15, 3, 0x25304a);
     const eye2 = this.add.circle(8, -15, 3, 0x25304a);
     const mouth = this.add.text(0, -4, "ω", { fontSize: "15px", color: "#6d4430" }).setOrigin(0.5);
-    const tail = this.add.arc(25, 9, 18, 230, 75, false, 0xf0a05c).setStrokeStyle(7, 0xf0a05c);
+    const tail = this.add.arc(25, 9, 18, 230, 75, false, 0xe7934f).setStrokeStyle(7, 0xe7934f);
     const catLabel = this.add.text(0, 42, "TOUCHE-MOI", {
       fontSize: "9px",
       color: "#ffd36a",
       fontStyle: "bold",
     }).setOrigin(0.5);
     this.officeCat = this.add
-      .container(610, 505, [tail, catBody, catHead, ear1, ear2, eye1, eye2, mouth, catLabel])
+      .container(610, 505, [catShadow, tail, catBody, catHead, ear1, ear2, eye1, eye2, mouth, catLabel])
       .setDepth(12);
     this.tweens.add({
       targets: this.officeCat,
@@ -201,10 +253,12 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private createHud(): void {
-    const panel = this.add.rectangle(180, 32, 330, 48, 0x0b1027, 0.84).setScrollFactor(0).setDepth(100);
-    panel.setStrokeStyle(1, 0xaebcff, 0.24);
+    this.add.rectangle(181, 35, 334, 52, 0x050916, 0.35).setScrollFactor(0).setDepth(99);
+    const panel = this.add.rectangle(180, 31, 330, 48, 0x101a30, 0.94).setScrollFactor(0).setDepth(100);
+    panel.setStrokeStyle(2, 0x8297c4, 0.3);
+    this.add.circle(43, 31, 15, 0xffd36a, 0.14).setScrollFactor(0).setDepth(101);
     this.add
-      .text(28, 18, "NIVEAU 2", { fontSize: "14px", color: "#fff", fontStyle: "bold" })
+      .text(62, 18, "BUREAU ORBITE", { fontSize: "12px", color: "#fff", fontStyle: "bold", letterSpacing: 1 })
       .setScrollFactor(0)
       .setDepth(101);
     this.objectiveText = this.add
@@ -219,14 +273,20 @@ export class OfficeScene extends Phaser.Scene {
       .setInteractive();
     sound.on("pointerdown", () => sound.setText(audio.toggle() ? "♪" : "×"));
 
+    this.messagePanel = this.add
+      .rectangle(180, 588, 326, 58, 0x071020, 0.92)
+      .setStrokeStyle(2, 0x7189b4, 0.28)
+      .setScrollFactor(0)
+      .setDepth(109)
+      .setAlpha(0);
     this.messageText = this.add
       .text(180, 590, "", {
-        fontSize: "14px",
+        fontFamily: "system-ui",
+        fontSize: "13px",
         color: "#fff",
         fontStyle: "bold",
         align: "center",
-        backgroundColor: "rgba(11,16,39,0.9)",
-        padding: { x: 16, y: 10 },
+        lineSpacing: 3,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -472,9 +532,10 @@ export class OfficeScene extends Phaser.Scene {
 
   private showMessage(message: string, duration: number): void {
     this.messageTimer?.remove(false);
+    this.messagePanel.setAlpha(1);
     this.messageText.setText(message).setAlpha(1);
     this.messageTimer = this.time.delayedCall(duration, () => {
-      this.tweens.add({ targets: this.messageText, alpha: 0, duration: 220 });
+      this.tweens.add({ targets: [this.messageText, this.messagePanel], alpha: 0, duration: 220 });
     });
   }
 }
