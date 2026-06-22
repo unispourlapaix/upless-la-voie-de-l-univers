@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { audio } from "./audio";
 
 export class MenuScene extends Phaser.Scene {
   constructor() {
@@ -30,6 +31,14 @@ export class MenuScene extends Phaser.Scene {
         letterSpacing: 2,
       })
       .setOrigin(0.5);
+    this.add
+      .text(180, 278, "♫  POP POLYPHONIQUE SYNTHÉTISÉE", {
+        fontFamily: "system-ui",
+        fontSize: "10px",
+        color: "#8799dc",
+        letterSpacing: 1,
+      })
+      .setOrigin(0.5);
 
     const hero = this.add.image(180, 365, "hero").setScale(1.5);
     this.tweens.add({ targets: hero, y: 354, duration: 850, yoyo: true, repeat: -1, ease: "Sine.inOut" });
@@ -47,6 +56,10 @@ export class MenuScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     this.tweens.add({ targets: start, scale: 1.04, duration: 900, yoyo: true, repeat: -1 });
-    this.input.once("pointerdown", () => this.scene.start("GameScene", { levelId: 1 }));
+    this.input.once("pointerdown", () => {
+      void audio.start();
+      audio.play("confirm");
+      this.scene.start("GameScene", { levelId: 1 });
+    });
   }
 }
