@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { audio } from "./audio";
 import { TouchInput } from "./input";
 import { levels } from "./levels";
 import { PlayerController } from "./player";
@@ -207,6 +208,21 @@ export class GameScene extends Phaser.Scene {
       })
       .setScrollFactor(0)
       .setDepth(101);
+
+    const soundButton = this.add
+      .text(259, 18, audio.isEnabled() ? "♪" : "×", {
+        fontFamily: "system-ui",
+        fontStyle: "bold",
+        fontSize: "16px",
+        color: "#ffd36a",
+      })
+      .setScrollFactor(0)
+      .setDepth(102)
+      .setInteractive({ useHandCursor: true });
+    soundButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      pointer.event.stopPropagation();
+      soundButton.setText(audio.toggle() ? "♪" : "×");
+    });
     this.objectiveText = this.add
       .text(330, 19, "✿ 0/3", {
         fontFamily: "system-ui",
@@ -237,6 +253,7 @@ export class GameScene extends Phaser.Scene {
   handleTap(screenX: number, screenY: number): void {
     if (this.isClimbing) return;
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
+    audio.play("tap");
     if (this.ladderReady && this.player.sprite.y > 650 && world.x > 415) {
       this.climbLadder();
       return;
@@ -313,6 +330,7 @@ export class GameScene extends Phaser.Scene {
     this.platforms.add(bridge.body);
     this.tweens.add({ targets: bridge.body, scaleX: 1, duration: 520, ease: "Back.out" });
     this.sparkle(bridge.definition.x + bridge.definition.width / 2, bridge.definition.y);
+    audio.play("bridge");
     this.vibrate(35);
     this.showMessage("Pont réparé !", 1800);
   }
@@ -321,6 +339,7 @@ export class GameScene extends Phaser.Scene {
     if (!this.rockSprite?.visible) return;
     zone.used = true;
     this.hasRock = true;
+    audio.play("rock");
     this.rockSprite.setVisible(false);
     const carried = this.add.image(0, -28, "rock").setScale(0.68);
     this.player.sprite.addToUpdateList();
@@ -355,6 +374,7 @@ export class GameScene extends Phaser.Scene {
 
   private defeatOgre(): void {
     this.ogreDefeated = true;
+    audio.play("ogre");
     this.cameras.main.shake(180, 0.009);
     if (this.ogre) {
       this.tweens.add({ targets: this.ogre, angle: 12, scaleY: 0.7, duration: 260, ease: "Bounce.out" });
@@ -386,6 +406,7 @@ export class GameScene extends Phaser.Scene {
     const save = loadSave();
     writeSave({ ...save, lastLevel: 1, unlockedLevel: Math.max(save.unlockedLevel, 1) });
     this.player.stop();
+    audio.play("portal");
     this.cameras.main.flash(600, 255, 230, 150);
     this.time.delayedCall(500, () => this.scene.start("LevelCompleteScene"));
   }
@@ -456,6 +477,7 @@ export class GameScene extends Phaser.Scene {
           onComplete: () => child.destroy(),
         });
         this.sparkle(child.x, child.y);
+        audio.play("flower");
         this.showMessage(`${this.flowers}/3 fleur${this.flowers > 1 ? "s" : ""}`, 900);
         if (this.flowers === 3) this.openWindowAndSendBee();
       }
@@ -491,6 +513,7 @@ export class GameScene extends Phaser.Scene {
 
   private respawn(): void {
     this.player.stop();
+    audio.play("window");
     this.player.sprite.setPosition(this.checkpoint.x, this.checkpoint.y).setVelocity(0, 0);
     this.cameras.main.fadeIn(220);
     this.showMessage("Retour au dernier repère", 1300);
@@ -557,6 +580,7 @@ export class GameScene extends Phaser.Scene {
     this.bee = this.add
       .container(this.level.window.x, this.level.window.y, [wing1, wing2, body, stripe1, stripe2])
       .setDepth(30);
+    audio.play("bee");
     this.tweens.add({
       targets: [wing1, wing2],
       scaleY: 0.35,
@@ -593,6 +617,7 @@ export class GameScene extends Phaser.Scene {
       ease: "Bounce.out",
       onComplete: () => {
         this.ladderReady = true;
+        audio.play("ladder");
         this.updateObjective();
         this.vibrate([25, 30, 25]);
         this.showMessage("L’abeille a lancé une échelle !\nTouche-la pour remonter", 2600);
