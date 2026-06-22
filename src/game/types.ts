@@ -42,6 +42,7 @@ export type LevelDefinition = {
   id: number;
   name: string;
   worldWidth: number;
+  worldHeight: number;
   playerStart: Point;
   platforms: Rect[];
   dangers: Rect[];
@@ -51,6 +52,10 @@ export type LevelDefinition = {
   enemies: (Point & { id: string; bridgeId: string })[];
   actionZones: ActionZone[];
   checkpoints: (Point & { id: string })[];
+  flowers?: (Point & { id: string })[];
+  secretPlatform?: Rect;
+  window?: Point;
+  ladderTop?: Point;
   exit: Point;
 };
 
