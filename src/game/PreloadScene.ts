@@ -8,20 +8,25 @@ export class PreloadScene extends Phaser.Scene {
   create(): void {
     const graphics = this.make.graphics({ x: 0, y: 0 });
 
-    graphics.fillStyle(0x111526, 0.35).fillEllipse(4, 39, 32, 7);
+    graphics.fillStyle(0x111526, 0.28).fillEllipse(7, 43, 35, 8);
+    graphics.fillStyle(0xffffff).fillRoundedRect(3, 4, 34, 38, 13);
+    graphics.fillTriangle(3, 16, 6, 0, 16, 7);
+    graphics.fillTriangle(10, 9, 19, 0, 22, 8);
+    graphics.fillTriangle(19, 8, 30, 0, 31, 12);
+    graphics.fillTriangle(27, 12, 40, 5, 35, 21);
     graphics.lineStyle(3, 0x161827, 1);
-    graphics.fillStyle(0xffd16b).fillRoundedRect(4, 7, 28, 30, 10).strokeRoundedRect(4, 7, 28, 30, 10);
-    graphics.fillStyle(0xffe7a5).fillRoundedRect(7, 9, 22, 21, 8);
-    graphics.fillStyle(0x20263b).fillTriangle(4, 14, 7, 2, 14, 9);
-    graphics.fillTriangle(11, 9, 18, 0, 20, 9);
-    graphics.fillTriangle(18, 9, 27, 2, 28, 13);
-    graphics.fillTriangle(25, 12, 34, 7, 31, 19);
-    graphics.fillStyle(0xffffff).fillEllipse(13, 19, 7, 9).fillEllipse(24, 19, 7, 9);
-    graphics.fillStyle(0x273150).fillEllipse(14, 20, 3, 5).fillEllipse(23, 20, 3, 5);
-    graphics.lineStyle(2, 0x8a5537, 1).beginPath().arc(19, 25, 5, 0.2, Math.PI - 0.2).strokePath();
-    graphics.fillStyle(0x5d6fe5).fillRoundedRect(7, 31, 9, 9, 3);
-    graphics.fillStyle(0x3e50ba).fillRoundedRect(20, 31, 9, 9, 3);
-    graphics.generateTexture("hero", 37, 43);
+    graphics.fillStyle(0xffd16b).fillRoundedRect(6, 8, 28, 30, 10).strokeRoundedRect(6, 8, 28, 30, 10);
+    graphics.fillStyle(0xffe7a5).fillRoundedRect(9, 10, 22, 21, 8);
+    graphics.fillStyle(0x20263b).fillTriangle(6, 15, 9, 3, 16, 10);
+    graphics.fillTriangle(13, 10, 20, 1, 22, 10);
+    graphics.fillTriangle(20, 10, 29, 3, 30, 14);
+    graphics.fillTriangle(27, 13, 36, 8, 33, 20);
+    graphics.fillStyle(0xffffff).fillEllipse(15, 20, 7, 9).fillEllipse(26, 20, 7, 9);
+    graphics.fillStyle(0x273150).fillEllipse(16, 21, 3, 5).fillEllipse(25, 21, 3, 5);
+    graphics.lineStyle(2, 0x8a5537, 1).beginPath().arc(21, 26, 5, 0.2, Math.PI - 0.2).strokePath();
+    graphics.fillStyle(0x5d6fe5).fillRoundedRect(9, 32, 9, 9, 3);
+    graphics.fillStyle(0x3e50ba).fillRoundedRect(22, 32, 9, 9, 3);
+    graphics.generateTexture("hero", 42, 47);
     graphics.clear();
 
     graphics.fillStyle(0x7e8aab).fillCircle(13, 13, 13);
