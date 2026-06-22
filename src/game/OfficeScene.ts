@@ -151,6 +151,10 @@ export class OfficeScene extends Phaser.Scene {
       { x: 690, tie: 0x9c6ee6 },
     ].forEach(({ x, tie }, index) => {
       const shadow = this.add.ellipse(0, 28, 48, 11, 0x0a1020, 0.28);
+      const stickerBody = this.add.rectangle(0, 5, 52, 67, 0xffffff);
+      const stickerHead = this.add.ellipse(0, -50, 39, 45, 0xffffff);
+      const stickerEar1 = this.add.circle(-20, -49, 6, 0xffffff);
+      const stickerEar2 = this.add.circle(20, -49, 6, 0xffffff);
       const suit = this.add.rectangle(0, 0, 42, 58, index % 2 ? 0x334e8a : 0x51447b).setStrokeStyle(3, 0x302844);
       const shoulder = this.add.ellipse(0, -16, 48, 23, index % 2 ? 0x334e8a : 0x51447b).setStrokeStyle(2, 0x302844);
       const shirt = this.add.triangle(0, -18, -10, 0, 10, 0, 0, 20, 0xf3f4f7);
@@ -165,12 +169,32 @@ export class OfficeScene extends Phaser.Scene {
       const pupil1 = this.add.circle(-6, -50, 1.5, 0x302844);
       const pupil2 = this.add.circle(6, -50, 1.5, 0x302844);
       const man = this.add
-        .container(x, 486, [shadow, suit, shoulder, shirt, necktie, neck, head, ear1, ear2, hair, eye1, eye2, pupil1, pupil2])
+        .container(x, 486, [
+          shadow,
+          stickerBody,
+          stickerHead,
+          stickerEar1,
+          stickerEar2,
+          suit,
+          shoulder,
+          shirt,
+          necktie,
+          neck,
+          head,
+          ear1,
+          ear2,
+          hair,
+          eye1,
+          eye2,
+          pupil1,
+          pupil2,
+        ])
         .setDepth(9);
       this.executives.push(man);
       this.tweens.add({
         targets: man,
-        angle: index % 2 ? 2 : -2,
+        angle: index % 2 ? 1.8 : -1.8,
+        scaleX: { from: 0.98, to: 1.02 },
         duration: 700 + index * 90,
         yoyo: true,
         repeat: -1,
@@ -214,6 +238,10 @@ export class OfficeScene extends Phaser.Scene {
     this.add.container(0, 0, [screen]);
 
     const catShadow = this.add.ellipse(0, 30, 58, 12, 0x080e1b, 0.28);
+    const catStickerBody = this.add.ellipse(0, 12, 58, 46, 0xffffff);
+    const catStickerHead = this.add.circle(0, -13, 29, 0xffffff);
+    const catStickerEar1 = this.add.triangle(-16, -32, -12, 5, 12, 5, 0, -18, 0xffffff);
+    const catStickerEar2 = this.add.triangle(16, -32, -12, 5, 12, 5, 0, -18, 0xffffff);
     const catBody = this.add.ellipse(0, 12, 48, 36, 0xe7934f);
     const catHead = this.add.circle(0, -13, 23, 0xf3ad63);
     const ear1 = this.add.triangle(-14, -31, -9, 4, 9, 4, 0, -15, 0xf0a05c);
@@ -228,7 +256,22 @@ export class OfficeScene extends Phaser.Scene {
       fontStyle: "bold",
     }).setOrigin(0.5);
     this.officeCat = this.add
-      .container(610, 505, [catShadow, tail, catBody, catHead, ear1, ear2, eye1, eye2, mouth, catLabel])
+      .container(610, 505, [
+        catShadow,
+        catStickerBody,
+        catStickerHead,
+        catStickerEar1,
+        catStickerEar2,
+        tail,
+        catBody,
+        catHead,
+        ear1,
+        ear2,
+        eye1,
+        eye2,
+        mouth,
+        catLabel,
+      ])
       .setDepth(12);
     this.tweens.add({
       targets: this.officeCat,
@@ -243,6 +286,7 @@ export class OfficeScene extends Phaser.Scene {
   private createUpperGarden(): void {
     [920, 1060, 1200].forEach((x, index) => {
       const stem = this.add.rectangle(0, 8, 4, 22, 0x70c98c);
+      const sticker = this.add.circle(0, -4, 19, 0xffffff);
       const color = [0xff8fb3, 0x92c8ff, 0xd39aff][index];
       const petals = [
         this.add.circle(-7, -4, 6, color),
@@ -251,7 +295,7 @@ export class OfficeScene extends Phaser.Scene {
         this.add.circle(0, 3, 6, color),
       ];
       const center = this.add.circle(0, -4, 5, 0xffd36a);
-      const flower = this.add.container(x, 393, [stem, ...petals, center]).setData("officeFlower", true);
+      const flower = this.add.container(x, 393, [sticker, stem, ...petals, center]).setData("officeFlower", true);
       this.tweens.add({ targets: flower, angle: { from: -4, to: 4 }, duration: 900, yoyo: true, repeat: -1 });
     });
 
@@ -467,13 +511,19 @@ export class OfficeScene extends Phaser.Scene {
 
   private summonMonkey(): void {
     audio.play("monkey");
+    const stickerHead = this.add.circle(0, 0, 32, 0xffffff);
+    const stickerEar1 = this.add.circle(-29, 0, 13, 0xffffff);
+    const stickerEar2 = this.add.circle(29, 0, 13, 0xffffff);
     const head = this.add.circle(0, 0, 25, 0x8a5e3c);
     const face = this.add.ellipse(0, 4, 28, 23, 0xd6a77e);
     const ear1 = this.add.circle(-25, 0, 9, 0x9a6845);
     const ear2 = this.add.circle(25, 0, 9, 0x9a6845);
     const eye1 = this.add.circle(-7, 1, 3, 0x24202a);
     const eye2 = this.add.circle(7, 1, 3, 0x24202a);
-    this.monkey = this.add.container(1325, 340, [ear1, ear2, head, face, eye1, eye2]).setDepth(20);
+    const smile = this.add.arc(0, 8, 8, 12, 168, false, 0x4e3329).setStrokeStyle(3, 0x4e3329);
+    this.monkey = this.add
+      .container(1325, 340, [stickerEar1, stickerEar2, stickerHead, ear1, ear2, head, face, eye1, eye2, smile])
+      .setDepth(20);
     this.tweens.add({
       targets: this.monkey,
       y: 300,
