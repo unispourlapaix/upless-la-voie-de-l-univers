@@ -1,8 +1,14 @@
 import Phaser from "phaser";
 
 export class LevelCompleteScene extends Phaser.Scene {
+  private completedLevel = 1;
+
   constructor() {
     super("LevelCompleteScene");
+  }
+
+  init(data: { completedLevel?: number }): void {
+    this.completedLevel = data.completedLevel ?? 1;
   }
 
   create(): void {
@@ -26,8 +32,9 @@ export class LevelCompleteScene extends Phaser.Scene {
         lineSpacing: 8,
       })
       .setOrigin(0.5);
-    this.add
-      .text(180, 435, "LA SUITE ARRIVE BIENTÔT…", {
+    const hasNextLevel = this.completedLevel === 1;
+    const button = this.add
+      .text(180, 435, hasNextLevel ? "NIVEAU SUIVANT" : "LA SUITE ARRIVE BIENTÔT…", {
         fontFamily: "system-ui",
         fontStyle: "bold",
         fontSize: "13px",
@@ -35,6 +42,11 @@ export class LevelCompleteScene extends Phaser.Scene {
         backgroundColor: "#ffd36a",
         padding: { x: 20, y: 14 },
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    if (hasNextLevel) {
+      button.on("pointerdown", () => this.scene.start("OfficeScene"));
+    }
   }
 }
