@@ -118,9 +118,19 @@ export class GameScene extends Phaser.Scene {
   private createPlatforms(): void {
     this.platforms = this.physics.add.staticGroup();
     this.dangers = this.physics.add.staticGroup();
-    const colors = [0x6e7ed8, 0x7f8ee5, 0x8d80d7, 0x5f91c9];
+    const colors = [0x6175c8, 0x7185d8, 0x766ac4, 0x4f83b5];
 
     this.level.platforms.forEach((platform, index) => {
+      this.add
+        .rectangle(
+          platform.x + platform.width / 2 + 4,
+          platform.y + platform.height / 2 + 7,
+          platform.width,
+          platform.height,
+          0x080e22,
+          0.38,
+        )
+        .setDepth(1);
       const block = this.add
         .rectangle(
           platform.x + platform.width / 2,
@@ -129,7 +139,18 @@ export class GameScene extends Phaser.Scene {
           platform.height,
           colors[index % colors.length],
         )
-        .setStrokeStyle(2, 0xcbd3ff, 0.25);
+        .setStrokeStyle(2, 0xdce4ff, 0.38)
+        .setDepth(2);
+      this.add
+        .rectangle(
+          platform.x + platform.width / 2,
+          platform.y + 4,
+          Math.max(8, platform.width - 8),
+          4,
+          0xe5e9ff,
+          0.22,
+        )
+        .setDepth(3);
       this.platforms.add(block);
     });
 
@@ -195,16 +216,19 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createHud(): void {
-    const panel = this.add.rectangle(180, 32, 330, 48, 0x0b1027, 0.78).setScrollFactor(0).setDepth(100);
-    panel.setStrokeStyle(1, 0xaebcff, 0.24);
+    this.add.rectangle(181, 35, 334, 52, 0x050916, 0.35).setScrollFactor(0).setDepth(99);
+    const panel = this.add.rectangle(180, 31, 330, 48, 0x10182f, 0.94).setScrollFactor(0).setDepth(100);
+    panel.setStrokeStyle(2, 0x8ea2d4, 0.3);
+    this.add.circle(44, 31, 15, 0xffd36a, 0.14).setScrollFactor(0).setDepth(101);
     this.uiBounds.push(new Phaser.Geom.Rectangle(15, 8, 330, 48));
 
     this.add
-      .text(28, 19, "UPLESS", {
+      .text(64, 19, "CHEMIN EN 8", {
         fontFamily: "system-ui",
         fontStyle: "bold",
-        fontSize: "14px",
+        fontSize: "12px",
         color: "#ffffff",
+        letterSpacing: 1,
       })
       .setScrollFactor(0)
       .setDepth(101);
@@ -651,13 +675,22 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createOgre(x: number, y: number): Phaser.GameObjects.Container {
-    const body = this.add.rectangle(0, 0, 62, 52, 0x737b91).setStrokeStyle(3, 0xb5bdd0, 0.6);
-    const eye1 = this.add.circle(-13, -6, 5, 0xffffff);
-    const eye2 = this.add.circle(13, -6, 5, 0xffffff);
-    const pupil1 = this.add.circle(-12, -5, 2, 0x20263b);
-    const pupil2 = this.add.circle(14, -5, 2, 0x20263b);
-    const mouth = this.add.rectangle(0, 14, 25, 5, 0x34394b);
-    return this.add.container(x, y - 18, [body, eye1, eye2, pupil1, pupil2, mouth]).setDepth(8);
+    const shadow = this.add.ellipse(0, 29, 76, 15, 0x090d18, 0.38);
+    const legs = this.add.rectangle(0, 18, 52, 30, 0x525d76).setStrokeStyle(3, 0x818ba2);
+    const body = this.add.ellipse(0, -3, 72, 64, 0x68748e).setStrokeStyle(4, 0xaab4c9, 0.65);
+    const belly = this.add.ellipse(0, 8, 45, 33, 0x7f8aa0, 0.8);
+    const ear1 = this.add.circle(-34, -8, 10, 0x68748e).setStrokeStyle(3, 0xaab4c9);
+    const ear2 = this.add.circle(34, -8, 10, 0x68748e).setStrokeStyle(3, 0xaab4c9);
+    const brow1 = this.add.rectangle(-14, -17, 16, 4, 0x30384b).setAngle(10);
+    const brow2 = this.add.rectangle(14, -17, 16, 4, 0x30384b).setAngle(-10);
+    const eye1 = this.add.circle(-14, -9, 7, 0xf5f7ff);
+    const eye2 = this.add.circle(14, -9, 7, 0xf5f7ff);
+    const pupil1 = this.add.circle(-12, -8, 3, 0x20263b);
+    const pupil2 = this.add.circle(12, -8, 3, 0x20263b);
+    const mouth = this.add.arc(0, 8, 13, 15, 165, false, 0x34394b).setStrokeStyle(4, 0x34394b);
+    return this.add
+      .container(x, y - 25, [shadow, legs, ear1, ear2, body, belly, brow1, brow2, eye1, eye2, pupil1, pupil2, mouth])
+      .setDepth(8);
   }
 
   private createExit(): void {
