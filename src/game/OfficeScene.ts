@@ -63,38 +63,43 @@ export class OfficeScene extends Phaser.Scene {
 
   private drawOffice(): void {
     const background = this.add.graphics().setScrollFactor(0);
-    background.fillGradientStyle(0x162747, 0x162747, 0x273b62, 0x273b62, 1);
+    background.fillGradientStyle(0xf7f2e8, 0xf7f2e8, 0xdad7ef, 0xdad7ef, 1);
     background.fillRect(0, 0, 360, 640);
+    const halftone = this.add.graphics().setScrollFactor(0);
+    halftone.fillStyle(0x493d69, 0.11);
+    for (let y = 95; y < 590; y += 14) {
+      for (let x = (y / 14) % 2 ? 6 : 13; x < 360; x += 14) halftone.fillCircle(x, y, 1.5);
+    }
 
     for (let x = 60; x < 1540; x += 210) {
-      this.add.rectangle(x + 8, 176, 158, 190, 0x07142b, 0.42);
-      this.add.rectangle(x, 168, 158, 190, 0x1a3155).setStrokeStyle(7, 0x6987b5, 0.45);
-      this.add.rectangle(x, 168, 142, 174, 0x0c1b35);
+      this.add.rectangle(x + 8, 176, 158, 190, 0x392f54, 0.17);
+      this.add.rectangle(x, 168, 158, 190, 0xffffff).setStrokeStyle(6, 0x302844, 0.9);
+      this.add.rectangle(x, 168, 142, 174, 0x90c9df);
       this.add.circle(x - 42, 132, 20, 0xeabf7b, 0.25);
       this.add.rectangle(x - 36, 196, 3, 166, 0x8ba5ca, 0.28);
       this.add.rectangle(x + 36, 196, 3, 166, 0x8ba5ca, 0.28);
       this.add.rectangle(x, 163, 140, 3, 0x8ba5ca, 0.2);
     }
 
-    this.add.rectangle(186, 76, 306, 54, 0x0d1830, 0.76).setStrokeStyle(2, 0x7492ca, 0.28);
-    this.add.circle(51, 76, 18, 0xffc665, 0.18);
+    this.add.rectangle(186, 76, 306, 54, 0xffffff, 0.94).setStrokeStyle(3, 0x302844, 1);
+    this.add.circle(51, 76, 18, 0xff4f8b, 0.9).setStrokeStyle(3, 0x302844);
     this.add.text(51, 76, "U", {
       fontFamily: "system-ui",
       fontStyle: "bold",
       fontSize: "17px",
-      color: "#ffd987",
+      color: "#ffffff",
     }).setOrigin(0.5);
     this.add.text(78, 63, "UPLESS AEROSPACE", {
       fontFamily: "system-ui",
       fontStyle: "bold",
       fontSize: "15px",
-      color: "#eef4ff",
+      color: "#302844",
       letterSpacing: 1,
     });
     this.add.text(78, 84, "CONSEIL DU PROGRAMME ORBITE", {
       fontFamily: "system-ui",
       fontSize: "8px",
-      color: "#8299bf",
+      color: "#665b7d",
       letterSpacing: 1,
     });
 
@@ -102,14 +107,14 @@ export class OfficeScene extends Phaser.Scene {
       this.add.rectangle(x, 551, 93, 4, x % 190 === 0 ? 0x7a8caf : 0x5e7197, 0.28);
     }
 
-    this.add.ellipse(500, 480, 374, 104, 0x0e1628, 0.3);
-    this.add.rectangle(500, 462, 366, 82, 0x523c34).setStrokeStyle(4, 0x1d263b, 0.7);
-    this.add.ellipse(500, 433, 366, 88, 0xb67e52).setStrokeStyle(5, 0xf0bb7a, 0.68);
-    this.add.ellipse(500, 426, 340, 66, 0xd69a61, 0.72);
+    this.add.ellipse(500, 480, 374, 104, 0x302844, 0.18);
+    this.add.rectangle(500, 462, 366, 82, 0x73503e).setStrokeStyle(5, 0x302844, 1);
+    this.add.ellipse(500, 433, 366, 88, 0xe39a5c).setStrokeStyle(5, 0x302844, 1);
+    this.add.ellipse(500, 426, 340, 66, 0xffbd75, 0.9);
     this.add.rectangle(500, 480, 250, 16, 0x332b2d, 0.5);
     this.add.text(500, 426, "PROJET ORBITE", {
       fontSize: "13px",
-      color: "#4a2e2a",
+      color: "#302844",
       fontStyle: "bold",
       letterSpacing: 2,
     }).setOrigin(0.5);
@@ -146,19 +151,21 @@ export class OfficeScene extends Phaser.Scene {
       { x: 690, tie: 0x9c6ee6 },
     ].forEach(({ x, tie }, index) => {
       const shadow = this.add.ellipse(0, 28, 48, 11, 0x0a1020, 0.28);
-      const suit = this.add.rectangle(0, 0, 42, 58, index % 2 ? 0x273b5e : 0x36445e).setStrokeStyle(2, 0x8594b0);
-      const shoulder = this.add.ellipse(0, -16, 48, 23, index % 2 ? 0x273b5e : 0x36445e);
+      const suit = this.add.rectangle(0, 0, 42, 58, index % 2 ? 0x334e8a : 0x51447b).setStrokeStyle(3, 0x302844);
+      const shoulder = this.add.ellipse(0, -16, 48, 23, index % 2 ? 0x334e8a : 0x51447b).setStrokeStyle(2, 0x302844);
       const shirt = this.add.triangle(0, -18, -10, 0, 10, 0, 0, 20, 0xf3f4f7);
       const necktie = this.add.triangle(0, 0, -5, -12, 5, -12, 0, 19, tie);
       const neck = this.add.rectangle(0, -35, 13, 14, index % 2 ? 0xd5a77f : 0xb97f5d);
-      const head = this.add.ellipse(0, -50, 31, 37, index % 2 ? 0xd5a77f : 0xb97f5d);
+      const head = this.add.ellipse(0, -50, 31, 37, index % 2 ? 0xf0bf91 : 0xc98a66).setStrokeStyle(2, 0x302844);
       const ear1 = this.add.circle(-16, -49, 4, index % 2 ? 0xd5a77f : 0xb97f5d);
       const ear2 = this.add.circle(16, -49, 4, index % 2 ? 0xd5a77f : 0xb97f5d);
       const hair = this.add.arc(0, -56, 16, 180, 360, false, index % 2 ? 0x413329 : 0x2e2521);
-      const eye1 = this.add.circle(-6, -50, 1.5, 0x27222a);
-      const eye2 = this.add.circle(6, -50, 1.5, 0x27222a);
+      const eye1 = this.add.ellipse(-6, -50, 5, 7, 0xffffff).setStrokeStyle(1, 0x302844);
+      const eye2 = this.add.ellipse(6, -50, 5, 7, 0xffffff).setStrokeStyle(1, 0x302844);
+      const pupil1 = this.add.circle(-6, -50, 1.5, 0x302844);
+      const pupil2 = this.add.circle(6, -50, 1.5, 0x302844);
       const man = this.add
-        .container(x, 486, [shadow, suit, shoulder, shirt, necktie, neck, head, ear1, ear2, hair, eye1, eye2])
+        .container(x, 486, [shadow, suit, shoulder, shirt, necktie, neck, head, ear1, ear2, hair, eye1, eye2, pupil1, pupil2])
         .setDepth(9);
       this.executives.push(man);
       this.tweens.add({
@@ -253,12 +260,12 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private createHud(): void {
-    this.add.rectangle(181, 35, 334, 52, 0x050916, 0.35).setScrollFactor(0).setDepth(99);
-    const panel = this.add.rectangle(180, 31, 330, 48, 0x101a30, 0.94).setScrollFactor(0).setDepth(100);
-    panel.setStrokeStyle(2, 0x8297c4, 0.3);
-    this.add.circle(43, 31, 15, 0xffd36a, 0.14).setScrollFactor(0).setDepth(101);
+    this.add.rectangle(181, 35, 334, 52, 0x302844, 0.2).setScrollFactor(0).setDepth(99);
+    const panel = this.add.rectangle(180, 31, 330, 48, 0xffffff, 0.96).setScrollFactor(0).setDepth(100);
+    panel.setStrokeStyle(3, 0x302844, 1);
+    this.add.circle(43, 31, 15, 0xff4f8b, 0.9).setStrokeStyle(2, 0x302844).setScrollFactor(0).setDepth(101);
     this.add
-      .text(62, 18, "BUREAU ORBITE", { fontSize: "12px", color: "#fff", fontStyle: "bold", letterSpacing: 1 })
+      .text(62, 18, "BUREAU ORBITE", { fontSize: "12px", color: "#302844", fontStyle: "bold", letterSpacing: 1 })
       .setScrollFactor(0)
       .setDepth(101);
     this.objectiveText = this.add
