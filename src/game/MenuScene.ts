@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { audio } from "./audio";
+import { loadSave } from "./types";
 
 export class MenuScene extends Phaser.Scene {
   constructor() {
@@ -59,7 +60,13 @@ export class MenuScene extends Phaser.Scene {
     this.input.once("pointerdown", () => {
       void audio.start();
       audio.play("confirm");
-      this.scene.start("GameScene", { levelId: 1 });
+      const requestedLevel = new URLSearchParams(window.location.search).get("level");
+      const save = loadSave();
+      if (requestedLevel === "2" || save.lastLevel >= 2) {
+        this.scene.start("OfficeScene");
+      } else {
+        this.scene.start("GameScene", { levelId: 1 });
+      }
     });
   }
 }
