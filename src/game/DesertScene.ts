@@ -473,6 +473,11 @@ export class DesertScene extends Phaser.Scene {
       return;
     }
 
+    if (item.id === "plastic" && this.triedBunker) {
+      this.pollutePondWithPlastic(item);
+      return;
+    }
+
     if ((item.id === "virus" || item.id === "redWater") && this.triedBunker) {
       this.healFrogAndPond();
       return;
@@ -655,6 +660,17 @@ export class DesertScene extends Phaser.Scene {
         this.time.delayedCall(650, () => this.showMessage("La grenouille saute dans la mare.\nL’eau redevient verte.", 2300));
       },
     });
+  }
+
+  private pollutePondWithPlastic(item: DesertItem): void {
+    audio.play("danger");
+    item.found = true;
+    this.pondHealed = false;
+    this.tweens.add({ targets: item.container, y: item.y + 7, angle: -6, scale: 1.16, duration: 220, yoyo: true });
+    this.pondWater.setFillStyle(0xb82539, 0.92).setStrokeStyle(4, 0x5b1523, 0.9);
+    this.tweens.add({ targets: this.pondWater, scaleX: 1.13, scaleY: 1.22, duration: 260, yoyo: true });
+    this.showMessage("Le plastique flotte encore…\nLa mare redevient rouge.", 2200);
+    this.time.delayedCall(2250, () => this.showMessage("Singe : Hihihi… bravo, retour à la case pollution.", 2300));
   }
 
   private interactWithRobot(): void {
