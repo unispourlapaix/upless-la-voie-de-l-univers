@@ -12,6 +12,7 @@ type DesertItem = {
   x: number;
   y: number;
   phrase: string;
+  monkeyComment?: string;
   solution?: boolean;
   found: boolean;
   container: Phaser.GameObjects.Container;
@@ -231,11 +232,51 @@ export class DesertScene extends Phaser.Scene {
 
   private createItems(): void {
     this.items = [
-      this.addItem("rocket", "Bout de fusée", 540, 545, "Ils ont voulu fuir vers le ciel…"),
-      this.addItem("plastic", "Déchet plastique", 1024, 532, "Même après la fin, ça flotte encore là…"),
-      this.addItem("battery", "Batterie smartphone", 850, 532, "Ils tenaient le monde dans leurs mains… puis ils l’ont laissé tomber."),
-      this.addItem("virus", "Virus alien", 1188, 505, "Cette grenouille transpire quelque chose de vivant…"),
-      this.addItem("redWater", "Mare rouge", 1070, 540, "L’eau elle-même a changé de couleur."),
+      this.addItem(
+        "rocket",
+        "Bout de fusée",
+        540,
+        545,
+        "Un gros morceau de fusée moderne.\nMême la technologie la plus brillante a fini dans le sable.",
+        false,
+        "Singe : Hihihi… joli caillou pour des génies.",
+      ),
+      this.addItem(
+        "plastic",
+        "Déchet plastique",
+        1024,
+        532,
+        "Un vieux sac plastique flotte dans la mare rouge.\nLéger, inutile… et toujours vivant.",
+        false,
+        "Singe : Hihihi… même la fin du monde n’a pas réussi à le jeter.",
+      ),
+      this.addItem(
+        "battery",
+        "Batterie smartphone",
+        850,
+        532,
+        "Ils tenaient le monde dans leurs mains… puis ils l’ont laissé tomber.",
+        false,
+        "Singe : Hihihi… plus de réseau, plus de courage.",
+      ),
+      this.addItem(
+        "virus",
+        "Virus alien",
+        1188,
+        505,
+        "Cette grenouille transpire quelque chose de vivant…",
+        false,
+        "Singe : Hihihi… elle a mauvaise mine, ta planète.",
+      ),
+      this.addItem(
+        "redWater",
+        "Mare rouge",
+        1070,
+        540,
+        "L’eau elle-même a changé de couleur.",
+        false,
+        "Singe : Hihihi… au moins, ils ont inventé la soupe toxique.",
+      ),
       this.addItem("oil", "Huile rare", 625, 536, "De l’huile rare… précieuse pour les vieilles machines.", true),
     ];
   }
@@ -247,16 +288,22 @@ export class DesertScene extends Phaser.Scene {
     y: number,
     phrase: string,
     solution = false,
+    monkeyComment?: string,
   ): DesertItem {
     const sticker =
       id === "redWater"
         ? this.add.ellipse(0, 7, 58, 24, 0xffffff, 0.16).setStrokeStyle(2, 0xffffff, 0.25)
+        : id === "rocket"
+          ? this.add.ellipse(0, 0, 46, 31, 0xffffff).setStrokeStyle(4, 0x302844)
         : this.add.circle(0, 0, solution ? 20 : 18, 0xffffff).setStrokeStyle(3, 0x302844);
     const parts: Phaser.GameObjects.GameObject[] = [sticker];
 
     if (id === "rocket") {
-      parts.push(this.add.triangle(0, -3, -14, 14, 14, 14, 0, -16, 0xd55f58).setStrokeStyle(2, 0x302844));
-      parts.push(this.add.rectangle(0, 7, 16, 18, 0xd8e0ef).setStrokeStyle(2, 0x302844));
+      parts.push(this.add.ellipse(2, 0, 50, 28, 0xe9edf6).setStrokeStyle(3, 0x302844).setAngle(-8));
+      parts.push(this.add.ellipse(15, -2, 18, 13, 0x78d7ff, 0.9).setStrokeStyle(2, 0x302844).setAngle(-8));
+      parts.push(this.add.rectangle(-18, 5, 18, 9, 0xd55f58).setStrokeStyle(2, 0x302844).setAngle(-8));
+      parts.push(this.add.triangle(-27, 5, -7, 7, 7, 7, 0, -12, 0xffa14d).setStrokeStyle(2, 0x302844).setAngle(-98));
+      parts.push(this.add.line(0, 0, -6, -13, 19, 11, 0x302844, 0.55).setLineWidth(2));
     } else if (id === "plastic") {
       parts.push(this.add.ellipse(0, 3, 34, 12, 0xdaf6ff, 0.9).setStrokeStyle(2, 0x5b7890));
       parts.push(this.add.rectangle(0, -5, 20, 7, 0xdaf6ff, 0.86).setStrokeStyle(2, 0x5b7890).setAngle(-6));
@@ -288,7 +335,7 @@ export class DesertScene extends Phaser.Scene {
     } else {
       this.tweens.add({ targets: container, scale: 1.05, duration: 900 + (x % 4) * 80, yoyo: true, repeat: -1 });
     }
-    return { id, label, x, y, phrase, solution, found: false, container };
+    return { id, label, x, y, phrase, monkeyComment, solution, found: false, container };
   }
 
   private createHud(): void {
@@ -419,9 +466,13 @@ export class DesertScene extends Phaser.Scene {
     this.showMessage(item.phrase, 2300);
     this.updateObjective();
 
+    if (item.monkeyComment) {
+      this.time.delayedCall(2350, () => this.showMessage(item.monkeyComment!, 2100));
+    }
+
     const foundClues = this.items.filter((candidate) => candidate.found && !candidate.solution).length;
-    if (foundClues >= 4 && !this.hasOil) {
-      this.time.delayedCall(2300, () =>
+    if (foundClues >= 4 && !this.hasOil && !item.monkeyComment) {
+      this.time.delayedCall(2350, () =>
         this.showMessage("Singe : Hihihi… il te manque ce qui fait taire les grincements.", 2600),
       );
     }
