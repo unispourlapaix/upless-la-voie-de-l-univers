@@ -113,8 +113,7 @@ export class DesertScene extends Phaser.Scene {
     this.add.rectangle(286, 422, 16, 44, 0x2f3c4c, 0.35).setAngle(-8);
     this.add.line(0, 0, 336, 415, 315, 452, 0x2f3c4c, 0.9).setLineWidth(3);
     this.add.line(0, 0, 351, 500, 333, 535, 0x2f3c4c, 0.75).setLineWidth(3);
-    this.add.circle(376, 567, 19, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c);
-    this.add.rectangle(410, 558, 78, 18, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c).setAngle(9);
+    this.drawBrokenTorchOnGround();
     this.add.text(196, 356, "STATUE\nBRISÉE", {
       fontFamily: "system-ui",
       fontSize: "10px",
@@ -129,6 +128,32 @@ export class DesertScene extends Phaser.Scene {
 
     this.drawToxicPond();
     this.drawSickFrog();
+  }
+
+  private drawBrokenTorchOnGround(): void {
+    this.add.ellipse(428, 575, 164, 23, 0x3f2530, 0.24);
+    this.add.rectangle(421, 558, 112, 22, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c).setAngle(8);
+    this.add.rectangle(382, 552, 38, 26, 0x78a5a1).setStrokeStyle(4, 0x2f3c4c).setAngle(8);
+    this.add.rectangle(462, 564, 32, 18, 0x78a5a1).setStrokeStyle(3, 0x2f3c4c).setAngle(8);
+    this.add.circle(364, 547, 26, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c);
+    this.add.circle(364, 547, 15, 0x6f9996).setStrokeStyle(3, 0x2f3c4c);
+    [-22, -11, 0, 11, 22].forEach((offset, index) => {
+      this.add.rectangle(364 + offset, 526 + Math.abs(offset) * 0.15, 8, 28 - index * 2, 0x8db7b2)
+        .setStrokeStyle(2, 0x2f3c4c)
+        .setAngle(offset * 0.55);
+    });
+    this.add.triangle(330, 520, -13, 19, 13, 19, 0, -28, 0xe86b49).setStrokeStyle(3, 0x2f3c4c).setAngle(-28);
+    this.add.triangle(354, 505, -10, 16, 10, 16, 0, -23, 0xffb65f).setStrokeStyle(3, 0x2f3c4c).setAngle(10);
+    this.add.triangle(381, 515, -9, 15, 9, 15, 0, -20, 0xd94a3d).setStrokeStyle(3, 0x2f3c4c).setAngle(31);
+    this.add.line(0, 0, 333, 541, 350, 555, 0x2f3c4c, 0.85).setLineWidth(3);
+    this.add.line(0, 0, 390, 548, 423, 567, 0x2f3c4c, 0.75).setLineWidth(3);
+    this.add.line(0, 0, 451, 555, 473, 571, 0x2f3c4c, 0.7).setLineWidth(2);
+    this.add.text(440, 525, "torche cassée", {
+      fontFamily: "system-ui",
+      fontSize: "9px",
+      color: "#5e3b43",
+      fontStyle: "bold",
+    }).setAngle(8);
   }
 
   private drawToxicPond(): void {
