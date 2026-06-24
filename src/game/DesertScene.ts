@@ -28,8 +28,12 @@ export class DesertScene extends Phaser.Scene {
   private items: DesertItem[] = [];
   private robot!: Phaser.GameObjects.Container;
   private robotEyes!: Phaser.GameObjects.Arc[];
+  private pondWater!: Phaser.GameObjects.Ellipse;
+  private frog!: Phaser.GameObjects.Container;
   private robotNoCount = 0;
   private triedBunker = false;
+  private batteryTaps = 0;
+  private smartphoneEventDone = false;
   private hasOil = false;
   private robotLubricated = false;
   private bunkerOpen = false;
@@ -128,7 +132,7 @@ export class DesertScene extends Phaser.Scene {
 
   private drawToxicPond(): void {
     this.add.ellipse(1065, 552, 185, 44, 0x5e1726, 0.42);
-    this.add.ellipse(1065, 541, 165, 38, 0xb82539, 0.9).setStrokeStyle(4, 0x5b1523, 0.8);
+    this.pondWater = this.add.ellipse(1065, 541, 165, 38, 0xb82539, 0.9).setStrokeStyle(4, 0x5b1523, 0.8);
     this.add.ellipse(1022, 535, 53, 14, 0xf2eef0, 0.78).setStrokeStyle(2, 0x5b7890, 0.85).setAngle(-9);
     this.add.rectangle(1023, 528, 29, 8, 0xdaf6ff, 0.9).setStrokeStyle(2, 0x5b7890).setAngle(-9);
     this.add.ellipse(1108, 545, 36, 9, 0xff6a76, 0.4);
@@ -137,7 +141,7 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private drawSickFrog(): void {
-    const frog = this.add.container(1182, 530).setDepth(10);
+    this.frog = this.add.container(1182, 530).setDepth(10);
     const shadow = this.add.ellipse(0, 32, 66, 13, 0x25172a, 0.3);
     const body = this.add.ellipse(0, 12, 56, 38, 0x75b553).setStrokeStyle(4, 0x263b2b);
     const head = this.add.ellipse(0, -12, 64, 42, 0x86c761).setStrokeStyle(4, 0x263b2b);
@@ -155,7 +159,7 @@ export class DesertScene extends Phaser.Scene {
       color: "#5e3b43",
       fontStyle: "bold",
     }).setOrigin(0.5);
-    frog.add([shadow, body, head, eye1, eye2, pupil1, pupil2, mouth, sweat1, sweat2, sweat3, sign]);
+    this.frog.add([shadow, body, head, eye1, eye2, pupil1, pupil2, mouth, sweat1, sweat2, sweat3, sign]);
     this.tweens.add({ targets: [sweat1, sweat2, sweat3], alpha: 0.35, y: "+=7", duration: 650, yoyo: true, repeat: -1 });
   }
 
@@ -255,9 +259,9 @@ export class DesertScene extends Phaser.Scene {
         "Batterie smartphone",
         850,
         532,
-        "Ils tenaient le monde dans leurs mains… puis ils l’ont laissé tomber.",
+        "Une batterie gonflée. À côté, un vieux smartphone poussiéreux attend encore un doigt.",
         false,
-        "Singe : Hihihi… plus de réseau, plus de courage.",
+        "Singe : Hihihi… attention, ça rend les yeux carrés.",
       ),
       this.addItem(
         "virus",
@@ -433,6 +437,11 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private interactWithItem(item: DesertItem): void {
+    if (item.id === "battery") {
+      this.interactWithBattery(item);
+      return;
+    }
+
     if (item.solution) {
       if (this.hasOil) {
         this.showMessage("Tu as déjà l’huile rare.", 1100);
@@ -476,6 +485,145 @@ export class DesertScene extends Phaser.Scene {
         this.showMessage("Singe : Hihihi… il te manque ce qui fait taire les grincements.", 2600),
       );
     }
+  }
+
+  private interactWithBattery(item: DesertItem): void {
+    if (!this.triedBunker && this.robotNoCount === 0) {
+      this.showMessage("Une batterie de smartphone.\nPas le moment de scroller l’apocalypse.", 1900);
+      return;
+    }
+    if (this.smartphoneEventDone) {
+      this.showMessage("Le smartphone est calmé.\nTes yeux aussi.", 1300);
+      return;
+    }
+
+    this.batteryTaps += 1;
+    audio.play("tap");
+    this.tweens.add({ targets: item.container, scale: 1.25, angle: this.batteryTaps % 2 ? -7 : 7, duration: 120, yoyo: true });
+
+    if (this.batteryTaps === 1) {
+      this.showMessage("Tu ramasses le vieux smartphone.\nIl vibre encore…", 1800);
+      return;
+    }
+    if (this.batteryTaps === 2) {
+      this.showMessage("Tes yeux tournent en rond.\nTic… tic…", 1800);
+      this.showSpiralEyes();
+      return;
+    }
+
+    this.smartphoneEventDone = true;
+    item.found = true;
+    this.showSmartphoneRitual(item);
+  }
+
+  private showSpiralEyes(): void {
+    const eyes = this.add.text(this.player.sprite.x, this.player.sprite.y - 42, "◎  ◎", {
+      fontFamily: "system-ui",
+      fontSize: "18px",
+      color: "#8cf06a",
+      fontStyle: "bold",
+      stroke: "#20182b",
+      strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(55);
+    this.tweens.add({
+      targets: eyes,
+      angle: 720,
+      y: eyes.y - 14,
+      alpha: 0,
+      duration: 950,
+      ease: "Sine.out",
+      onComplete: () => eyes.destroy(),
+    });
+  }
+
+  private showSmartphoneRitual(item: DesertItem): void {
+    this.player.stop();
+    const phone = this.add.container(this.player.sprite.x + 14, this.player.sprite.y - 32).setDepth(60);
+    const body = this.add.rectangle(0, 0, 20, 31, 0x1f2430).setStrokeStyle(3, 0xffffff);
+    const screen = this.add.rectangle(0, -1, 14, 21, 0x74e7ff);
+    const glow = this.add.circle(0, -1, 28, 0x74e7ff, 0.18);
+    const tapText = this.add.text(this.player.sprite.x, this.player.sprite.y - 74, "tic tic tic toc…", {
+      fontFamily: "system-ui",
+      fontSize: "15px",
+      color: "#ffffff",
+      fontStyle: "bold",
+      stroke: "#20182b",
+      strokeThickness: 4,
+    }).setOrigin(0.5).setDepth(61);
+    phone.add([glow, body, screen]);
+    this.showSpiralEyes();
+    this.showMessage("Tu tapotes sans réfléchir…\ntic tic tic toc…", 2300);
+    audio.play("wire");
+
+    this.tweens.add({ targets: phone, y: phone.y - 8, angle: 12, duration: 150, yoyo: true, repeat: 7 });
+    this.tweens.add({ targets: tapText, scale: 1.15, duration: 180, yoyo: true, repeat: 6 });
+    this.tweens.add({
+      targets: item.container,
+      alpha: 0,
+      y: item.container.y - 30,
+      duration: 520,
+      delay: 900,
+      onComplete: () => item.container.setVisible(false),
+    });
+
+    this.time.delayedCall(1650, () => {
+      tapText.destroy();
+      phone.destroy();
+      this.launchRocket();
+      this.healFrogAndPond();
+    });
+  }
+
+  private launchRocket(): void {
+    const rocketItem = this.items.find((item) => item.id === "rocket");
+    if (!rocketItem) return;
+    rocketItem.found = true;
+    rocketItem.container.setVisible(true).setAlpha(1).setScale(1.15).setAngle(-12);
+    const flame = this.add.triangle(rocketItem.x - 34, rocketItem.y + 12, -13, 0, 13, 0, 0, 36, 0xff8a2a)
+      .setStrokeStyle(3, 0xfff0a0)
+      .setDepth(10)
+      .setAngle(-12);
+    audio.play("portal");
+    this.showMessage("La fusée se répare toute seule…\nPuis elle s’envole !", 2400);
+    this.cameras.main.shake(320, 0.006);
+    this.tweens.add({ targets: flame, scaleY: 1.8, alpha: 0.25, duration: 110, yoyo: true, repeat: 9 });
+    this.tweens.add({
+      targets: rocketItem.container,
+      x: rocketItem.x + 190,
+      y: rocketItem.y - 430,
+      angle: 24,
+      scale: 1.6,
+      duration: 1600,
+      ease: "Sine.in",
+      onComplete: () => rocketItem.container.setVisible(false),
+    });
+    this.tweens.add({
+      targets: flame,
+      x: flame.x + 190,
+      y: flame.y - 430,
+      alpha: 0,
+      duration: 1600,
+      ease: "Sine.in",
+      onComplete: () => flame.destroy(),
+    });
+  }
+
+  private healFrogAndPond(): void {
+    audio.play("flower");
+    this.tweens.add({
+      targets: this.frog,
+      x: 1084,
+      y: 522,
+      angle: -18,
+      duration: 760,
+      ease: "Back.out",
+      onComplete: () => {
+        this.frog.setAngle(0);
+        this.pondWater.setFillStyle(0x58c86a, 0.9).setStrokeStyle(4, 0x2e7b45, 0.8);
+        this.tweens.add({ targets: this.pondWater, scaleX: 1.08, scaleY: 1.16, duration: 240, yoyo: true });
+        this.time.delayedCall(650, () => this.showMessage("La grenouille saute dans la mare.\nL’eau redevient verte.", 2300));
+      },
+    });
   }
 
   private interactWithRobot(): void {
