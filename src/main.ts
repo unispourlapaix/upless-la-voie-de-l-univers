@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import "./style.css";
+import { DesertScene } from "./game/DesertScene";
 import { GameScene } from "./game/GameScene";
 import { LevelCompleteScene } from "./game/LevelCompleteScene";
 import { MenuScene } from "./game/MenuScene";
@@ -29,7 +30,7 @@ try {
       width: 360,
       height: 640,
     },
-    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, LevelCompleteScene],
+    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, DesertScene, LevelCompleteScene],
     render: {
       antialias: true,
       pixelArt: false,
