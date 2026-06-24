@@ -89,12 +89,25 @@ export class DesertScene extends Phaser.Scene {
       this.add.ellipse(x + 35, 615, 310, 60, 0xb7643f, 0.34);
     }
 
-    this.add.rectangle(250, 568, 220, 28, 0xc47448, 0.45).setAngle(-3);
+    this.add.rectangle(250, 568, 260, 34, 0xc47448, 0.45).setAngle(-3);
     this.add.rectangle(348, 486, 40, 185, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c);
     this.add.rectangle(316, 410, 92, 48, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c).setAngle(-8);
+    this.add.rectangle(258, 454, 92, 18, 0x7da8a4).setStrokeStyle(4, 0x2f3c4c).setAngle(18);
+    this.add.rectangle(222, 431, 18, 82, 0x7da8a4).setStrokeStyle(4, 0x2f3c4c).setAngle(18);
+    this.add.rectangle(205, 384, 37, 34, 0x7da8a4).setStrokeStyle(4, 0x2f3c4c).setAngle(18);
+    this.add.triangle(205, 351, -16, 20, 16, 20, 0, -23, 0xcc6b49).setStrokeStyle(3, 0x2f3c4c).setAngle(18);
     this.add.circle(286, 389, 24, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c);
     this.add.triangle(286, 345, -24, 34, 24, 34, 0, -36, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c);
+    [-20, -10, 0, 10, 20].forEach((offset, index) => {
+      this.add.triangle(286 + offset, 356 + Math.abs(offset) * 0.25, -5, 17, 5, 17, 0, -13 - index, 0x8db7b2)
+        .setStrokeStyle(2, 0x2f3c4c)
+        .setAngle(offset * 0.7);
+    });
     this.add.rectangle(286, 422, 16, 44, 0x2f3c4c, 0.35).setAngle(-8);
+    this.add.line(0, 0, 336, 415, 315, 452, 0x2f3c4c, 0.9).setLineWidth(3);
+    this.add.line(0, 0, 351, 500, 333, 535, 0x2f3c4c, 0.75).setLineWidth(3);
+    this.add.circle(376, 567, 19, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c);
+    this.add.rectangle(410, 558, 78, 18, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c).setAngle(9);
     this.add.text(196, 356, "STATUE\nBRISÉE", {
       fontFamily: "system-ui",
       fontSize: "10px",
@@ -106,6 +119,42 @@ export class DesertScene extends Phaser.Scene {
     for (let x = 560; x < 1070; x += 130) {
       this.add.rectangle(x, 548, 70, 6, 0x6f493e, 0.4).setAngle(Phaser.Math.Between(-8, 8));
     }
+
+    this.drawToxicPond();
+    this.drawSickFrog();
+  }
+
+  private drawToxicPond(): void {
+    this.add.ellipse(1065, 552, 185, 44, 0x5e1726, 0.42);
+    this.add.ellipse(1065, 541, 165, 38, 0xb82539, 0.9).setStrokeStyle(4, 0x5b1523, 0.8);
+    this.add.ellipse(1022, 535, 53, 14, 0xf2eef0, 0.78).setStrokeStyle(2, 0x5b7890, 0.85).setAngle(-9);
+    this.add.rectangle(1023, 528, 29, 8, 0xdaf6ff, 0.9).setStrokeStyle(2, 0x5b7890).setAngle(-9);
+    this.add.ellipse(1108, 545, 36, 9, 0xff6a76, 0.4);
+    this.add.circle(1000, 545, 4, 0xff8390, 0.75);
+    this.add.circle(1127, 536, 3, 0xff9ca5, 0.6);
+  }
+
+  private drawSickFrog(): void {
+    const frog = this.add.container(1182, 530).setDepth(10);
+    const shadow = this.add.ellipse(0, 32, 66, 13, 0x25172a, 0.3);
+    const body = this.add.ellipse(0, 12, 56, 38, 0x75b553).setStrokeStyle(4, 0x263b2b);
+    const head = this.add.ellipse(0, -12, 64, 42, 0x86c761).setStrokeStyle(4, 0x263b2b);
+    const eye1 = this.add.circle(-19, -31, 11, 0xe8ffe0).setStrokeStyle(3, 0x263b2b);
+    const eye2 = this.add.circle(19, -31, 11, 0xe8ffe0).setStrokeStyle(3, 0x263b2b);
+    const pupil1 = this.add.circle(-19, -29, 3, 0x263b2b);
+    const pupil2 = this.add.circle(19, -29, 3, 0x263b2b);
+    const mouth = this.add.arc(0, -7, 17, 18, 162, false, 0x263b2b).setStrokeStyle(3, 0x263b2b);
+    const sweat1 = this.add.ellipse(-30, -5, 7, 13, 0x8cf06a, 0.92).setAngle(-20);
+    const sweat2 = this.add.ellipse(30, 1, 6, 12, 0x8cf06a, 0.82).setAngle(20);
+    const sweat3 = this.add.ellipse(8, -42, 5, 10, 0x8cf06a, 0.86);
+    const sign = this.add.text(0, 52, "grenouille contaminée", {
+      fontFamily: "system-ui",
+      fontSize: "8px",
+      color: "#5e3b43",
+      fontStyle: "bold",
+    }).setOrigin(0.5);
+    frog.add([shadow, body, head, eye1, eye2, pupil1, pupil2, mouth, sweat1, sweat2, sweat3, sign]);
+    this.tweens.add({ targets: [sweat1, sweat2, sweat3], alpha: 0.35, y: "+=7", duration: 650, yoyo: true, repeat: -1 });
   }
 
   private createPlatforms(): void {
@@ -181,12 +230,12 @@ export class DesertScene extends Phaser.Scene {
 
   private createItems(): void {
     this.items = [
-      this.addItem("rocket", "Bout de fusée", 540, 534, "Ils ont voulu fuir vers le ciel…"),
-      this.addItem("plastic", "Déchet plastique", 690, 542, "Même après la fin, ça reste là…"),
+      this.addItem("rocket", "Bout de fusée", 540, 545, "Ils ont voulu fuir vers le ciel…"),
+      this.addItem("plastic", "Déchet plastique", 1024, 532, "Même après la fin, ça flotte encore là…"),
       this.addItem("battery", "Batterie smartphone", 850, 532, "Ils tenaient le monde dans leurs mains… puis ils l’ont laissé tomber."),
-      this.addItem("virus", "Virus alien", 990, 523, "Ce virus ne vient peut-être pas d’ici…"),
-      this.addItem("redWater", "Eau rouge", 1085, 549, "L’eau elle-même a changé de couleur."),
-      this.addItem("oil", "Huile rare", 625, 515, "De l’huile rare… précieuse pour les vieilles machines.", true),
+      this.addItem("virus", "Virus alien", 1188, 505, "Cette grenouille transpire quelque chose de vivant…"),
+      this.addItem("redWater", "Mare rouge", 1070, 540, "L’eau elle-même a changé de couleur."),
+      this.addItem("oil", "Huile rare", 625, 536, "De l’huile rare… précieuse pour les vieilles machines.", true),
     ];
   }
 
@@ -198,28 +247,32 @@ export class DesertScene extends Phaser.Scene {
     phrase: string,
     solution = false,
   ): DesertItem {
-    const sticker = this.add.circle(0, 0, solution ? 20 : 18, 0xffffff).setStrokeStyle(3, 0x302844);
+    const sticker =
+      id === "redWater"
+        ? this.add.ellipse(0, 7, 58, 24, 0xffffff, 0.16).setStrokeStyle(2, 0xffffff, 0.25)
+        : this.add.circle(0, 0, solution ? 20 : 18, 0xffffff).setStrokeStyle(3, 0x302844);
     const parts: Phaser.GameObjects.GameObject[] = [sticker];
 
     if (id === "rocket") {
       parts.push(this.add.triangle(0, -3, -14, 14, 14, 14, 0, -16, 0xd55f58).setStrokeStyle(2, 0x302844));
       parts.push(this.add.rectangle(0, 7, 16, 18, 0xd8e0ef).setStrokeStyle(2, 0x302844));
     } else if (id === "plastic") {
-      parts.push(this.add.rectangle(0, 0, 24, 18, 0xdaf6ff, 0.82).setStrokeStyle(2, 0x5b7890));
-      parts.push(this.add.rectangle(0, -12, 14, 7, 0xdaf6ff, 0.82).setStrokeStyle(2, 0x5b7890));
+      parts.push(this.add.ellipse(0, 3, 34, 12, 0xdaf6ff, 0.9).setStrokeStyle(2, 0x5b7890));
+      parts.push(this.add.rectangle(0, -5, 20, 7, 0xdaf6ff, 0.86).setStrokeStyle(2, 0x5b7890).setAngle(-6));
     } else if (id === "battery") {
       parts.push(this.add.rectangle(0, 0, 26, 15, 0x3f4656).setStrokeStyle(2, 0x151923));
       parts.push(this.add.rectangle(17, 0, 5, 8, 0x151923));
       parts.push(this.add.text(0, 0, "⚡", { fontSize: "12px", color: "#f6d66c" }).setOrigin(0.5));
     } else if (id === "virus") {
-      parts.push(this.add.circle(0, 0, 14, 0x8cf06a).setStrokeStyle(2, 0x244328));
+      parts.push(this.add.circle(0, 0, 11, 0x8cf06a).setStrokeStyle(2, 0x244328));
       for (let i = 0; i < 8; i += 1) {
         const angle = (Math.PI * 2 * i) / 8;
-        parts.push(this.add.circle(Math.cos(angle) * 15, Math.sin(angle) * 15, 3, 0x8cf06a));
+        parts.push(this.add.circle(Math.cos(angle) * 13, Math.sin(angle) * 13, 2.5, 0x8cf06a));
       }
     } else if (id === "redWater") {
-      parts.push(this.add.ellipse(0, 6, 30, 16, 0xb82539, 0.92).setStrokeStyle(2, 0x5b1523));
-      parts.push(this.add.circle(-8, 1, 5, 0xf05a68, 0.75));
+      parts.push(this.add.ellipse(0, 6, 72, 18, 0xb82539, 0.55).setStrokeStyle(2, 0x5b1523));
+      parts.push(this.add.circle(-18, 1, 5, 0xf05a68, 0.75));
+      parts.push(this.add.circle(21, 4, 4, 0xff8791, 0.65));
     } else {
       parts.push(this.add.rectangle(0, 0, 28, 24, 0xc8b080).setStrokeStyle(3, 0x302844));
       parts.push(this.add.rectangle(0, -3, 31, 7, 0x807766).setStrokeStyle(2, 0x302844));
@@ -227,7 +280,13 @@ export class DesertScene extends Phaser.Scene {
     }
 
     const container = this.add.container(x, y, parts).setDepth(11);
-    this.tweens.add({ targets: container, y: y - 5, duration: 900 + (x % 4) * 80, yoyo: true, repeat: -1 });
+    if (id === "plastic") {
+      this.tweens.add({ targets: container, y: y + 3, angle: 4, duration: 900, yoyo: true, repeat: -1 });
+    } else if (id === "virus") {
+      this.tweens.add({ targets: container, scale: 1.12, duration: 620, yoyo: true, repeat: -1 });
+    } else {
+      this.tweens.add({ targets: container, scale: 1.05, duration: 900 + (x % 4) * 80, yoyo: true, repeat: -1 });
+    }
     return { id, label, x, y, phrase, solution, found: false, container };
   }
 
