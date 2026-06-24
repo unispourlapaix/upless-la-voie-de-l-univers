@@ -96,23 +96,7 @@ export class DesertScene extends Phaser.Scene {
       this.add.ellipse(x + 35, 615, 310, 60, 0xb7643f, 0.34);
     }
 
-    this.add.rectangle(250, 568, 260, 34, 0xc47448, 0.45).setAngle(-3);
-    this.add.rectangle(348, 486, 40, 185, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c);
-    this.add.rectangle(316, 410, 92, 48, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c).setAngle(-8);
-    this.add.rectangle(258, 454, 92, 18, 0x7da8a4).setStrokeStyle(4, 0x2f3c4c).setAngle(18);
-    this.add.rectangle(222, 431, 18, 82, 0x7da8a4).setStrokeStyle(4, 0x2f3c4c).setAngle(18);
-    this.add.rectangle(205, 384, 37, 34, 0x7da8a4).setStrokeStyle(4, 0x2f3c4c).setAngle(18);
-    this.add.triangle(205, 351, -16, 20, 16, 20, 0, -23, 0xcc6b49).setStrokeStyle(3, 0x2f3c4c).setAngle(18);
-    this.add.circle(286, 389, 24, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c);
-    this.add.triangle(286, 345, -24, 34, 24, 34, 0, -36, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c);
-    [-20, -10, 0, 10, 20].forEach((offset, index) => {
-      this.add.triangle(286 + offset, 356 + Math.abs(offset) * 0.25, -5, 17, 5, 17, 0, -13 - index, 0x8db7b2)
-        .setStrokeStyle(2, 0x2f3c4c)
-        .setAngle(offset * 0.7);
-    });
-    this.add.rectangle(286, 422, 16, 44, 0x2f3c4c, 0.35).setAngle(-8);
-    this.add.line(0, 0, 336, 415, 315, 452, 0x2f3c4c, 0.9).setLineWidth(3);
-    this.add.line(0, 0, 351, 500, 333, 535, 0x2f3c4c, 0.75).setLineWidth(3);
+    this.drawFallenLibertyBust();
     this.drawBrokenTorchOnGround();
     this.add.text(196, 356, "STATUE\nBRISÉE", {
       fontFamily: "system-ui",
@@ -128,6 +112,31 @@ export class DesertScene extends Phaser.Scene {
 
     this.drawToxicPond();
     this.drawSickFrog();
+  }
+
+  private drawFallenLibertyBust(): void {
+    this.add.ellipse(266, 570, 300, 42, 0x3f2530, 0.18);
+    this.add.rectangle(244, 555, 224, 34, 0xc47448, 0.45).setAngle(-3);
+    this.add.ellipse(260, 536, 158, 70, 0x7da8a4).setStrokeStyle(5, 0x2f3c4c).setAngle(-8);
+    this.add.rectangle(226, 542, 82, 68, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c).setAngle(-8);
+    this.add.rectangle(292, 525, 70, 54, 0x6f9996).setStrokeStyle(4, 0x2f3c4c).setAngle(-8);
+    this.add.line(0, 0, 199, 520, 237, 568, 0x2f3c4c, 0.75).setLineWidth(3);
+    this.add.line(0, 0, 260, 503, 296, 558, 0x2f3c4c, 0.7).setLineWidth(3);
+
+    this.add.ellipse(188, 486, 88, 64, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c).setAngle(-14);
+    this.add.ellipse(172, 486, 12, 18, 0x2f3c4c, 0.3).setAngle(-14);
+    this.add.ellipse(200, 479, 10, 15, 0x2f3c4c, 0.3).setAngle(-14);
+    this.add.rectangle(189, 503, 34, 4, 0x2f3c4c, 0.55).setAngle(-14);
+    this.add.rectangle(152, 492, 22, 9, 0x7da8a4).setStrokeStyle(3, 0x2f3c4c).setAngle(20);
+    [-42, -25, -9, 8, 25, 42].forEach((offset, index) => {
+      this.add.triangle(190 + offset, 452 + Math.abs(offset) * 0.16, -7, 19, 7, 19, 0, -24 - (index % 2) * 5, 0x8db7b2)
+        .setStrokeStyle(3, 0x2f3c4c)
+        .setAngle(offset * 0.35 - 8);
+    });
+    this.add.triangle(146, 447, -9, 17, 9, 17, 0, -25, 0x8db7b2).setStrokeStyle(3, 0x2f3c4c).setAngle(-41);
+    this.add.line(0, 0, 206, 465, 238, 448, 0x2f3c4c, 0.8).setLineWidth(3);
+    this.add.circle(304, 566, 16, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c);
+    this.add.rectangle(335, 558, 62, 16, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c).setAngle(7);
   }
 
   private drawBrokenTorchOnGround(): void {
