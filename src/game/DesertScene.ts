@@ -32,8 +32,9 @@ export class DesertScene extends Phaser.Scene {
   private frog!: Phaser.GameObjects.Container;
   private robotNoCount = 0;
   private triedBunker = false;
-  private batteryTaps = 0;
   private smartphoneEventDone = false;
+  private rocketLaunched = false;
+  private pondHealed = false;
   private hasOil = false;
   private robotLubricated = false;
   private bunkerOpen = false;
@@ -442,6 +443,16 @@ export class DesertScene extends Phaser.Scene {
       return;
     }
 
+    if (item.id === "rocket" && this.triedBunker) {
+      this.launchRocket();
+      return;
+    }
+
+    if ((item.id === "virus" || item.id === "redWater") && this.triedBunker) {
+      this.healFrogAndPond();
+      return;
+    }
+
     if (item.solution) {
       if (this.hasOil) {
         this.showMessage("Tu as déjà l’huile rare.", 1100);
@@ -496,24 +507,10 @@ export class DesertScene extends Phaser.Scene {
       this.showMessage("Le smartphone est calmé.\nTes yeux aussi.", 1300);
       return;
     }
-
-    this.batteryTaps += 1;
-    audio.play("tap");
-    this.tweens.add({ targets: item.container, scale: 1.25, angle: this.batteryTaps % 2 ? -7 : 7, duration: 120, yoyo: true });
-
-    if (this.batteryTaps === 1) {
-      this.showMessage("Tu ramasses le vieux smartphone.\nIl vibre encore…", 1800);
-      return;
-    }
-    if (this.batteryTaps === 2) {
-      this.showMessage("Tes yeux tournent en rond.\nTic… tic…", 1800);
-      this.showSpiralEyes();
-      return;
-    }
-
     this.smartphoneEventDone = true;
     item.found = true;
     this.showSmartphoneRitual(item);
+    this.updateObjective();
   }
 
   private showSpiralEyes(): void {
@@ -569,14 +566,18 @@ export class DesertScene extends Phaser.Scene {
     this.time.delayedCall(1650, () => {
       tapText.destroy();
       phone.destroy();
-      this.launchRocket();
-      this.healFrogAndPond();
+      this.showMessage("Singe : Hihihi… trois secondes dehors et déjà hypnotisé.", 2300);
     });
   }
 
   private launchRocket(): void {
+    if (this.rocketLaunched) {
+      this.showMessage("La fusée est déjà partie.\nTrop tard pour réserver.", 1500);
+      return;
+    }
     const rocketItem = this.items.find((item) => item.id === "rocket");
     if (!rocketItem) return;
+    this.rocketLaunched = true;
     rocketItem.found = true;
     rocketItem.container.setVisible(true).setAlpha(1).setScale(1.15).setAngle(-12);
     const flame = this.add.triangle(rocketItem.x - 34, rocketItem.y + 12, -13, 0, 13, 0, 0, 36, 0xff8a2a)
@@ -609,6 +610,11 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private healFrogAndPond(): void {
+    if (this.pondHealed) {
+      this.showMessage("La mare est déjà verte.\nLa grenouille respire mieux.", 1500);
+      return;
+    }
+    this.pondHealed = true;
     audio.play("flower");
     this.tweens.add({
       targets: this.frog,
