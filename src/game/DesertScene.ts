@@ -28,6 +28,7 @@ export class DesertScene extends Phaser.Scene {
   private robot!: Phaser.GameObjects.Container;
   private robotEyes!: Phaser.GameObjects.Arc[];
   private robotNoCount = 0;
+  private triedBunker = false;
   private hasOil = false;
   private robotLubricated = false;
   private bunkerOpen = false;
@@ -197,7 +198,7 @@ export class DesertScene extends Phaser.Scene {
     const leg1 = this.add.rectangle(-17, 50, 17, 32, 0x716457).setStrokeStyle(3, 0x312831);
     const leg2 = this.add.rectangle(17, 50, 17, 32, 0x716457).setStrokeStyle(3, 0x312831);
     this.robotEyes = [eye1, eye2];
-    this.robot = this.add.container(1195, 493, [
+    this.robot = this.add.container(1276, 493, [
       shadow,
       arm1,
       arm2,
@@ -369,6 +370,7 @@ export class DesertScene extends Phaser.Scene {
     }
 
     if (world.x > 1240 && world.x < 1455 && world.y > 355 && world.y < 590) {
+      this.triedBunker = true;
       if (this.bunkerOpen) this.showMessage("Le bunker s’est ouvert…", 1500);
       else if (this.robotLubricated) this.showMessage("La porte glisse lentement.", 1400);
       else this.showMessage("Cette porte est trop lourde…\nLe robot garde l’entrée.", 1900);
@@ -387,6 +389,10 @@ export class DesertScene extends Phaser.Scene {
     if (item.solution) {
       if (this.hasOil) {
         this.showMessage("Tu as déjà l’huile rare.", 1100);
+        return;
+      }
+      if (!this.triedBunker && this.robotNoCount === 0) {
+        this.showMessage("Une vieille boîte d’huile.\nPour l’instant, tu n’en vois pas l’utilité.", 1900);
         return;
       }
       this.hasOil = true;
@@ -422,6 +428,7 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private interactWithRobot(): void {
+    this.triedBunker = true;
     if (this.robotLubricated) {
       this.showMessage("Robot : Passage autorisé.", 1500);
       return;
@@ -552,7 +559,8 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private canMoveTo(fromX: number, targetX: number): boolean {
-    if (!this.bunkerOpen && fromX < 1160 && targetX > 1185) {
+    if (!this.bunkerOpen && fromX < 1230 && targetX > 1250) {
+      this.triedBunker = true;
       this.showMessage("Le robot garde l’entrée.", 1400);
       return false;
     }
