@@ -4,6 +4,11 @@ import { TouchInput } from "./input";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
 
+type DialogueLine = {
+  speaker: "MIMI" | "TOI";
+  text: string;
+};
+
 export class OfficeScene extends Phaser.Scene {
   private player!: PlayerController;
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
@@ -11,6 +16,7 @@ export class OfficeScene extends Phaser.Scene {
   private messageText!: Phaser.GameObjects.Text;
   private messagePanel!: Phaser.GameObjects.Rectangle;
   private dialogueBox!: Phaser.GameObjects.Container;
+  private dialogueNameText!: Phaser.GameObjects.Text;
   private dialogueText!: Phaser.GameObjects.Text;
   private objectiveText!: Phaser.GameObjects.Text;
   private wireDisconnected = false;
@@ -36,6 +42,11 @@ export class OfficeScene extends Phaser.Scene {
   private messageTimer?: Phaser.Time.TimerEvent;
   private dialogueTimer?: Phaser.Time.TimerEvent;
   private dialogueOpen = false;
+  private dialogueLines: DialogueLine[] = [];
+  private dialogueIndex = 0;
+  private dialogueFullText = "";
+  private dialogueTyped = 0;
+  private dialogueComplete?: () => void;
 
   constructor() {
     super("OfficeScene");
@@ -490,7 +501,7 @@ export class OfficeScene extends Phaser.Scene {
     const eye1 = this.add.arc(-137, -19, 5, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
     const eye2 = this.add.arc(-119, -19, 5, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
     const nameTag = this.add.rectangle(-82, -55, 76, 24, 0xff4f8b).setStrokeStyle(3, 0x302844);
-    const name = this.add
+    this.dialogueNameText = this.add
       .text(-82, -55, "MIMI", { fontSize: "11px", color: "#ffffff", fontStyle: "bold" })
       .setOrigin(0.5);
     this.dialogueText = this.add.text(-82, -29, "", {
@@ -517,7 +528,7 @@ export class OfficeScene extends Phaser.Scene {
         eye1,
         eye2,
         nameTag,
-        name,
+        this.dialogueNameText,
         this.dialogueText,
         continueMark,
       ])
@@ -528,7 +539,7 @@ export class OfficeScene extends Phaser.Scene {
 
   private handleTap(screenX: number, screenY: number): void {
     if (this.dialogueOpen) {
-      this.closeDialogue();
+      this.advanceDialogue();
       return;
     }
     if (this.climbing) return;
@@ -636,31 +647,69 @@ export class OfficeScene extends Phaser.Scene {
       this.showMessage("Un petit chat t’observe près de la table", 1400);
       return;
     }
-    this.catHintReceived = true;
     audio.play("cat");
     this.player.stop();
-    this.objectiveText.setText("▣ BOÎTE");
-    this.openDialogue(
-      "Miaou ! Tu vois la petite boîte rose près de l’arbre ? Touche-la : elle ouvre le panneau électrique.",
+    this.openDialogueSequence(
+      [
+        { speaker: "MIMI", text: "Bonjour toi ! Mais qu’est-ce que tu fais là ? Tu es maboul ?" },
+        { speaker: "TOI", text: "Non, je cherche un singe." },
+        { speaker: "MIMI", text: "Il y a plein de singes ici, hahaha !" },
+        { speaker: "TOI", text: "Trêve de plaisanterie, peux-tu m’aider ?" },
+        { speaker: "MIMI", text: "Je pense qu’il faudrait couper le wifi. Regarde la boîte dehors." },
+      ],
+      () => {
+        this.catHintReceived = true;
+        this.objectiveText.setText("▣ BOÎTE");
+        this.showMessage("La boîte dehors peut ouvrir le panneau", 1700);
+      },
     );
     this.tweens.add({ targets: this.officeCat, scaleY: 0.76, scaleX: 0.9, duration: 150, yoyo: true });
   }
 
-  private openDialogue(text: string): void {
+  private openDialogueSequence(lines: DialogueLine[], onComplete?: () => void): void {
+    this.dialogueLines = lines;
+    this.dialogueIndex = 0;
+    this.dialogueComplete = onComplete;
+    this.showDialogueLine();
+  }
+
+  private showDialogueLine(): void {
     this.dialogueTimer?.remove(false);
     this.dialogueOpen = true;
     this.dialogueBox.setVisible(true).setScale(0.94).setAlpha(0);
+    const line = this.dialogueLines[this.dialogueIndex];
+    this.dialogueFullText = line.text;
+    this.dialogueTyped = 0;
+    this.dialogueNameText.setText(line.speaker);
+    this.dialogueNameText.setColor(line.speaker === "MIMI" ? "#ffffff" : "#302844");
     this.dialogueText.setText("");
     this.tweens.add({ targets: this.dialogueBox, alpha: 1, scale: 1, duration: 180, ease: "Back.out" });
-    let index = 0;
     this.dialogueTimer = this.time.addEvent({
       delay: 23,
-      repeat: text.length - 1,
+      repeat: this.dialogueFullText.length - 1,
       callback: () => {
-        index += 1;
-        this.dialogueText.setText(text.slice(0, index));
+        this.dialogueTyped += 1;
+        this.dialogueText.setText(this.dialogueFullText.slice(0, this.dialogueTyped));
       },
     });
+  }
+
+  private advanceDialogue(): void {
+    if (this.dialogueTyped < this.dialogueFullText.length) {
+      this.dialogueTimer?.remove(false);
+      this.dialogueTyped = this.dialogueFullText.length;
+      this.dialogueText.setText(this.dialogueFullText);
+      return;
+    }
+    if (this.dialogueIndex < this.dialogueLines.length - 1) {
+      this.dialogueIndex += 1;
+      this.showDialogueLine();
+      return;
+    }
+    this.closeDialogue();
+    const onComplete = this.dialogueComplete;
+    this.dialogueComplete = undefined;
+    onComplete?.();
   }
 
   private closeDialogue(): void {
@@ -852,7 +901,7 @@ export class OfficeScene extends Phaser.Scene {
       onComplete: () => {
         audio.play("portal");
         const save = loadSave();
-        writeSave({ ...save, lastLevel: 2, unlockedLevel: Math.max(save.unlockedLevel, 2) });
+        writeSave({ ...save, lastLevel: 2, unlockedLevel: Math.max(save.unlockedLevel, 3) });
         this.cameras.main.flash(600, 255, 220, 145);
         this.time.delayedCall(500, () => this.scene.start("LevelCompleteScene", { completedLevel: 2 }));
       },
