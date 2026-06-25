@@ -732,6 +732,9 @@ export class DesertScene extends Phaser.Scene {
       return;
     }
     this.pondHealed = true;
+    const virusItem = this.items.find((item) => item.id === "virus");
+    virusItem?.container.setVisible(true).setAlpha(1).setDepth(16);
+    if (virusItem) virusItem.found = true;
     audio.play("flower");
     this.tweens.add({
       targets: this.frog,
@@ -747,6 +750,28 @@ export class DesertScene extends Phaser.Scene {
         this.time.delayedCall(650, () => this.showMessage("La grenouille saute dans la mare.\nL’eau redevient verte.", 2300));
       },
     });
+    if (virusItem) {
+      this.tweens.add({
+        targets: virusItem.container,
+        x: 1104,
+        y: 512,
+        angle: 35,
+        scale: 1.28,
+        duration: 760,
+        ease: "Back.out",
+        onComplete: () => {
+          this.tweens.add({
+            targets: virusItem.container,
+            alpha: 0,
+            scale: 0.25,
+            y: 536,
+            duration: 520,
+            ease: "Sine.in",
+            onComplete: () => virusItem.container.setVisible(false),
+          });
+        },
+      });
+    }
   }
 
   private pollutePondWithPlastic(item: DesertItem): void {
