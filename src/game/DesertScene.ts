@@ -646,34 +646,84 @@ export class DesertScene extends Phaser.Scene {
     if (!rocketItem) return;
     this.rocketLaunched = true;
     rocketItem.found = true;
-    rocketItem.container.setVisible(true).setAlpha(1).setScale(1.15).setAngle(-12);
-    const flame = this.add.triangle(rocketItem.x - 34, rocketItem.y + 12, -13, 0, 13, 0, 0, 36, 0xff8a2a)
-      .setStrokeStyle(3, 0xfff0a0)
-      .setDepth(10)
-      .setAngle(-12);
     audio.play("portal");
-    this.showMessage("La fusée se répare toute seule…\nPuis elle s’envole !", 2400);
+    this.showMessage("La fusée se reconstruit…\nElle est beaucoup trop moderne.", 2400);
     this.cameras.main.shake(320, 0.006);
-    this.tweens.add({ targets: flame, scaleY: 1.8, alpha: 0.25, duration: 110, yoyo: true, repeat: 9 });
+
+    const rocket = this.createFuturisticRocket(rocketItem.x, rocketItem.y - 72).setAlpha(0).setScale(0.28).setDepth(24);
+    const beam = this.add.rectangle(rocketItem.x, rocketItem.y - 62, 7, 130, 0x80f3ff, 0.4).setDepth(23);
+    const rings = [0, 1, 2].map((index) =>
+      this.add.ellipse(rocketItem.x, rocketItem.y - 62, 52 + index * 28, 18 + index * 10, 0x80f3ff, 0)
+        .setStrokeStyle(2, 0x80f3ff, 0.8)
+        .setDepth(23),
+    );
+
+    this.tweens.add({ targets: rocketItem.container, alpha: 0.15, scale: 0.25, duration: 520, ease: "Back.in" });
+    this.tweens.add({ targets: rings, scaleX: 1.7, scaleY: 1.7, alpha: 0, duration: 700, repeat: 2, ease: "Sine.out" });
+    this.tweens.add({ targets: beam, alpha: 0, scaleY: 1.4, duration: 1100, ease: "Sine.out" });
     this.tweens.add({
-      targets: rocketItem.container,
-      x: rocketItem.x + 190,
-      y: rocketItem.y - 430,
-      angle: 24,
-      scale: 1.6,
-      duration: 1600,
-      ease: "Sine.in",
-      onComplete: () => rocketItem.container.setVisible(false),
+      targets: rocket,
+      alpha: 1,
+      scale: 1.18,
+      y: rocket.y - 28,
+      duration: 900,
+      ease: "Back.out",
+      onComplete: () => {
+        this.showMessage("Décollage futuriste !", 1200);
+        const flame = this.add.container(rocket.x, rocket.y + 92).setDepth(23);
+        flame.add([
+          this.add.triangle(0, 24, -27, 0, 27, 0, 0, 84, 0xff8a2a),
+          this.add.triangle(0, 18, -15, 0, 15, 0, 0, 56, 0xfff0a0),
+          this.add.ellipse(0, 72, 72, 28, 0x80f3ff, 0.28),
+        ]);
+        this.tweens.add({ targets: flame, scaleY: 1.35, alpha: 0.65, duration: 110, yoyo: true, repeat: 10 });
+        this.tweens.add({
+          targets: [rocket, flame],
+          x: rocket.x + 105,
+          y: rocket.y - 540,
+          scale: 1.45,
+          duration: 1650,
+          ease: "Sine.in",
+          onComplete: () => {
+            rocket.destroy();
+            flame.destroy();
+            rings.forEach((ring) => ring.destroy());
+            beam.destroy();
+          },
+        });
+      },
     });
-    this.tweens.add({
-      targets: flame,
-      x: flame.x + 190,
-      y: flame.y - 430,
-      alpha: 0,
-      duration: 1600,
-      ease: "Sine.in",
-      onComplete: () => flame.destroy(),
-    });
+  }
+
+  private createFuturisticRocket(x: number, y: number): Phaser.GameObjects.Container {
+    const shadow = this.add.ellipse(0, 118, 92, 18, 0x20182b, 0.18);
+    const hull = this.add.ellipse(0, 0, 58, 166, 0xf4f7ff).setStrokeStyle(5, 0x18223b);
+    const nose = this.add.triangle(0, -100, -27, 12, 27, 12, 0, -48, 0x9feaff).setStrokeStyle(4, 0x18223b);
+    const glass = this.add.ellipse(0, -34, 34, 42, 0x68ddff, 0.92).setStrokeStyle(4, 0x18223b);
+    const shine = this.add.ellipse(-7, -43, 10, 16, 0xffffff, 0.72).setAngle(28);
+    const stripe = this.add.rectangle(0, 21, 56, 13, 0xff4f8b).setStrokeStyle(3, 0x18223b);
+    const core = this.add.circle(0, 55, 14, 0x80f3ff, 0.9).setStrokeStyle(3, 0x18223b);
+    const wing1 = this.add.triangle(-35, 59, -8, -23, 9, 23, -31, 54, 0x6757d8).setStrokeStyle(4, 0x18223b);
+    const wing2 = this.add.triangle(35, 59, -9, 23, 8, -23, 31, 54, 0x6757d8).setStrokeStyle(4, 0x18223b);
+    const engine1 = this.add.rectangle(-17, 89, 17, 30, 0x4b5878).setStrokeStyle(3, 0x18223b);
+    const engine2 = this.add.rectangle(17, 89, 17, 30, 0x4b5878).setStrokeStyle(3, 0x18223b);
+    const antenna = this.add.line(0, 0, 0, -122, 0, -101, 0x18223b, 1).setLineWidth(3);
+    const antennaTip = this.add.circle(0, -126, 5, 0xffd36a).setStrokeStyle(2, 0x18223b);
+    return this.add.container(x, y, [
+      shadow,
+      wing1,
+      wing2,
+      hull,
+      nose,
+      glass,
+      shine,
+      stripe,
+      core,
+      engine1,
+      engine2,
+      antenna,
+      antennaTip,
+    ]);
   }
 
   private healFrogAndPond(): void {
