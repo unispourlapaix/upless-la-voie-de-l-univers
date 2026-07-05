@@ -452,7 +452,7 @@ export class BeachScene extends Phaser.Scene {
     this.time.delayedCall(2700, () => {
       const save = loadSave();
       writeSave({ ...save, lastLevel: 4, unlockedLevel: Math.max(save.unlockedLevel, 5) });
-      this.scene.start("LevelCompleteScene", { completedLevel: 4 });
+      this.scene.start("MoonScene");
     });
   }
 
