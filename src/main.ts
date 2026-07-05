@@ -11,6 +11,14 @@ import { PreloadScene } from "./game/PreloadScene";
 
 const bootScreen = document.querySelector<HTMLDivElement>("#boot-screen");
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error: unknown) => {
+      console.warn("Upless web app install helper unavailable", error);
+    });
+  });
+}
+
 try {
   const game = new Phaser.Game({
     // Canvas is deliberately used for wider compatibility on mobile browsers.
