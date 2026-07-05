@@ -254,26 +254,61 @@ export class MoonScene extends Phaser.Scene {
       this.cameras.main.stopFollow();
       this.cameras.main.setScroll(0, 0);
       this.cameras.main.setBackgroundColor("#0b1024");
-      this.add.text(180, 72, "UPLESS", { fontSize: "38px", color: "#ffd36a", fontStyle: "bold" }).setOrigin(0.5);
-      this.add.text(180, 112, "Générique de fin", { fontSize: "17px", color: "#e8eeff", fontStyle: "bold" }).setOrigin(0.5);
-      this.add.text(180, 162, "Le héros • La girafe • Pinwinkis\nLe singe civilisé • Mimi le chat\nL’alien calculateur • L’ogre sonné\nLa grenouille • Le bateau lunaire", {
-        fontSize: "15px",
-        color: "#b8c5ff",
-        align: "center",
-        lineSpacing: 7,
-      }).setOrigin(0.5, 0);
-      ["😄", "🦒", "🐧", "🐒", "🐱", "👽", "🐸"].forEach((emoji, index) => {
-        const icon = this.add.text(40 + index * 46, 440, emoji, { fontSize: "30px" }).setOrigin(0.5);
-        this.tweens.add({ targets: icon, y: 426, angle: index % 2 ? 8 : -8, duration: 420 + index * 45, yoyo: true, repeat: -1 });
+      this.add.rectangle(180, 320, 360, 640, 0x0b1024);
+      for (let i = 0; i < 55; i += 1) {
+        this.add.circle(Phaser.Math.Between(0, 360), Phaser.Math.Between(0, 640), Phaser.Math.FloatBetween(0.8, 2), 0xffffff, Phaser.Math.FloatBetween(0.2, 0.75));
+      }
+
+      const credits = this.add.container(180, 720);
+      const titleStyle = { fontFamily: "monospace", fontSize: "34px", color: "#ffd36a", fontStyle: "bold" };
+      const smallStyle = { fontFamily: "monospace", fontSize: "14px", color: "#b8c5ff", align: "center", lineSpacing: 8 };
+      credits.add([
+        this.add.text(0, 0, "UPLESS", titleStyle).setOrigin(0.5),
+        this.add.text(0, 48, "GÉNÉRIQUE DE FIN", { fontFamily: "monospace", fontSize: "16px", color: "#e8eeff", fontStyle: "bold", letterSpacing: 2 }).setOrigin(0.5),
+        this.add.text(0, 115, "AVEC", { fontFamily: "monospace", fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setOrigin(0.5),
+        this.add.text(0, 154, "LE HÉROS\nLA GIRAFE\nPINWINKIS\nLE SINGE CIVILISÉ\nMIMI LE CHAT\nL’ALIEN CALCULATEUR\nL’OGRE SONNÉ\nLA GRENOUILLE\nLE BATEAU LUNAIRE", smallStyle).setOrigin(0.5, 0),
+        this.add.text(0, 390, "REMERCIEMENTS", { fontFamily: "monospace", fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setOrigin(0.5),
+        this.add.text(0, 430, "aux algues coincées\naux développeurs fous\nau SAV planétaire\nà Origine, quelque part", smallStyle).setOrigin(0.5, 0),
+        this.add.text(0, 590, "😄   🦒   🐧   🐒   🐱   👽   🐸", { fontSize: "25px" }).setOrigin(0.5),
+        this.add.text(0, 675, "TOUT LE MONDE RIGOLE", { fontFamily: "monospace", fontSize: "16px", color: "#ffffff", fontStyle: "bold" }).setOrigin(0.5),
+      ]);
+
+      this.tweens.add({
+        targets: credits,
+        y: -790,
+        duration: 15000,
+        ease: "Linear",
+        onComplete: () => this.showFinalPunchline(),
       });
-      this.add.text(180, 516, "Tout le monde rigole.\nVoilà, c’est comme ça que le Big Bang s’est fait.\nLa vraie fausse histoire du monde humain. lol\nFIN", {
-        fontSize: "15px",
-        color: "#ffffff",
-        align: "center",
-        fontStyle: "bold",
-        lineSpacing: 5,
-      }).setOrigin(0.5);
     });
+  }
+
+  private showFinalPunchline(): void {
+    this.children.removeAll();
+    this.cameras.main.setBackgroundColor("#060812");
+    this.add.circle(180, 175, 92, 0xffd36a, 0.08);
+    this.add.text(180, 144, "✦", { fontSize: "72px", color: "#ffd36a" }).setOrigin(0.5);
+    this.add.text(180, 292, "Voilà, c’est comme ça\nque le Big Bang s’est fait.", {
+      fontFamily: "monospace",
+      fontSize: "18px",
+      color: "#ffffff",
+      align: "center",
+      fontStyle: "bold",
+      lineSpacing: 8,
+    }).setOrigin(0.5);
+    this.add.text(180, 390, "La vraie fausse histoire\ndu monde humain. lol", {
+      fontFamily: "monospace",
+      fontSize: "15px",
+      color: "#b8c5ff",
+      align: "center",
+      lineSpacing: 7,
+    }).setOrigin(0.5);
+    this.add.text(180, 500, "FIN", {
+      fontFamily: "monospace",
+      fontSize: "32px",
+      color: "#ffd36a",
+      fontStyle: "bold",
+    }).setOrigin(0.5);
   }
 
   private showMessage(message: string, duration: number): void {
