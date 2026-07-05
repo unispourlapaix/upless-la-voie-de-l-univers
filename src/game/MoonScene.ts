@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
 import { icon, t } from "./language";
@@ -69,6 +70,7 @@ export class MoonScene extends Phaser.Scene {
     const sky = this.add.graphics().setScrollFactor(0);
     sky.fillGradientStyle(0x10182f, 0x10182f, 0x2a2147, 0x5c3c69, 1);
     sky.fillRect(0, 0, 360, 640);
+    addWorldGrain(this, "moon", 0.1);
     for (let i = 0; i < 70; i += 1) {
       this.add.circle(Phaser.Math.Between(0, 360), Phaser.Math.Between(40, 520), Phaser.Math.FloatBetween(0.7, 2), 0xffffff, Phaser.Math.FloatBetween(0.25, 0.8)).setScrollFactor(0);
     }
@@ -99,7 +101,7 @@ export class MoonScene extends Phaser.Scene {
 
   private createPlatforms(): void {
     this.platforms = this.physics.add.staticGroup();
-    this.platforms.add(this.add.rectangle(760, 580, 1520, 60, 0x8d94aa).setStrokeStyle(3, 0xdce3f3, 0.28));
+    this.platforms.add(addReliefBlock(this, 760, 580, 1520, 60, 0x8d94aa, { texture: "moon", stroke: 0xdce3f3, strokeAlpha: 0.42, depth: 2 }));
   }
 
   private createArrivalBoat(): void {
