@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
+import { icon, t } from "./language";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
 
@@ -56,8 +57,8 @@ export class MoonScene extends Phaser.Scene {
       isUiHit: (_x, y) => y < 58,
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.inputController?.destroy());
-    this.showMessage("Niveau 5 — SAV lunaire", 2300);
-    this.time.delayedCall(2400, () => this.showMessage("Le bateau arrive sur la Lune.\nNe demande pas comment.", 2300));
+    this.showMessage(icon("🌙", "Niveau 5 — SAV lunaire", "Level 5 — Lunar support desk"), 2300);
+    this.time.delayedCall(2400, () => this.showMessage(icon("⛵", "Le bateau arrive sur la Lune.\nNe demande pas comment.", "The boat lands on the Moon.\nDo not ask how."), 2300));
   }
 
   update(): void {
@@ -104,7 +105,7 @@ export class MoonScene extends Phaser.Scene {
   private createArrivalBoat(): void {
     const hull = this.add.ellipse(0, 36, 172, 48, 0xffffff).setStrokeStyle(5, 0x1f2a44);
     const sail = this.add.triangle(20, -16, -28, 54, 34, 54, -26, -48, 0xffd36a).setStrokeStyle(4, 0x1f2a44);
-    const label = this.add.text(0, 70, "bateau lunaire", { fontSize: "10px", color: "#e9eefb", fontStyle: "bold" }).setOrigin(0.5);
+    const label = this.add.text(0, 70, t("bateau lunaire", "moon boat"), { fontSize: "10px", color: "#e9eefb", fontStyle: "bold" }).setOrigin(0.5);
     this.add.container(150, 492, [sail, hull, label]).setDepth(9).setAngle(-5);
   }
 
@@ -139,7 +140,7 @@ export class MoonScene extends Phaser.Scene {
     this.add.ellipse(1040, 548, 128, 36, 0x3f465d, 0.5).setStrokeStyle(3, 0xdce3f3, 0.25);
     this.add.circle(1018, 532, 15, 0xc9f5ff).setStrokeStyle(3, 0xffffff);
     this.add.circle(1044, 536, 11, 0xa8e9ff).setStrokeStyle(2, 0xffffff);
-    this.add.text(1040, 576, "cratère glacé", { fontSize: "10px", color: "#eef6ff", fontStyle: "bold" }).setOrigin(0.5);
+    this.add.text(1040, 576, t("cratère glacé", "ice crater"), { fontSize: "10px", color: "#eef6ff", fontStyle: "bold" }).setOrigin(0.5);
     this.targets.push({ id: "ice", x: 1040, y: 536, radius: 72, action: () => this.collectIce() });
   }
 
@@ -155,8 +156,8 @@ export class MoonScene extends Phaser.Scene {
 
   private createHud(): void {
     this.add.rectangle(180, 27, 332, 42, 0x111827, 0.9).setScrollFactor(0).setDepth(100);
-    this.add.text(27, 18, "NIV. 5", { fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setScrollFactor(0).setDepth(101);
-    this.objectiveText = this.add.text(328, 18, "💧 EAU", { fontSize: "12px", color: "#ffffff", fontStyle: "bold" }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+    this.add.text(27, 18, t("NIV. 5", "LV. 5"), { fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setScrollFactor(0).setDepth(101);
+    this.objectiveText = this.add.text(328, 18, icon("💧", "EAU", "WATER"), { fontSize: "12px", color: "#ffffff", fontStyle: "bold" }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
     this.messagePanel = this.add.rectangle(180, 588, 326, 70, 0x111827, 0.94).setStrokeStyle(3, 0x8eeaff, 0.35).setScrollFactor(0).setDepth(109).setAlpha(0);
     this.messageText = this.add.text(180, 590, "", {
       fontFamily: "system-ui",
@@ -181,13 +182,13 @@ export class MoonScene extends Phaser.Scene {
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
     const target = this.targets.find((candidate) => Phaser.Math.Distance.Between(world.x, world.y, candidate.x, candidate.y) < candidate.radius);
     if (target) target.action();
-    else this.showMessage("La poussière lunaire garde ses secrets.", 1300);
+    else this.showMessage(icon("…", "La poussière lunaire garde ses secrets.", "Moon dust keeps its secrets."), 1300);
   }
 
   private talkAlien(): void {
     if (!this.hasIce) {
-      this.showMessage("Alien : calcul en cours…\nIl manque de l’eau pour l’atmosphère.", 2600);
-      this.objectiveText.setText("🧊 GLACE");
+      this.showMessage(icon("👽", "Alien : calcul en cours…\nIl manque de l’eau pour l’atmosphère.", "Alien: computing…\nWater is missing for the atmosphere."), 2600);
+      this.objectiveText.setText(icon("🧊", "GLACE", "ICE"));
       return;
     }
     this.helpAlien();
@@ -195,8 +196,8 @@ export class MoonScene extends Phaser.Scene {
 
   private inspectDevice(): void {
     if (!this.hasIce) {
-      this.showMessage("L’appareil fabrique atmosphère et fumée.\nIl clignote : EAU MANQUANTE.", 2600);
-      this.objectiveText.setText("🧊 CRATÈRE");
+      this.showMessage(icon("⚙", "L’appareil fabrique atmosphère et fumée.\nIl clignote : EAU MANQUANTE.", "The device makes atmosphere and smoke.\nIt blinks: WATER MISSING."), 2600);
+      this.objectiveText.setText(icon("🧊", "CRATÈRE", "CRATER"));
       return;
     }
     this.helpAlien();
@@ -204,13 +205,13 @@ export class MoonScene extends Phaser.Scene {
 
   private collectIce(): void {
     if (this.hasIce) {
-      this.showMessage("Tu as déjà la glace lunaire.", 1200);
+      this.showMessage(icon("🧊", "Tu as déjà la glace lunaire.", "You already have the moon ice."), 1200);
       return;
     }
     this.hasIce = true;
     audio.play("flower");
-    this.objectiveText.setText("👽 ALIEN");
-    this.showMessage("Tu trouves de l’eau en glace dans le cratère.", 2300);
+    this.objectiveText.setText(icon("👽", "ALIEN", "ALIEN"));
+    this.showMessage(icon("🧊", "Tu trouves de l’eau en glace dans le cratère.", "You find frozen water in the crater."), 2300);
   }
 
   private helpAlien(): void {
@@ -221,23 +222,23 @@ export class MoonScene extends Phaser.Scene {
     this.deviceHelped = true;
     this.hasIce = false;
     audio.play("bridge");
-    this.objectiveText.setText("✦ PORTE");
-    this.showMessage("Tu donnes la glace à l’alien.\nIl programme le dispositif.", 2600);
+    this.objectiveText.setText(icon("✦", "PORTE", "GATE"));
+    this.showMessage(icon("👽", "Tu donnes la glace à l’alien.\nIl programme le dispositif.", "You give the ice to the alien.\nIt programs the device."), 2600);
     this.tweens.add({ targets: this.deviceSmoke.list, alpha: 0.45, scale: 1.4, duration: 650, yoyo: true, repeat: 2 });
     this.time.delayedCall(1700, () => this.openThenBreakGate());
   }
 
   private inspectGate(): void {
     if (!this.deviceHelped) {
-      this.showMessage("Une porte stellaire muette.\nElle attend de l’atmosphère.", 2200);
+      this.showMessage(icon("✦", "Une porte stellaire muette.\nElle attend de l’atmosphère.", "A silent stargate.\nIt waits for atmosphere."), 2200);
       return;
     }
-    this.showMessage("La porte sent le brûlé cosmique.", 1600);
+    this.showMessage(icon("♨", "La porte sent le brûlé cosmique.", "The gate smells like cosmic burning."), 1600);
   }
 
   private openThenBreakGate(): void {
     audio.play("portal");
-    this.showMessage("La porte stellaire s’ouvre !", 1600);
+    this.showMessage(icon("✦", "La porte stellaire s’ouvre !", "The stargate opens!"), 1600);
     this.gateCore.setFillStyle(0x8eeaff, 0.75).setStrokeStyle(4, 0xffffff, 0.8);
     this.cameras.main.shake(400, 0.006);
     this.tweens.add({ targets: this.gate, scale: 1.12, duration: 320, yoyo: true, repeat: 2 });
@@ -249,7 +250,7 @@ export class MoonScene extends Phaser.Scene {
       audio.play("danger");
       this.gateCore.setFillStyle(0x22111d, 0.82).setStrokeStyle(4, 0xff4f8b, 0.35);
       this.cameras.main.shake(650, 0.012);
-      this.showMessage("Puis… panne générale.", 1300);
+      this.showMessage(icon("⚠", "Puis… panne générale.", "Then… total system failure."), 1300);
       this.time.delayedCall(1050, () => this.bigBangBoom());
     });
   }
@@ -275,7 +276,7 @@ export class MoonScene extends Phaser.Scene {
     this.tweens.add({ targets: this.gate, scale: 1.35, angle: 9, duration: 120, yoyo: true, repeat: 6 });
     this.time.delayedCall(1550, () => {
       boom.destroy();
-      this.showMessage("Fin du jeu.", 1100);
+      this.showMessage(icon("■", "Fin du jeu.", "End of the game."), 1100);
       this.time.delayedCall(1200, () => this.showCredits());
     });
   }
@@ -302,13 +303,13 @@ export class MoonScene extends Phaser.Scene {
       const smallStyle = { fontFamily: "monospace", fontSize: "14px", color: "#b8c5ff", align: "center", lineSpacing: 8 };
       credits.add([
         this.add.text(0, 0, "UPLESS", titleStyle).setOrigin(0.5),
-        this.add.text(0, 48, "GÉNÉRIQUE DE FIN", { fontFamily: "monospace", fontSize: "16px", color: "#e8eeff", fontStyle: "bold", letterSpacing: 2 }).setOrigin(0.5),
-        this.add.text(0, 115, "AVEC", { fontFamily: "monospace", fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setOrigin(0.5),
-        this.add.text(0, 154, "LE HÉROS\nLA GIRAFE\nPINWINKIS\nLE SINGE CIVILISÉ\nMIMI LE CHAT\nL’ALIEN CALCULATEUR\nL’OGRE SONNÉ\nLA GRENOUILLE\nLE BATEAU LUNAIRE", smallStyle).setOrigin(0.5, 0),
-        this.add.text(0, 390, "REMERCIEMENTS", { fontFamily: "monospace", fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setOrigin(0.5),
-        this.add.text(0, 430, "aux algues coincées\naux développeurs fous\nau SAV planétaire\nà Origine, quelque part", smallStyle).setOrigin(0.5, 0),
+        this.add.text(0, 48, t("GÉNÉRIQUE DE FIN", "END CREDITS"), { fontFamily: "monospace", fontSize: "16px", color: "#e8eeff", fontStyle: "bold", letterSpacing: 2 }).setOrigin(0.5),
+        this.add.text(0, 115, t("AVEC", "WITH"), { fontFamily: "monospace", fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setOrigin(0.5),
+        this.add.text(0, 154, t("LE HÉROS\nLA GIRAFE\nPINWINKIS\nLE SINGE CIVILISÉ\nMIMI LE CHAT\nL’ALIEN CALCULATEUR\nL’OGRE SONNÉ\nLA GRENOUILLE\nLE BATEAU LUNAIRE", "THE HERO\nTHE GIRAFFE\nPINWINKIS\nTHE CIVILIZED MONKEY\nMIMI THE CAT\nTHE CALCULATING ALIEN\nTHE DIZZY OGRE\nTHE FROG\nTHE MOON BOAT"), smallStyle).setOrigin(0.5, 0),
+        this.add.text(0, 390, t("REMERCIEMENTS", "THANKS"), { fontFamily: "monospace", fontSize: "13px", color: "#8eeaff", fontStyle: "bold" }).setOrigin(0.5),
+        this.add.text(0, 430, t("aux algues coincées\naux développeurs fous\nau SAV planétaire\nà Origine, quelque part", "to the stuck seaweed\nto the mad developers\nto planetary support\nto Origine, somewhere"), smallStyle).setOrigin(0.5, 0),
         this.add.text(0, 590, "😄   🦒   🐧   🐒   🐱   👽   🐸", { fontSize: "25px" }).setOrigin(0.5),
-        this.add.text(0, 675, "TOUT LE MONDE RIGOLE", { fontFamily: "monospace", fontSize: "16px", color: "#ffffff", fontStyle: "bold" }).setOrigin(0.5),
+        this.add.text(0, 675, t("TOUT LE MONDE RIGOLE", "EVERYONE LAUGHS"), { fontFamily: "monospace", fontSize: "16px", color: "#ffffff", fontStyle: "bold" }).setOrigin(0.5),
       ]);
 
       this.tweens.add({
@@ -326,7 +327,7 @@ export class MoonScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor("#060812");
     this.add.circle(180, 175, 92, 0xffd36a, 0.08);
     this.add.text(180, 144, "✦", { fontSize: "72px", color: "#ffd36a" }).setOrigin(0.5);
-    this.add.text(180, 292, "Voilà, c’est comme ça\nque le Big Bang s’est fait.", {
+    this.add.text(180, 292, t("Voilà, c’est comme ça\nque le Big Bang s’est fait.", "So that is how\nthe Big Bang happened."), {
       fontFamily: "monospace",
       fontSize: "18px",
       color: "#ffffff",
@@ -334,14 +335,14 @@ export class MoonScene extends Phaser.Scene {
       fontStyle: "bold",
       lineSpacing: 8,
     }).setOrigin(0.5);
-    this.add.text(180, 390, "La vraie fausse histoire\ndu monde humain. lol", {
+    this.add.text(180, 390, t("La vraie fausse histoire\ndu monde humain. lol", "The true fake story\nof the human world. lol"), {
       fontFamily: "monospace",
       fontSize: "15px",
       color: "#b8c5ff",
       align: "center",
       lineSpacing: 7,
     }).setOrigin(0.5);
-    this.add.text(180, 500, "FIN", {
+    this.add.text(180, 500, t("FIN", "THE END"), {
       fontFamily: "monospace",
       fontSize: "32px",
       color: "#ffd36a",
