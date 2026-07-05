@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { icon, t } from "./language";
 
 export class LevelCompleteScene extends Phaser.Scene {
   private completedLevel = 1;
@@ -16,7 +17,7 @@ export class LevelCompleteScene extends Phaser.Scene {
     this.add.circle(180, 175, 90, 0xffd36a, 0.12);
     this.add.text(180, 145, "✦", { fontSize: "78px", color: "#ffd36a" }).setOrigin(0.5);
     this.add
-      .text(180, 250, "Niveau terminé !", {
+      .text(180, 250, icon("✓", "Niveau terminé !", "Level complete!"), {
         fontFamily: "system-ui",
         fontStyle: "bold",
         fontSize: "28px",
@@ -24,7 +25,7 @@ export class LevelCompleteScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     this.add
-      .text(180, 315, "Le petit héros avance\nsur la voie de l’univers.", {
+      .text(180, 315, t("Le petit héros avance\nsur la voie de l’univers.", "The tiny hero walks on\nthe way of the universe."), {
         fontFamily: "system-ui",
         align: "center",
         fontSize: "17px",
@@ -34,7 +35,7 @@ export class LevelCompleteScene extends Phaser.Scene {
       .setOrigin(0.5);
     const hasNextLevel = this.completedLevel < 5;
     const button = this.add
-      .text(180, 435, hasNextLevel ? "NIVEAU SUIVANT" : "LA SUITE ARRIVE BIENTÔT…", {
+      .text(180, 435, hasNextLevel ? icon("▶", "NIVEAU SUIVANT", "NEXT LEVEL") : t("LA SUITE ARRIVE BIENTÔT…", "MORE COMING SOON…"), {
         fontFamily: "system-ui",
         fontStyle: "bold",
         fontSize: "13px",
