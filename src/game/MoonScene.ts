@@ -237,8 +237,34 @@ export class MoonScene extends Phaser.Scene {
       audio.play("danger");
       this.gateCore.setFillStyle(0x22111d, 0.82).setStrokeStyle(4, 0xff4f8b, 0.35);
       this.cameras.main.shake(650, 0.012);
-      this.showMessage("Puis… panne générale.\nFin du jeu.", 2600);
-      this.time.delayedCall(2600, () => this.showCredits());
+      this.showMessage("Puis… panne générale.", 1300);
+      this.time.delayedCall(1050, () => this.bigBangBoom());
+    });
+  }
+
+  private bigBangBoom(): void {
+    audio.play("ogre");
+    this.cameras.main.flash(500, 255, 230, 120);
+    this.cameras.main.shake(1100, 0.024);
+    const boom = this.add.text(1330, 392, "BA DA\nBOUM!!!", {
+      fontFamily: "monospace",
+      fontSize: "42px",
+      color: "#ffffff",
+      align: "center",
+      fontStyle: "bold",
+      stroke: "#ff4f8b",
+      strokeThickness: 8,
+    }).setOrigin(0.5).setDepth(80).setScale(0.2);
+    const shockwave = this.add.circle(1330, 494, 20, 0xffd36a, 0.25).setStrokeStyle(6, 0xffffff, 0.85).setDepth(75);
+    const burst = this.add.circle(1330, 494, 55, 0xff4f8b, 0.35).setDepth(74);
+    this.tweens.add({ targets: boom, scale: 1.15, angle: 4, duration: 420, ease: "Back.out" });
+    this.tweens.add({ targets: shockwave, scale: 8, alpha: 0, duration: 1050, ease: "Sine.out", onComplete: () => shockwave.destroy() });
+    this.tweens.add({ targets: burst, scale: 3.8, alpha: 0, duration: 780, ease: "Sine.out", onComplete: () => burst.destroy() });
+    this.tweens.add({ targets: this.gate, scale: 1.35, angle: 9, duration: 120, yoyo: true, repeat: 6 });
+    this.time.delayedCall(1550, () => {
+      boom.destroy();
+      this.showMessage("Fin du jeu.", 1100);
+      this.time.delayedCall(1200, () => this.showCredits());
     });
   }
 
