@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="110" y1="82" x2="410" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff4f8b"/>
+      <stop offset="1" stop-color="#6949d7"/>
+    </linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#10162f" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <circle cx="256" cy="256" r="222" fill="url(#g)" filter="url(#s)"/>
+  <circle cx="256" cy="256" r="222" fill="none" stroke="#ffd36a" stroke-width="18"/>
+  <circle cx="256" cy="256" r="144" fill="#fff" opacity=".96" stroke="#211b38" stroke-width="14"/>
+  <text x="256" y="323" text-anchor="middle" font-family="Arial Rounded MT Bold, system-ui, sans-serif" font-size="188" font-weight="900" fill="#211b38">U</text>
+  <text x="337" y="168" text-anchor="middle" font-family="Arial, system-ui, sans-serif" font-size="88" font-weight="900" fill="#ffd36a">✦</text>
+  <g fill="#fff" opacity=".35">
+    <circle cx="127" cy="256" r="5"/><circle cx="151" cy="181" r="5"/><circle cx="214" cy="135" r="5"/>
+    <circle cx="298" cy="135" r="5"/><circle cx="361" cy="181" r="5"/><circle cx="385" cy="256" r="5"/>
+    <circle cx="361" cy="331" r="5"/><circle cx="298" cy="377" r="5"/><circle cx="214" cy="377" r="5"/><circle cx="151" cy="331" r="5"/>
+  </g>
+</svg>
