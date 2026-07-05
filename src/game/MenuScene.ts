@@ -96,7 +96,9 @@ export class MenuScene extends Phaser.Scene {
       audio.play("confirm");
       const requestedLevel = new URLSearchParams(window.location.search).get("level");
       const save = loadSave();
-      if (requestedLevel === "4" || save.lastLevel >= 4) {
+      if (requestedLevel === "5" || save.lastLevel >= 5) {
+        this.scene.start("MoonScene");
+      } else if (requestedLevel === "4" || save.lastLevel >= 4) {
         this.scene.start("BeachScene");
       } else if (requestedLevel === "3" || save.lastLevel >= 3) {
         this.scene.start("DesertScene");
