@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { audio } from "./audio";
+import { getLanguage, icon, toggleLanguage } from "./language";
 import { loadSave } from "./types";
 
 export class MenuScene extends Phaser.Scene {
@@ -63,12 +64,32 @@ export class MenuScene extends Phaser.Scene {
         letterSpacing: 2,
       })
       .setOrigin(0.5);
-    this.add
-      .text(180, 278, "♫  POP POLYPHONIQUE SYNTHÉTISÉE", {
+    const musicLabel = this.add
+      .text(180, 278, icon("♫", "POP POLYPHONIQUE SYNTHÉTISÉE", "SYNTH POP POLYPHONY"), {
         fontFamily: "system-ui",
         fontSize: "10px",
         color: "#7e6d91",
         letterSpacing: 1,
+      })
+      .setOrigin(0.5);
+
+    const languageButton = this.add
+      .text(306, 24, getLanguage().toUpperCase(), {
+        fontFamily: "system-ui",
+        fontStyle: "bold",
+        fontSize: "13px",
+        color: "#211b38",
+        backgroundColor: "#ffffff",
+        padding: { x: 10, y: 7 },
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    this.add
+      .text(180, 310, "👁  ✋  ✦  💬  💥", {
+        fontFamily: "system-ui",
+        fontSize: "20px",
+        color: "#2a2440",
       })
       .setOrigin(0.5);
 
@@ -77,7 +98,7 @@ export class MenuScene extends Phaser.Scene {
     this.tweens.add({ targets: hero, y: 354, duration: 850, yoyo: true, repeat: -1, ease: "Sine.inOut" });
 
     const start = this.add
-      .text(180, 486, "TOUCHER POUR COMMENCER", {
+      .text(180, 486, icon("▶", "TOUCHER POUR COMMENCER", "TOUCH TO START"), {
         fontFamily: "system-ui",
         fontStyle: "bold",
         fontSize: "15px",
@@ -91,7 +112,15 @@ export class MenuScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     this.tweens.add({ targets: start, scale: 1.04, duration: 900, yoyo: true, repeat: -1 });
-    this.input.once("pointerdown", () => {
+    languageButton.on("pointerdown", () => {
+      const next = toggleLanguage();
+      languageButton.setText(next.toUpperCase());
+      musicLabel.setText(icon("♫", "POP POLYPHONIQUE SYNTHÉTISÉE", "SYNTH POP POLYPHONY"));
+      start.setText(icon("▶", "TOUCHER POUR COMMENCER", "TOUCH TO START"));
+      audio.play("tap");
+    });
+
+    start.on("pointerdown", () => {
       void audio.start();
       audio.play("confirm");
       const requestedLevel = new URLSearchParams(window.location.search).get("level");
