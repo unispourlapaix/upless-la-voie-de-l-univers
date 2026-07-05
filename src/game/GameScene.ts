@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
 import { levels } from "./levels";
@@ -86,6 +87,7 @@ export class GameScene extends Phaser.Scene {
     const background = this.add.graphics().setScrollFactor(0);
     background.fillGradientStyle(0x17244d, 0x17244d, 0x3a315d, 0x3a315d, 1);
     background.fillRect(0, 0, 360, 640);
+    addWorldGrain(this, "paper", 0.11);
 
     for (let i = 0; i < 38; i += 1) {
       const star = this.add.circle(
@@ -121,36 +123,15 @@ export class GameScene extends Phaser.Scene {
     const colors = [0x6175c8, 0x7185d8, 0x766ac4, 0x4f83b5];
 
     this.level.platforms.forEach((platform, index) => {
-      this.add
-        .rectangle(
-          platform.x + platform.width / 2 + 4,
-          platform.y + platform.height / 2 + 7,
-          platform.width,
-          platform.height,
-          0x080e22,
-          0.38,
-        )
-        .setDepth(1);
-      const block = this.add
-        .rectangle(
-          platform.x + platform.width / 2,
-          platform.y + platform.height / 2,
-          platform.width,
-          platform.height,
-          colors[index % colors.length],
-        )
-        .setStrokeStyle(2, 0xdce4ff, 0.38)
-        .setDepth(2);
-      this.add
-        .rectangle(
-          platform.x + platform.width / 2,
-          platform.y + 4,
-          Math.max(8, platform.width - 8),
-          4,
-          0xe5e9ff,
-          0.22,
-        )
-        .setDepth(3);
+      const block = addReliefBlock(
+        this,
+        platform.x + platform.width / 2,
+        platform.y + platform.height / 2,
+        platform.width,
+        platform.height,
+        colors[index % colors.length],
+        { texture: "paper", stroke: 0xdce4ff, strokeAlpha: 0.46, depth: 2 },
+      );
       this.platforms.add(block);
     });
 
