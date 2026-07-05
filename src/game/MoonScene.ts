@@ -266,11 +266,12 @@ export class MoonScene extends Phaser.Scene {
         const icon = this.add.text(40 + index * 46, 440, emoji, { fontSize: "30px" }).setOrigin(0.5);
         this.tweens.add({ targets: icon, y: 426, angle: index % 2 ? 8 : -8, duration: 420 + index * 45, yoyo: true, repeat: -1 });
       });
-      this.add.text(180, 530, "Tout le monde rigole.\nLa voie de l’univers continue…", {
-        fontSize: "18px",
+      this.add.text(180, 516, "Tout le monde rigole.\nVoilà, c’est comme ça que le Big Bang s’est fait.\nLa vraie fausse histoire du monde humain. lol\nFIN", {
+        fontSize: "15px",
         color: "#ffffff",
         align: "center",
         fontStyle: "bold",
+        lineSpacing: 5,
       }).setOrigin(0.5);
     });
   }
