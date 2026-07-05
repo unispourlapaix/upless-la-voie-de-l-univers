@@ -71,9 +71,21 @@ export class MoonScene extends Phaser.Scene {
     for (let i = 0; i < 70; i += 1) {
       this.add.circle(Phaser.Math.Between(0, 360), Phaser.Math.Between(40, 520), Phaser.Math.FloatBetween(0.7, 2), 0xffffff, Phaser.Math.FloatBetween(0.25, 0.8)).setScrollFactor(0);
     }
-    this.add.circle(290, 105, 44, 0xf5f0cf, 0.9).setScrollFactor(0);
-    this.add.circle(278, 95, 7, 0xbeb89b, 0.35).setScrollFactor(0);
-    this.add.circle(305, 117, 10, 0xbeb89b, 0.28).setScrollFactor(0);
+    const earthGlow = this.add.circle(290, 105, 52, 0xff3b4d, 0.14);
+    const earth = this.add.circle(290, 105, 42, 0x9f1d2f, 0.94).setStrokeStyle(3, 0xff8a76, 0.72);
+    const redSea = this.add.ellipse(303, 115, 52, 18, 0xe23535, 0.72).setAngle(-18);
+    const africa = this.add.polygon(288, 104, [
+      -8, -30,
+      12, -21,
+      20, -4,
+      12, 14,
+      3, 34,
+      -11, 25,
+      -18, 5,
+      -15, -15,
+    ], 0x050507, 0.9);
+    const darkLand = this.add.ellipse(266, 91, 26, 16, 0x140b10, 0.55).setAngle(20);
+    this.add.container(0, 0, [earthGlow, earth, redSea, darkLand, africa]).setScrollFactor(0);
 
     for (let x = 0; x < 1520; x += 160) {
       this.add.ellipse(x + 72, 585, 245, 70, 0xaeb4c6, 0.92);
