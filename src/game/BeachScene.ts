@@ -26,6 +26,7 @@ export class BeachScene extends Phaser.Scene {
   private items: BeachItem[] = [];
   private hasVrHeadset = false;
   private pinwinkisFound = false;
+  private pinwinkisPenguinMode = false;
   private boatRepaired = false;
   private departing = false;
   private pinwinkis?: Phaser.GameObjects.Container;
@@ -297,7 +298,7 @@ export class BeachScene extends Phaser.Scene {
       this.pinwinkis = this.createPinwinkis(520, 350).setAlpha(0).setScale(0.35).setDepth(16);
       this.tweens.add({ targets: this.pinwinkis, alpha: 1, y: 402, scale: 1, duration: 720, ease: "Bounce.out" });
       audio.play("monkey");
-      this.showMessage("Pinwinkis tombe du cocotier.\nIl refuse de travailler sans casque VR.", 2600);
+      this.showMessage("Pinwinkis, petit singe blanc, tombe du cocotier.\nIl refuse de travailler sans casque VR.", 2800);
       this.objectiveText.setText("🥽 CASQUE VR");
       return;
     }
@@ -309,26 +310,66 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createPinwinkis(x: number, y: number): Phaser.GameObjects.Container {
-    const body = this.add.ellipse(0, 12, 42, 58, 0x23283b).setStrokeStyle(4, 0xffffff);
-    const belly = this.add.ellipse(0, 18, 26, 40, 0xffffff);
-    const head = this.add.circle(0, -22, 23, 0x23283b).setStrokeStyle(4, 0xffffff);
-    const face = this.add.ellipse(0, -20, 28, 20, 0xffffff);
-    const beak = this.add.triangle(0, -15, -8, -4, 8, -4, 0, 7, 0xffb44a).setStrokeStyle(2, 0x2d1c12);
-    const eye1 = this.add.circle(-7, -23, 3, 0x23283b);
-    const eye2 = this.add.circle(7, -23, 3, 0x23283b);
-    const foot1 = this.add.ellipse(-12, 45, 20, 9, 0xffb44a);
-    const foot2 = this.add.ellipse(12, 45, 20, 9, 0xffb44a);
-    return this.add.container(x, y, [foot1, foot2, body, belly, head, face, beak, eye1, eye2]);
+    const tail = this.add.arc(0, 18, 23, 35, 270, false, 0xf7f4ea).setStrokeStyle(5, 0xf7f4ea);
+    const body = this.add.ellipse(0, 14, 40, 54, 0xf7f4ea).setStrokeStyle(4, 0x302844);
+    const belly = this.add.ellipse(0, 19, 25, 34, 0xffe2c5);
+    const head = this.add.circle(0, -24, 23, 0xf7f4ea).setStrokeStyle(4, 0x302844);
+    const face = this.add.ellipse(0, -20, 27, 20, 0xffdec0);
+    const ear1 = this.add.circle(-22, -25, 8, 0xf7f4ea).setStrokeStyle(2, 0x302844);
+    const ear2 = this.add.circle(22, -25, 8, 0xf7f4ea).setStrokeStyle(2, 0x302844);
+    const eye1 = this.add.circle(-7, -24, 3, 0x302844);
+    const eye2 = this.add.circle(7, -24, 3, 0x302844);
+    const mouth = this.add.arc(0, -15, 7, 12, 168, false, 0x302844).setStrokeStyle(2, 0x302844);
+    const foot1 = this.add.ellipse(-12, 45, 17, 8, 0xffdec0);
+    const foot2 = this.add.ellipse(12, 45, 17, 8, 0xffdec0);
+    return this.add.container(x, y, [tail, foot1, foot2, ear1, ear2, body, belly, head, face, eye1, eye2, mouth]);
   }
 
   private giveVrToPinwinkis(): void {
     if (!this.pinwinkis || this.boatRepaired) return;
     this.hasVrHeadset = false;
     audio.play("confirm");
-    const headset = this.add.rectangle(this.pinwinkis.x, this.pinwinkis.y - 24, 38, 17, 0x20263b).setStrokeStyle(3, 0x8eeaff).setDepth(30);
-    this.tweens.add({ targets: headset, scale: 1.18, duration: 140, yoyo: true, repeat: 2 });
-    this.showMessage("Pinwinkis accepte.\nRéparation nautique en réalité virtuelle.", 2600);
-    this.time.delayedCall(850, () => this.repairBoat());
+    this.showMessage("Le casque charge Pinwinkis…\nMode pingouin en cours.", 2400);
+    this.transformPinwinkisIntoPenguin();
+    this.time.delayedCall(1150, () => this.repairBoat());
+  }
+
+  private transformPinwinkisIntoPenguin(): void {
+    if (!this.pinwinkis || this.pinwinkisPenguinMode) return;
+    this.pinwinkisPenguinMode = true;
+    const x = this.pinwinkis.x;
+    const y = this.pinwinkis.y;
+    this.tweens.add({
+      targets: this.pinwinkis,
+      scale: 0.15,
+      angle: 360,
+      alpha: 0.25,
+      duration: 430,
+      ease: "Back.in",
+      onComplete: () => {
+        this.pinwinkis?.destroy();
+        this.pinwinkis = this.createPinwinkisPenguin(x, y).setScale(0.2).setAlpha(0).setDepth(18);
+        this.tweens.add({ targets: this.pinwinkis, scale: 1, alpha: 1, angle: 0, duration: 520, ease: "Back.out" });
+        audio.play("confirm");
+        this.showMessage("Pinwinkis est chargé en pingouin.\nRéparation nautique en réalité virtuelle.", 2600);
+      },
+    });
+  }
+
+  private createPinwinkisPenguin(x: number, y: number): Phaser.GameObjects.Container {
+    const body = this.add.ellipse(0, 13, 44, 60, 0x23283b).setStrokeStyle(4, 0xffffff);
+    const belly = this.add.ellipse(0, 19, 27, 42, 0xffffff);
+    const head = this.add.circle(0, -23, 24, 0x23283b).setStrokeStyle(4, 0xffffff);
+    const face = this.add.ellipse(0, -21, 29, 20, 0xffffff);
+    const headset = this.add.rectangle(0, -25, 39, 16, 0x20263b).setStrokeStyle(3, 0x8eeaff);
+    const lens1 = this.add.ellipse(-10, -25, 12, 9, 0x8eeaff, 0.9);
+    const lens2 = this.add.ellipse(10, -25, 12, 9, 0x8eeaff, 0.9);
+    const beak = this.add.triangle(0, -14, -8, -4, 8, -4, 0, 8, 0xffb44a).setStrokeStyle(2, 0x2d1c12);
+    const foot1 = this.add.ellipse(-13, 46, 21, 9, 0xffb44a);
+    const foot2 = this.add.ellipse(13, 46, 21, 9, 0xffb44a);
+    const flipper1 = this.add.ellipse(-28, 12, 14, 42, 0x23283b).setStrokeStyle(3, 0xffffff).setAngle(20);
+    const flipper2 = this.add.ellipse(28, 12, 14, 42, 0x23283b).setStrokeStyle(3, 0xffffff).setAngle(-20);
+    return this.add.container(x, y, [foot1, foot2, flipper1, flipper2, body, belly, head, face, headset, lens1, lens2, beak]);
   }
 
   private repairBoat(): void {
