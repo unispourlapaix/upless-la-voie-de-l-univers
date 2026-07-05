@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
 import { PlayerController } from "./player";
@@ -82,6 +83,7 @@ export class DesertScene extends Phaser.Scene {
     const sky = this.add.graphics().setScrollFactor(0);
     sky.fillGradientStyle(0xffd39a, 0xffd39a, 0xe87955, 0x8c435f, 1);
     sky.fillRect(0, 0, 360, 640);
+    addWorldGrain(this, "sand", 0.16);
     this.add.circle(294, 95, 45, 0xfff2b8, 0.9).setScrollFactor(0);
     this.add.circle(294, 95, 68, 0xfff2b8, 0.16).setScrollFactor(0);
 
@@ -200,7 +202,7 @@ export class DesertScene extends Phaser.Scene {
 
   private createPlatforms(): void {
     this.platforms = this.physics.add.staticGroup();
-    const ground = this.add.rectangle(800, 580, 1600, 58, 0xa95d39).setStrokeStyle(3, 0xffd08b, 0.34);
+    const ground = addReliefBlock(this, 800, 580, 1600, 58, 0xa95d39, { texture: "sand", stroke: 0xffd08b, strokeAlpha: 0.45, depth: 2 });
     this.platforms.add(ground);
   }
 
