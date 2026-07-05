@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
 import { PlayerController } from "./player";
@@ -75,6 +76,7 @@ export class BeachScene extends Phaser.Scene {
     const sky = this.add.graphics().setScrollFactor(0);
     sky.fillGradientStyle(0x91e7ff, 0x91e7ff, 0xffd79a, 0xff8d76, 1);
     sky.fillRect(0, 0, 360, 640);
+    addWorldGrain(this, "sand", 0.1);
     this.add.circle(292, 116, 45, 0xfff1a3, 0.9).setScrollFactor(0);
     this.add.circle(292, 116, 72, 0xfff1a3, 0.16).setScrollFactor(0);
 
@@ -85,6 +87,7 @@ export class BeachScene extends Phaser.Scene {
 
     const sea = this.add.rectangle(760, 455, 1520, 142, 0x3ac6d7, 0.82);
     sea.setStrokeStyle(3, 0x1b92aa, 0.24);
+    this.add.tileSprite(760, 455, 1520, 132, "upless-texture-water").setAlpha(0.12).setBlendMode(Phaser.BlendModes.ADD).setDepth(0.8);
     for (let x = 0; x < 1520; x += 85) {
       this.add.arc(x, 438, 35, 0, 180, false, 0xe7ffff, 0.22).setStrokeStyle(3, 0xe7ffff, 0.55);
       this.add.arc(x + 42, 491, 30, 0, 180, false, 0xe7ffff, 0.15).setStrokeStyle(2, 0xe7ffff, 0.42);
@@ -93,7 +96,7 @@ export class BeachScene extends Phaser.Scene {
 
   private createPlatforms(): void {
     this.platforms = this.physics.add.staticGroup();
-    this.platforms.add(this.add.rectangle(760, 580, 1520, 60, 0xd8994a).setStrokeStyle(3, 0xffe3a8, 0.35));
+    this.platforms.add(addReliefBlock(this, 760, 580, 1520, 60, 0xd8994a, { texture: "sand", stroke: 0xffe3a8, strokeAlpha: 0.48, depth: 2 }));
   }
 
   private createGiraffe(): void {
