@@ -64,13 +64,17 @@ export type SaveData = {
   lastLevel: number;
   vibration: boolean;
   sound: boolean;
+  language: Language;
 };
+
+export type Language = "fr" | "en";
 
 export const defaultSave: SaveData = {
   unlockedLevel: 1,
   lastLevel: 1,
   vibration: true,
   sound: true,
+  language: "fr",
 };
 
 export function loadSave(): SaveData {
