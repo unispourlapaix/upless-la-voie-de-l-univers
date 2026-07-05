@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { generateArtTextures } from "./artEngine";
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -6,6 +7,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
+    generateArtTextures(this);
     const graphics = this.make.graphics({ x: 0, y: 0 });
 
     graphics.fillStyle(0x111526, 0.28).fillEllipse(7, 43, 35, 8);
