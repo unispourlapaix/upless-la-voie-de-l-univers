@@ -5,6 +5,7 @@ import { DesertScene } from "./game/DesertScene";
 import { GameScene } from "./game/GameScene";
 import { LevelCompleteScene } from "./game/LevelCompleteScene";
 import { MenuScene } from "./game/MenuScene";
+import { MoonScene } from "./game/MoonScene";
 import { OfficeScene } from "./game/OfficeScene";
 import { PreloadScene } from "./game/PreloadScene";
 
@@ -31,7 +32,7 @@ try {
       width: 360,
       height: 640,
     },
-    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, DesertScene, BeachScene, LevelCompleteScene],
+    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, DesertScene, BeachScene, MoonScene, LevelCompleteScene],
     render: {
       antialias: true,
       pixelArt: false,
