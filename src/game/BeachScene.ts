@@ -299,7 +299,7 @@ export class BeachScene extends Phaser.Scene {
       this.pinwinkis = this.createPinwinkis(520, 350).setAlpha(0).setScale(0.35).setDepth(16);
       this.tweens.add({ targets: this.pinwinkis, alpha: 1, y: 402, scale: 1, duration: 720, ease: "Bounce.out" });
       audio.play("monkey");
-      this.showMessage("Pinwinkis, petit singe blanc, tombe du cocotier.\nIl refuse de travailler sans casque VR.", 2800);
+      this.playPinwinkisIntroDialogue();
       this.objectiveText.setText("🥽 CASQUE VR");
       return;
     }
@@ -329,6 +329,22 @@ export class BeachScene extends Phaser.Scene {
     const foot1 = this.add.ellipse(-12, 45, 17, 8, 0xffdec0);
     const foot2 = this.add.ellipse(12, 45, 17, 8, 0xffdec0);
     return this.add.container(x, y, [tail, foot1, foot2, ear1, ear2, body, belly, head, face, eye1, eye2, mouth]);
+  }
+
+  private playPinwinkisIntroDialogue(): void {
+    const lines = [
+      "Toi : D’où viens-tu, petit bonhomme ?",
+      "Pinwinkis : Moi ? Je viens de très, très loin.",
+      "Pinwinkis : Je cherche mon amie Origine.",
+      "Pinwinkis : Elle fait du SAV planétaire. Tu l’as vue ?",
+      "Pinwinkis : Wouww… bouge pas.",
+      "Pinwinkis : Il y a une image de mon skin.",
+      "Pinwinkis : Ils ont ajouté un doigt. MDR.",
+      "Pinwinkis : Ils sont fous, ces développeurs.",
+    ];
+    lines.forEach((line, index) => {
+      this.time.delayedCall(index * 2450, () => this.showMessage(line, 2250));
+    });
   }
 
   private giveVrToPinwinkis(): void {
