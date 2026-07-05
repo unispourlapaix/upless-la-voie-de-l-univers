@@ -27,6 +27,7 @@ export class BeachScene extends Phaser.Scene {
   private hasVrHeadset = false;
   private pinwinkisFound = false;
   private pinwinkisPenguinMode = false;
+  private boatInspected = false;
   private boatRepaired = false;
   private departing = false;
   private pinwinkis?: Phaser.GameObjects.Container;
@@ -147,7 +148,7 @@ export class BeachScene extends Phaser.Scene {
         y: 562,
         radius: 62,
         used: false,
-        interact: () => this.showMessage("Des algues sont coincées sur l’hélice.\nIl faut quelqu’un de très petit.", 2300),
+        interact: () => this.inspectPropeller(),
       },
     );
   }
@@ -306,6 +307,11 @@ export class BeachScene extends Phaser.Scene {
       this.showMessage("Pinwinkis : non.\nJe répare seulement en immersion.", 2100);
       return;
     }
+    if (!this.boatInspected) {
+      this.showMessage("Pinwinkis renifle le casque.\n« Pourquoi faire ? Va voir le bateau d’abord. »", 2600);
+      this.objectiveText.setText("⛵ BATEAU");
+      return;
+    }
     this.giveVrToPinwinkis();
   }
 
@@ -401,10 +407,18 @@ export class BeachScene extends Phaser.Scene {
 
   private tryBoat(): void {
     if (!this.boatRepaired) {
+      this.boatInspected = true;
+      this.objectiveText.setText("🌴 PINWINKIS");
       this.showMessage("Le bateau ne marche pas.\nDes algues bloquent l’hélice.", 2200);
       return;
     }
     this.departAtSunset();
+  }
+
+  private inspectPropeller(): void {
+    this.boatInspected = true;
+    this.objectiveText.setText("🌴 PINWINKIS");
+    this.showMessage("Des algues sont coincées sur l’hélice.\nIl faut quelqu’un de très petit.", 2300);
   }
 
   private departAtSunset(): void {
@@ -428,6 +442,8 @@ export class BeachScene extends Phaser.Scene {
 
   private canMoveTo(fromX: number, targetX: number): boolean {
     if (!this.boatRepaired && fromX < 1120 && targetX > 1140) {
+      this.boatInspected = true;
+      this.objectiveText.setText("🌴 PINWINKIS");
       this.showMessage("Le bateau est bloqué.\nIl faut d’abord libérer l’hélice.", 1600);
       return false;
     }
