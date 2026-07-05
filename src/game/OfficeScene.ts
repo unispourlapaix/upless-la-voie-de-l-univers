@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
 import { PlayerController } from "./player";
@@ -88,6 +89,7 @@ export class OfficeScene extends Phaser.Scene {
     const background = this.add.graphics().setScrollFactor(0);
     background.fillGradientStyle(0xf7f2e8, 0xf7f2e8, 0xdad7ef, 0xdad7ef, 1);
     background.fillRect(0, 0, 360, 640);
+    addWorldGrain(this, "paper", 0.13);
     const halftone = this.add.graphics().setScrollFactor(0);
     halftone.fillStyle(0x493d69, 0.11);
     for (let y = 95; y < 590; y += 14) {
@@ -153,10 +155,8 @@ export class OfficeScene extends Phaser.Scene {
 
   private createPlatforms(): void {
     this.platforms = this.physics.add.staticGroup();
-    const ground = this.add.rectangle(770, 580, 1540, 60, 0x263653).setStrokeStyle(3, 0x6f86ad, 0.4);
-    const upper = this.add
-      .rectangle(1080, 430, 560, 30, 0x446e68)
-      .setStrokeStyle(4, 0xa9d6b1, 0.65);
+    const ground = addReliefBlock(this, 770, 580, 1540, 60, 0x263653, { texture: "metal", stroke: 0x6f86ad, strokeAlpha: 0.5, depth: 2 });
+    const upper = addReliefBlock(this, 1080, 430, 560, 30, 0x446e68, { texture: "paper", stroke: 0xa9d6b1, strokeAlpha: 0.7, depth: 2 });
     this.platforms.add(ground);
     this.platforms.add(upper);
 
