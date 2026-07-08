@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { createDetailedMonkey } from "./characterKit";
+import { createBrokenLibertyStatue } from "./decorKit";
 import { TouchInput } from "./input";
 import { createDetailedObject, type DetailObjectKind } from "./objectKit";
 import { PlayerController } from "./player";
@@ -118,76 +119,7 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private drawBrokenLibertyStatue(): void {
-    const stone = 0x8db7b2;
-    const dark = 0x2f3c4c;
-    const moss = 0x6f9996;
-    this.add.ellipse(280, 575, 430, 45, 0x3f2530, 0.2);
-    this.add.rectangle(278, 565, 350, 18, 0xc47448, 0.28).setAngle(-2);
-
-    const head = this.add.container(188, 487).setAngle(-13).setDepth(7);
-    head.add([
-      this.add.ellipse(0, 0, 88, 64, stone).setStrokeStyle(5, dark),
-      this.add.ellipse(-17, 0, 12, 18, dark, 0.28),
-      this.add.ellipse(12, -6, 10, 15, dark, 0.28),
-      this.add.rectangle(0, 18, 34, 4, dark, 0.55),
-      this.add.rectangle(-36, 7, 22, 9, moss).setStrokeStyle(3, dark).setAngle(25),
-      this.add.triangle(-42, -34, -7, 19, 7, 19, 0, -23, stone).setStrokeStyle(3, dark).setAngle(-18),
-      this.add.triangle(-24, -42, -7, 19, 7, 19, 0, -28, stone).setStrokeStyle(3, dark).setAngle(-10),
-      this.add.triangle(-4, -45, -7, 19, 7, 19, 0, -27, stone).setStrokeStyle(3, dark).setAngle(4),
-      this.add.triangle(17, -41, -7, 19, 7, 19, 0, -25, stone).setStrokeStyle(3, dark).setAngle(14),
-      this.add.triangle(37, -33, -7, 19, 7, 19, 0, -22, stone).setStrokeStyle(3, dark).setAngle(24),
-      this.add.line(0, 0, -15, 15, 20, -18, dark, 0.82).setLineWidth(3),
-    ]);
-
-    const bust = this.add.container(292, 532).setAngle(-6).setDepth(6);
-    bust.add([
-      this.add.ellipse(0, 5, 168, 72, stone).setStrokeStyle(5, dark),
-      this.add.rectangle(-37, 12, 70, 65, stone).setStrokeStyle(5, dark),
-      this.add.rectangle(42, -2, 68, 50, moss).setStrokeStyle(4, dark),
-      this.add.line(0, 0, -72, -11, -38, 45, dark, 0.7).setLineWidth(3),
-      this.add.line(0, 0, 8, -30, 58, 28, dark, 0.62).setLineWidth(3),
-      this.add.circle(70, 30, 14, stone).setStrokeStyle(4, dark),
-    ]);
-
-    const torch = this.add.container(430, 548).setAngle(7).setDepth(6);
-    torch.add([
-      this.add.rectangle(0, 13, 118, 22, stone).setStrokeStyle(4, dark),
-      this.add.rectangle(-45, 7, 38, 26, moss).setStrokeStyle(4, dark),
-      this.add.rectangle(42, 19, 32, 18, moss).setStrokeStyle(3, dark),
-      this.add.circle(-74, -2, 26, stone).setStrokeStyle(5, dark),
-      this.add.circle(-74, -2, 15, moss).setStrokeStyle(3, dark),
-      this.add.rectangle(-93, -28, 8, 30, stone).setStrokeStyle(2, dark).setAngle(-28),
-      this.add.rectangle(-80, -36, 8, 34, stone).setStrokeStyle(2, dark).setAngle(-8),
-      this.add.rectangle(-64, -35, 8, 30, stone).setStrokeStyle(2, dark).setAngle(13),
-      this.add.triangle(-106, -48, -13, 19, 13, 19, 0, -28, 0xe86b49).setStrokeStyle(3, dark).setAngle(-29),
-      this.add.triangle(-80, -62, -10, 16, 10, 16, 0, -23, 0xffb65f).setStrokeStyle(3, dark).setAngle(9),
-      this.add.triangle(-50, -49, -9, 15, 9, 15, 0, -20, 0xd94a3d).setStrokeStyle(3, dark).setAngle(31),
-      this.add.line(0, 0, -36, -5, -7, 26, dark, 0.78).setLineWidth(3),
-      this.add.line(0, 0, 23, 6, 55, 29, dark, 0.68).setLineWidth(2),
-    ]);
-
-    const foot = this.add.container(92, 558).setAngle(5).setDepth(6);
-    foot.add([
-      this.add.rectangle(0, 0, 95, 32, stone).setStrokeStyle(5, dark),
-      this.add.rectangle(-18, -20, 42, 32, moss).setStrokeStyle(4, dark),
-      this.add.ellipse(31, -18, 45, 22, stone).setStrokeStyle(4, dark),
-      this.add.line(0, 0, -36, -10, 22, 15, dark, 0.72).setLineWidth(3),
-      this.add.line(0, 0, 8, -33, 48, -12, dark, 0.58).setLineWidth(2),
-    ]);
-
-    [
-      { x: 188, y: 535, text: "tête" },
-      { x: 295, y: 589, text: "buste" },
-      { x: 432, y: 588, text: "torche" },
-      { x: 91, y: 598, text: "pied" },
-    ].forEach(({ x, y, text }) => {
-      this.add.text(x, y, text, {
-        fontFamily: "system-ui",
-        fontSize: "8px",
-        color: "#5e3b43",
-        fontStyle: "bold",
-      }).setOrigin(0.5);
-    });
+    createBrokenLibertyStatue(this, 280, 492);
   }
 
   private drawToxicPond(): void {
