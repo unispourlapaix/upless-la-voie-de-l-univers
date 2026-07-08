@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
+import { createEntityImage } from "./entityArt";
 import { TouchInput } from "./input";
 import { levels } from "./levels";
 import { PlayerController } from "./player";
@@ -656,44 +657,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createOgre(x: number, y: number): Phaser.GameObjects.Container {
-    const shadow = this.add.ellipse(0, 29, 76, 15, 0x090d18, 0.38);
-    const stickerBody = this.add.ellipse(0, -3, 84, 76, 0xffffff);
-    const stickerEar1 = this.add.circle(-39, -8, 14, 0xffffff);
-    const stickerEar2 = this.add.circle(39, -8, 14, 0xffffff);
-    const stickerLegs = this.add.rectangle(0, 20, 62, 48, 0xffffff);
-    const legs = this.add.rectangle(0, 18, 52, 30, 0x525d76).setStrokeStyle(3, 0x818ba2);
-    const body = this.add.ellipse(0, -3, 72, 64, 0x68748e).setStrokeStyle(4, 0xaab4c9, 0.65);
-    const belly = this.add.ellipse(0, 8, 45, 33, 0x7f8aa0, 0.8);
-    const ear1 = this.add.circle(-34, -8, 10, 0x68748e).setStrokeStyle(3, 0xaab4c9);
-    const ear2 = this.add.circle(34, -8, 10, 0x68748e).setStrokeStyle(3, 0xaab4c9);
-    const brow1 = this.add.rectangle(-14, -17, 16, 4, 0x30384b).setAngle(10);
-    const brow2 = this.add.rectangle(14, -17, 16, 4, 0x30384b).setAngle(-10);
-    const eye1 = this.add.circle(-14, -9, 7, 0xf5f7ff);
-    const eye2 = this.add.circle(14, -9, 7, 0xf5f7ff);
-    const pupil1 = this.add.circle(-12, -8, 3, 0x20263b);
-    const pupil2 = this.add.circle(12, -8, 3, 0x20263b);
-    const mouth = this.add.arc(0, 8, 13, 15, 165, false, 0x34394b).setStrokeStyle(4, 0x34394b);
-    return this.add
-      .container(x, y - 25, [
-        shadow,
-        stickerLegs,
-        stickerEar1,
-        stickerEar2,
-        stickerBody,
-        legs,
-        ear1,
-        ear2,
-        body,
-        belly,
-        brow1,
-        brow2,
-        eye1,
-        eye2,
-        pupil1,
-        pupil2,
-        mouth,
-      ])
-      .setDepth(8);
+    const ogre = createEntityImage(this, "ogre").setScale(0.78);
+    return this.add.container(x, y - 26, [ogre]).setDepth(8);
   }
 
   private createExit(): void {
