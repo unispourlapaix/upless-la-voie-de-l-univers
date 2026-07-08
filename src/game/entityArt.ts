@@ -58,6 +58,7 @@ const repairedBoatKey = "upless-boat-repaired-clean-v1";
 const galacticBoatKey = "upless-boat-galactic-futuristic-v1";
 const laughingBusinessmenKey = "upless-businessmen-laughing-cat-video-v2";
 const directorSurprisedKey = "upless-director-surprised-right-v1";
+const launchPanelKey = "upless-launch-panel-wires-buttons-v1";
 const coconutTreeKey = "upless-coconut-tree-v1";
 const iceCraterKey = "upless-ice-crater-v1";
 
@@ -68,6 +69,7 @@ const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidt
   moonBoat: { key: galacticBoatKey, targetWidth: 230, targetHeight: 150 },
   laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 300, targetHeight: 150 },
   officeDirectorSurprised: { key: directorSurprisedKey, targetWidth: 155, targetHeight: 190 },
+  controlPanel: { key: launchPanelKey, targetWidth: 150, targetHeight: 170 },
   coconutTree: { key: coconutTreeKey, targetWidth: 190, targetHeight: 245 },
   iceCrater: { key: iceCraterKey, targetWidth: 180, targetHeight: 115 },
 };
@@ -162,7 +164,7 @@ function tryDrawStandaloneCutout(scene: Phaser.Scene, kind: EntityArtKind, key: 
   const dx = (source.targetWidth - drawWidth) / 2;
   const dy = (source.targetHeight - drawHeight) / 2;
   ctx.drawImage(image, dx, dy, drawWidth, drawHeight);
-  removeMagentaKey(ctx, source.targetWidth, source.targetHeight);
+  removeChromaKey(ctx, source.targetWidth, source.targetHeight);
   texture.refresh();
   return true;
 }
@@ -192,12 +194,12 @@ function tryDrawMangaCutout(scene: Phaser.Scene, kind: EntityArtKind, key: strin
   const dy = (source.targetHeight - drawHeight) / 2;
   ctx.drawImage(sheet, source.x, source.y, source.width, source.height, dx, dy, drawWidth, drawHeight);
 
-  removeMagentaKey(ctx, source.targetWidth, source.targetHeight);
+  removeChromaKey(ctx, source.targetWidth, source.targetHeight);
   texture.refresh();
   return true;
 }
 
-function removeMagentaKey(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+function removeChromaKey(ctx: CanvasRenderingContext2D, width: number, height: number): void {
   const pixels = ctx.getImageData(0, 0, width, height);
   const data = pixels.data;
   for (let i = 0; i < data.length; i += 4) {
@@ -205,7 +207,8 @@ function removeMagentaKey(ctx: CanvasRenderingContext2D, width: number, height: 
     const g = data[i + 1];
     const b = data[i + 2];
     const isMagentaKey = r > 210 && g < 85 && b > 180 && r - g > 120 && b - g > 110;
-    if (isMagentaKey) {
+    const isGreenKey = g > 180 && r < 95 && b < 110 && g - r > 95 && g - b > 80;
+    if (isMagentaKey || isGreenKey) {
       data[i + 3] = 0;
     }
   }
