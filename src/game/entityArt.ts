@@ -44,6 +44,11 @@ const textureKeys: Record<EntityArtKind, string> = {
 };
 
 const mangaSheetKey = "upless-manga-sticker-sheet-v1";
+const giraffeBipedKey = "upless-giraffe-biped-tshirt-jeans-v1";
+
+const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidth: number; targetHeight: number }>> = {
+  beachGiraffe: { key: giraffeBipedKey, targetWidth: 170, targetHeight: 235 },
+};
 
 const mangaSources: Partial<Record<EntityArtKind, { x: number; y: number; width: number; height: number; targetWidth: number; targetHeight: number }>> = {
   rustyRobot: { x: 34, y: 365, width: 258, height: 318, targetWidth: 180, targetHeight: 230 },
@@ -80,7 +85,7 @@ function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
     return;
   }
 
-  if (tryDrawMangaCutout(scene, kind, textureKeys[kind])) {
+  if (tryDrawStandaloneCutout(scene, kind, textureKeys[kind]) || tryDrawMangaCutout(scene, kind, textureKeys[kind])) {
     return;
   }
 
@@ -103,6 +108,35 @@ function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
   if (kind === "controlPanel") drawControlPanel(scene, textureKeys[kind]);
   if (kind === "powerSwitch") drawPowerSwitch(scene, textureKeys[kind]);
   if (kind === "projectorScreen") drawProjectorScreen(scene, textureKeys[kind]);
+}
+
+function tryDrawStandaloneCutout(scene: Phaser.Scene, kind: EntityArtKind, key: string): boolean {
+  const source = standaloneSources[kind];
+  if (!source || !scene.textures.exists(source.key)) {
+    return false;
+  }
+
+  const texture = scene.textures.createCanvas(key, source.targetWidth, source.targetHeight);
+  if (!texture) return false;
+
+  const canvas = texture.getSourceImage() as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return false;
+
+  const image = scene.textures.get(source.key).getSourceImage() as CanvasImageSource;
+  const imageWidth = Number((image as HTMLImageElement).width ?? source.targetWidth);
+  const imageHeight = Number((image as HTMLImageElement).height ?? source.targetHeight);
+  ctx.clearRect(0, 0, source.targetWidth, source.targetHeight);
+
+  const scale = Math.min(source.targetWidth / imageWidth, source.targetHeight / imageHeight) * 0.98;
+  const drawWidth = imageWidth * scale;
+  const drawHeight = imageHeight * scale;
+  const dx = (source.targetWidth - drawWidth) / 2;
+  const dy = (source.targetHeight - drawHeight) / 2;
+  ctx.drawImage(image, dx, dy, drawWidth, drawHeight);
+  removeMagentaKey(ctx, source.targetWidth, source.targetHeight);
+  texture.refresh();
+  return true;
 }
 
 function tryDrawMangaCutout(scene: Phaser.Scene, kind: EntityArtKind, key: string): boolean {
@@ -128,7 +162,13 @@ function tryDrawMangaCutout(scene: Phaser.Scene, kind: EntityArtKind, key: strin
   const dy = (source.targetHeight - drawHeight) / 2;
   ctx.drawImage(sheet, source.x, source.y, source.width, source.height, dx, dy, drawWidth, drawHeight);
 
-  const pixels = ctx.getImageData(0, 0, source.targetWidth, source.targetHeight);
+  removeMagentaKey(ctx, source.targetWidth, source.targetHeight);
+  texture.refresh();
+  return true;
+}
+
+function removeMagentaKey(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+  const pixels = ctx.getImageData(0, 0, width, height);
   const data = pixels.data;
   for (let i = 0; i < data.length; i += 4) {
     const r = data[i];
@@ -139,8 +179,6 @@ function tryDrawMangaCutout(scene: Phaser.Scene, kind: EntityArtKind, key: strin
     }
   }
   ctx.putImageData(pixels, 0, 0);
-  texture.refresh();
-  return true;
 }
 
 function makeCanvas(scene: Phaser.Scene, key: string, width: number, height: number): CanvasRenderingContext2D {
