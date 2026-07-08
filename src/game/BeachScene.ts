@@ -36,6 +36,7 @@ export class BeachScene extends Phaser.Scene {
   private departing = false;
   private pinkwindkis?: Phaser.GameObjects.Container;
   private algae!: Phaser.GameObjects.Container;
+  private boatArt!: Phaser.GameObjects.Image;
   private boat!: Phaser.GameObjects.Container;
   private giraffe!: Phaser.GameObjects.Container;
 
@@ -117,13 +118,14 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createBoat(): void {
-    const boatArt = createEntityImage(this, "sailingBoat").setPosition(0, 0);
+    this.boatArt = createEntityImage(this, "sailingBoat").setPosition(0, 0);
+    createEntityImage(this, "repairedBoat").setVisible(false).destroy();
     this.algae = this.add.container(132, 75, [
       this.add.arc(0, 0, 29, 210, 20, false, 0x2d9b5f).setStrokeStyle(8, 0x2d9b5f),
       this.add.arc(5, 2, 22, 180, 50, false, 0x4abf68).setStrokeStyle(7, 0x4abf68),
       this.add.circle(-14, -5, 6, 0x3dbb60),
     ]);
-    this.boat = this.add.container(1220, 486, [boatArt, this.algae]).setDepth(12);
+    this.boat = this.add.container(1220, 486, [this.boatArt, this.algae]).setDepth(12);
     this.items.push(
       {
         id: "boat",
@@ -362,12 +364,35 @@ export class BeachScene extends Phaser.Scene {
           ease: "Back.in",
           onComplete: () => {
             this.boatRepaired = true;
+            this.boatArt.setTexture("upless-entity-repaired-boat-comic").setScale(0.95);
+            this.tweens.add({ targets: this.boatArt, scale: 1.06, duration: 240, yoyo: true, repeat: 1, ease: "Back.out" });
+            this.sparkleBoat();
             this.objectiveText.setText("🌅 DÉPART");
-            this.showMessage("L’hélice est libérée !\nTouche le bateau pour partir au large.", 2600);
+            this.showMessage("Bateau tout neuf !\nTouche-le pour partir au large.", 2600);
           },
         });
       },
     });
+  }
+
+  private sparkleBoat(): void {
+    for (let i = 0; i < 14; i += 1) {
+      const spark = this.add.circle(
+        1220 + Phaser.Math.Between(-130, 130),
+        486 + Phaser.Math.Between(-70, 65),
+        Phaser.Math.Between(2, 5),
+        0xdffcff,
+        0.9,
+      ).setDepth(25);
+      this.tweens.add({
+        targets: spark,
+        y: spark.y - Phaser.Math.Between(14, 42),
+        alpha: 0,
+        scale: 1.8,
+        duration: Phaser.Math.Between(420, 780),
+        onComplete: () => spark.destroy(),
+      });
+    }
   }
 
   private tryBoat(): void {
