@@ -137,12 +137,14 @@ export class MoonScene extends Phaser.Scene {
   }
 
   private createStargate(): void {
-    const gateArt = createEntityImage(this, "stargate").setScale(0.94);
-    this.gateCore = this.add.ellipse(0, 0, 70, 104, 0x17203c, 0.18).setStrokeStyle(2, 0x8eeaff, 0.15);
-    const sparks = [0, 1, 2, 3, 4].map((i) => this.add.rectangle(Math.cos(i) * 50, Math.sin(i * 1.7) * 62, 4, 28, 0x8eeaff, 0.55).setAngle(i * 31));
-    this.gate = this.add.container(1330, 494, [gateArt, this.gateCore, ...sparks]).setDepth(11);
+    const gateArt = createEntityImage(this, "stargate").setScale(1.08);
+    this.gateCore = this.add.ellipse(0, -4, 94, 142, 0x8eeaff, 0.18).setStrokeStyle(3, 0xffffff, 0.18);
+    const sparks = [0, 1, 2, 3, 4, 5, 6].map((i) =>
+      this.add.rectangle(Math.cos(i) * 72, Math.sin(i * 1.7) * 88 - 4, 5, 38, 0x8eeaff, 0.62).setAngle(i * 31),
+    );
+    this.gate = this.add.container(1335, 458, [gateArt, this.gateCore, ...sparks]).setDepth(11);
     this.tweens.add({ targets: sparks, alpha: 0.05, duration: 160, yoyo: true, repeat: -1 });
-    this.targets.push({ id: "gate", x: 1330, y: 494, radius: 95, action: () => this.inspectGate() });
+    this.targets.push({ id: "gate", x: 1335, y: 486, radius: 130, action: () => this.inspectGate() });
   }
 
   private createHud(): void {
