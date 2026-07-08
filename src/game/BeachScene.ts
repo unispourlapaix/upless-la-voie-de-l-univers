@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
+import { createEntityImage } from "./entityArt";
 import { TouchInput } from "./input";
 import { createDetailedObject } from "./objectKit";
 import { createPinkwindkisSprite } from "./pinkwindkisArt";
@@ -102,15 +103,8 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createGiraffe(): void {
-    const body = this.add.ellipse(0, 8, 42, 62, 0xe8b85d).setStrokeStyle(4, 0x302844);
-    const neck = this.add.rectangle(6, -45, 18, 82, 0xe8b85d).setStrokeStyle(3, 0x302844);
-    const head = this.add.ellipse(18, -92, 43, 28, 0xe8b85d).setStrokeStyle(3, 0x302844);
-    const eye = this.add.circle(25, -96, 3, 0x302844);
-    const spot1 = this.add.circle(-8, 5, 6, 0x9a693e);
-    const spot2 = this.add.circle(9, 25, 5, 0x9a693e);
-    const leg1 = this.add.rectangle(-10, 48, 8, 48, 0xd9a24b).setStrokeStyle(2, 0x302844);
-    const leg2 = this.add.rectangle(14, 48, 8, 48, 0xd9a24b).setStrokeStyle(2, 0x302844);
-    this.giraffe = this.add.container(180, 500, [leg1, leg2, body, neck, head, eye, spot1, spot2]).setDepth(13);
+    const giraffe = createEntityImage(this, "beachGiraffe").setScale(0.74).setPosition(0, -8);
+    this.giraffe = this.add.container(180, 500, [giraffe]).setDepth(13);
     this.tweens.add({ targets: this.giraffe, y: 493, duration: 1200, yoyo: true, repeat: -1 });
     this.items.push({
       id: "giraffe",
@@ -123,21 +117,13 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createBoat(): void {
-    const shadow = this.add.ellipse(0, 78, 310, 35, 0x143142, 0.28);
-    const hull = this.add.ellipse(0, 52, 292, 82, 0xffffff).setStrokeStyle(6, 0x1f2a44);
-    const lower = this.add.rectangle(0, 70, 238, 35, 0x4a67d8).setStrokeStyle(4, 0x1f2a44);
-    const cabin = this.add.rectangle(-18, 3, 116, 70, 0xfffbef).setStrokeStyle(5, 0x1f2a44);
-    const window1 = this.add.ellipse(-45, -5, 26, 22, 0x8eeaff, 0.88).setStrokeStyle(3, 0x1f2a44);
-    const window2 = this.add.ellipse(-3, -5, 26, 22, 0x8eeaff, 0.88).setStrokeStyle(3, 0x1f2a44);
-    const mast = this.add.rectangle(70, -40, 8, 120, 0x1f2a44);
-    const sail = this.add.triangle(98, -25, -34, 58, 32, 58, -34, -58, 0xffd36a).setStrokeStyle(4, 0x1f2a44);
-    const propeller = this.add.circle(132, 75, 22, 0x8eeaff).setStrokeStyle(4, 0x1f2a44);
+    const boatArt = createEntityImage(this, "sailingBoat").setPosition(0, 0);
     this.algae = this.add.container(132, 75, [
       this.add.arc(0, 0, 29, 210, 20, false, 0x2d9b5f).setStrokeStyle(8, 0x2d9b5f),
       this.add.arc(5, 2, 22, 180, 50, false, 0x4abf68).setStrokeStyle(7, 0x4abf68),
       this.add.circle(-14, -5, 6, 0x3dbb60),
     ]);
-    this.boat = this.add.container(1220, 486, [shadow, mast, sail, hull, lower, cabin, window1, window2, propeller, this.algae]).setDepth(12);
+    this.boat = this.add.container(1220, 486, [boatArt, this.algae]).setDepth(12);
     this.items.push(
       {
         id: "boat",
