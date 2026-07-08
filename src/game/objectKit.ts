@@ -19,6 +19,10 @@ export type DetailObjectOptions = {
 
 const texturePrefix = "upless-drawn-object";
 
+const standaloneSources: Partial<Record<DetailObjectKind, { key: string; width: number; height: number; scale: number }>> = {
+  rocketPiece: { key: "upless-rocket-crashed-broken-v1", width: 230, height: 150, scale: 0.72 },
+};
+
 export function createDetailedObject(
   scene: Phaser.Scene,
   kind: DetailObjectKind,
@@ -30,7 +34,7 @@ export function createDetailedObject(
   if (!scene.textures.exists(key)) drawObjectTexture(scene, key, kind);
 
   const shadow = scene.add.ellipse(2, 22, 72, 15, 0x120d1b, 0.22);
-  const drawing = scene.add.image(0, 0, key).setScale(0.5);
+  const drawing = scene.add.image(0, 0, key).setScale(standaloneSources[kind]?.scale ?? 0.5);
   const container = scene.add.container(x, y, [shadow, drawing]).setScale(options.scale ?? 1);
   container.setData("detailKind", kind);
   container.setData("detailLabel", options.label ?? kind);
@@ -39,6 +43,8 @@ export function createDetailedObject(
 }
 
 function drawObjectTexture(scene: Phaser.Scene, key: string, kind: DetailObjectKind): void {
+  if (tryDrawStandaloneObject(scene, key, kind)) return;
+
   const texture = scene.textures.createCanvas(key, 160, 130);
   if (!texture) return;
   const canvas = texture.getSourceImage() as HTMLCanvasElement;
@@ -64,6 +70,44 @@ function drawObjectTexture(scene: Phaser.Scene, key: string, kind: DetailObjectK
 
   addInkGrain(ctx);
   texture.refresh();
+}
+
+function tryDrawStandaloneObject(scene: Phaser.Scene, key: string, kind: DetailObjectKind): boolean {
+  const source = standaloneSources[kind];
+  if (!source || !scene.textures.exists(source.key)) return false;
+
+  const texture = scene.textures.createCanvas(key, source.width, source.height);
+  if (!texture) return false;
+
+  const canvas = texture.getSourceImage() as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return false;
+
+  const image = scene.textures.get(source.key).getSourceImage() as CanvasImageSource;
+  const imageWidth = Number((image as HTMLImageElement).width ?? source.width);
+  const imageHeight = Number((image as HTMLImageElement).height ?? source.height);
+  const scale = Math.min(source.width / imageWidth, source.height / imageHeight) * 0.96;
+  const drawWidth = imageWidth * scale;
+  const drawHeight = imageHeight * scale;
+  ctx.clearRect(0, 0, source.width, source.height);
+  ctx.drawImage(image, (source.width - drawWidth) / 2, (source.height - drawHeight) / 2, drawWidth, drawHeight);
+  removeMagentaKey(ctx, source.width, source.height);
+  texture.refresh();
+  return true;
+}
+
+function removeMagentaKey(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+  const pixels = ctx.getImageData(0, 0, width, height);
+  const data = pixels.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    if (r > 220 && g < 55 && b > 190) {
+      data[i + 3] = 0;
+    }
+  }
+  ctx.putImageData(pixels, 0, 0);
 }
 
 function drawStickerPaper(ctx: CanvasRenderingContext2D): void {
