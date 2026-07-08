@@ -124,36 +124,15 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private drawToxicPond(): void {
-    this.add.ellipse(1065, 552, 185, 44, 0x5e1726, 0.42);
-    this.pondWater = this.add.ellipse(1065, 541, 165, 38, 0xb82539, 0.9).setStrokeStyle(4, 0x5b1523, 0.8);
-    this.add.ellipse(1022, 535, 53, 14, 0xf2eef0, 0.78).setStrokeStyle(2, 0x5b7890, 0.85).setAngle(-9);
-    this.add.rectangle(1023, 528, 29, 8, 0xdaf6ff, 0.9).setStrokeStyle(2, 0x5b7890).setAngle(-9);
-    this.add.ellipse(1108, 545, 36, 9, 0xff6a76, 0.4);
-    this.add.circle(1000, 545, 4, 0xff8390, 0.75);
-    this.add.circle(1127, 536, 3, 0xff9ca5, 0.6);
+    createEntityImage(this, "toxicPond", 1065, 541).setDepth(8);
+    this.pondWater = this.add.ellipse(1065, 541, 165, 38, 0xb82539, 0.001).setDepth(8);
   }
 
   private drawSickFrog(): void {
     this.frog = this.add.container(1182, 530).setDepth(10);
-    const shadow = this.add.ellipse(0, 32, 66, 13, 0x25172a, 0.3);
-    const body = this.add.ellipse(0, 12, 56, 38, 0x75b553).setStrokeStyle(4, 0x263b2b);
-    const head = this.add.ellipse(0, -12, 64, 42, 0x86c761).setStrokeStyle(4, 0x263b2b);
-    const eye1 = this.add.circle(-19, -31, 11, 0xe8ffe0).setStrokeStyle(3, 0x263b2b);
-    const eye2 = this.add.circle(19, -31, 11, 0xe8ffe0).setStrokeStyle(3, 0x263b2b);
-    const pupil1 = this.add.circle(-19, -29, 3, 0x263b2b);
-    const pupil2 = this.add.circle(19, -29, 3, 0x263b2b);
-    const mouth = this.add.arc(0, -7, 17, 18, 162, false, 0x263b2b).setStrokeStyle(3, 0x263b2b);
-    const sweat1 = this.add.ellipse(-30, -5, 7, 13, 0x8cf06a, 0.92).setAngle(-20);
-    const sweat2 = this.add.ellipse(30, 1, 6, 12, 0x8cf06a, 0.82).setAngle(20);
-    const sweat3 = this.add.ellipse(8, -42, 5, 10, 0x8cf06a, 0.86);
-    const sign = this.add.text(0, 52, "grenouille contaminée", {
-      fontFamily: "system-ui",
-      fontSize: "8px",
-      color: "#5e3b43",
-      fontStyle: "bold",
-    }).setOrigin(0.5);
-    this.frog.add([shadow, body, head, eye1, eye2, pupil1, pupil2, mouth, sweat1, sweat2, sweat3, sign]);
-    this.tweens.add({ targets: [sweat1, sweat2, sweat3], alpha: 0.35, y: "+=7", duration: 650, yoyo: true, repeat: -1 });
+    const frogArt = createEntityImage(this, "sickFrog");
+    this.frog.add([frogArt]);
+    this.tweens.add({ targets: frogArt, y: "+=5", duration: 650, yoyo: true, repeat: -1 });
   }
 
   private createPlatforms(): void {
@@ -163,21 +142,8 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private createBunker(): void {
-    this.add.ellipse(1330, 575, 330, 42, 0x2b2132, 0.33);
-    this.add.rectangle(1330, 482, 250, 184, 0x394050).setStrokeStyle(6, 0x181b25);
-    this.add.rectangle(1330, 398, 220, 38, 0x515a70).setStrokeStyle(4, 0x181b25);
-    this.add.circle(1230, 398, 13, 0xd95959, 0.8);
-    this.add.circle(1430, 398, 13, 0xd95959, 0.8);
-    this.bunkerDoor = this.add.rectangle(1330, 512, 112, 124, 0x151a24).setStrokeStyle(5, 0x6f778d);
-    this.add.rectangle(1330, 512, 78, 98, 0x252d3a, 0.9);
-    this.add.text(1330, 342, "BUNKER 08", {
-      fontFamily: "system-ui",
-      fontSize: "19px",
-      color: "#fff2c2",
-      fontStyle: "bold",
-      stroke: "#1d1b27",
-      strokeThickness: 5,
-    }).setOrigin(0.5);
+    createEntityImage(this, "desertBunker", 1330, 482).setDepth(9);
+    this.bunkerDoor = this.add.rectangle(1330, 512, 112, 124, 0x151a24, 0.001).setDepth(10);
   }
 
   private createRobot(): void {
@@ -754,23 +720,7 @@ export class DesertScene extends Phaser.Scene {
 
   private createGiraffe(): void {
     if (this.giraffe) return;
-    const legs = [
-      this.add.rectangle(-10, 38, 8, 52, 0xd9a24b).setStrokeStyle(2, 0x302844),
-      this.add.rectangle(13, 38, 8, 52, 0xd9a24b).setStrokeStyle(2, 0x302844),
-    ];
-    const body = this.add.ellipse(0, 5, 44, 62, 0xe8b85d).setStrokeStyle(4, 0x302844);
-    const neck = this.add.rectangle(5, -48, 18, 82, 0xe8b85d).setStrokeStyle(3, 0x302844);
-    const head = this.add.ellipse(15, -94, 43, 28, 0xe8b85d).setStrokeStyle(3, 0x302844);
-    const horn1 = this.add.rectangle(4, -113, 5, 18, 0x8c5838).setStrokeStyle(2, 0x302844);
-    const horn2 = this.add.rectangle(23, -113, 5, 18, 0x8c5838).setStrokeStyle(2, 0x302844);
-    const eye = this.add.circle(23, -97, 3, 0x302844);
-    const spots = [
-      this.add.circle(-9, -3, 6, 0x9a693e),
-      this.add.circle(9, 18, 5, 0x9a693e),
-      this.add.circle(4, -51, 4, 0x9a693e),
-      this.add.circle(11, -72, 4, 0x9a693e),
-    ];
-    this.giraffe = this.add.container(1360, 522, [...legs, body, neck, head, horn1, horn2, eye, ...spots])
+    this.giraffe = this.add.container(1360, 522, [createEntityImage(this, "beachGiraffe").setScale(0.74)])
       .setDepth(18)
       .setAlpha(0)
       .setScale(0.85);
