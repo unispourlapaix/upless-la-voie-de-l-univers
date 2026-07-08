@@ -106,9 +106,9 @@ export class MoonScene extends Phaser.Scene {
   }
 
   private createArrivalBoat(): void {
-    const boat = createEntityImage(this, "moonBoat").setScale(0.82);
-    const label = this.add.text(0, 70, t("bateau lunaire", "moon boat"), { fontSize: "10px", color: "#e9eefb", fontStyle: "bold" }).setOrigin(0.5);
-    this.add.container(150, 492, [boat, label]).setDepth(9).setAngle(-5);
+    const boat = createEntityImage(this, "moonBoat").setScale(0.96).setFlipX(true);
+    const label = this.add.text(0, 98, t("bateau lunaire", "moon boat"), { fontSize: "10px", color: "#e9eefb", fontStyle: "bold" }).setOrigin(0.5);
+    this.add.container(205, 474, [boat, label]).setDepth(9).setAngle(4);
   }
 
   private createAtmosphereDevice(): void {
