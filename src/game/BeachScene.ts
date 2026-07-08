@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
+import { createDetailedObject } from "./objectKit";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
 
@@ -184,10 +185,7 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createVrHeadset(x: number, y: number): void {
-    this.add.rectangle(x, y, 48, 27, 0x20263b).setStrokeStyle(4, 0x8eeaff);
-    this.add.ellipse(x - 15, y, 18, 13, 0x8eeaff, 0.85);
-    this.add.ellipse(x + 15, y, 18, 13, 0x8eeaff, 0.85);
-    this.add.text(x, y + 28, "VR", { fontSize: "10px", color: "#20263b", fontStyle: "bold" }).setOrigin(0.5);
+    createDetailedObject(this, "vrHeadset", x, y, { label: "casque VR" }).setDepth(12);
     this.items.push({
       id: "vr",
       x,
@@ -199,10 +197,7 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createUnderwear(x: number, y: number): void {
-    this.add.ellipse(x, y + 12, 52, 14, 0x5e2a44, 0.15);
-    this.add.triangle(x, y, -28, -7, 28, -7, 0, 22, 0xff5fb2).setStrokeStyle(3, 0x5e2a44);
-    this.add.circle(x - 19, y - 2, 5, 0xffb6da);
-    this.add.circle(x + 19, y - 2, 5, 0xffb6da);
+    createDetailedObject(this, "pinkUnderwear", x, y, { label: "slip rose fraise" }).setDepth(12);
     this.items.push({
       id: "underwear",
       x,
@@ -214,9 +209,7 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createDinoBook(x: number, y: number): void {
-    this.add.rectangle(x, y, 44, 31, 0x7b4f2d).setStrokeStyle(3, 0x2f2018).setAngle(-7);
-    this.add.text(x, y, "DINO", { fontSize: "9px", color: "#ffe0a3", fontStyle: "bold" }).setOrigin(0.5).setAngle(-7);
-    this.add.circle(x + 15, y + 7, 5, 0x93d66f);
+    createDetailedObject(this, "dinoBook", x, y, { label: "livre dinosaures" }).setDepth(12);
     this.items.push({
       id: "dinoBook",
       x,
@@ -228,10 +221,7 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createAntenna(x: number, y: number): void {
-    this.add.rectangle(x, y + 16, 42, 13, 0x3f4b6d).setStrokeStyle(3, 0x20263b);
-    this.add.line(0, 0, x, y + 8, x + 20, y - 48, 0x20263b, 1).setLineWidth(4);
-    this.add.circle(x + 20, y - 48, 7, 0xffd36a).setStrokeStyle(2, 0x20263b);
-    this.add.arc(x + 31, y - 58, 22, 135, 220, false, 0x8eeaff).setStrokeStyle(2, 0x8eeaff);
+    createDetailedObject(this, "satelliteAntenna", x, y, { label: "antenne satellite", scale: 1.05 }).setDepth(12);
     this.items.push({
       id: "antenna",
       x,
