@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
+import { createEntityImage } from "./entityArt";
 import { TouchInput } from "./input";
 import { icon, t } from "./language";
 import { PlayerController } from "./player";
@@ -105,35 +106,26 @@ export class MoonScene extends Phaser.Scene {
   }
 
   private createArrivalBoat(): void {
-    const hull = this.add.ellipse(0, 36, 172, 48, 0xffffff).setStrokeStyle(5, 0x1f2a44);
-    const sail = this.add.triangle(20, -16, -28, 54, 34, 54, -26, -48, 0xffd36a).setStrokeStyle(4, 0x1f2a44);
+    const boat = createEntityImage(this, "moonBoat").setScale(0.82);
     const label = this.add.text(0, 70, t("bateau lunaire", "moon boat"), { fontSize: "10px", color: "#e9eefb", fontStyle: "bold" }).setOrigin(0.5);
-    this.add.container(150, 492, [sail, hull, label]).setDepth(9).setAngle(-5);
+    this.add.container(150, 492, [boat, label]).setDepth(9).setAngle(-5);
   }
 
   private createAtmosphereDevice(): void {
-    const base = this.add.rectangle(0, 42, 96, 50, 0x3f4b6d).setStrokeStyle(4, 0xdce3f3);
-    const dome = this.add.ellipse(0, 2, 70, 54, 0x8eeaff, 0.75).setStrokeStyle(4, 0xdce3f3);
-    const tube1 = this.add.rectangle(-45, 20, 18, 86, 0x2b3655).setStrokeStyle(3, 0xdce3f3);
-    const tube2 = this.add.rectangle(45, 20, 18, 86, 0x2b3655).setStrokeStyle(3, 0xdce3f3);
+    const device = createEntityImage(this, "moonDevice").setScale(0.86);
     this.deviceSmoke = this.add.container(0, -48, [
       this.add.circle(-24, 0, 16, 0xbff7ff, 0.25),
       this.add.circle(0, -12, 22, 0xdffcff, 0.22),
       this.add.circle(26, 2, 15, 0xffffff, 0.18),
     ]);
     this.tweens.add({ targets: this.deviceSmoke.list, y: "-=16", alpha: 0.08, duration: 900, yoyo: true, repeat: -1 });
-    this.add.container(620, 492, [tube1, tube2, base, dome, this.deviceSmoke]).setDepth(12);
+    this.add.container(620, 492, [device, this.deviceSmoke]).setDepth(12);
     this.targets.push({ id: "device", x: 620, y: 500, radius: 95, action: () => this.inspectDevice() });
   }
 
   private createAlien(): void {
-    const body = this.add.ellipse(0, 15, 42, 58, 0x7cf06a).setStrokeStyle(4, 0x173820);
-    const head = this.add.ellipse(0, -30, 58, 46, 0x8cff78).setStrokeStyle(4, 0x173820);
-    const eye1 = this.add.ellipse(-13, -34, 12, 19, 0x111827);
-    const eye2 = this.add.ellipse(13, -34, 12, 19, 0x111827);
-    const tablet = this.add.rectangle(34, 4, 32, 24, 0x20263b).setStrokeStyle(3, 0x8eeaff);
-    const math = this.add.text(34, 3, "∑π", { fontSize: "10px", color: "#8eeaff", fontStyle: "bold" }).setOrigin(0.5);
-    this.alien = this.add.container(760, 500, [body, head, eye1, eye2, tablet, math]).setDepth(13);
+    const alien = createEntityImage(this, "moonAlien").setScale(0.82);
+    this.alien = this.add.container(760, 500, [alien]).setDepth(13);
     this.tweens.add({ targets: this.alien, y: 492, duration: 780, yoyo: true, repeat: -1 });
     this.targets.push({ id: "alien", x: 760, y: 500, radius: 82, action: () => this.talkAlien() });
   }
@@ -147,11 +139,10 @@ export class MoonScene extends Phaser.Scene {
   }
 
   private createStargate(): void {
-    const ring1 = this.add.ellipse(0, 0, 118, 164, 0x000000, 0).setStrokeStyle(8, 0x9ca7c9);
-    const ring2 = this.add.ellipse(0, 0, 88, 126, 0x000000, 0).setStrokeStyle(4, 0x4b567b);
-    this.gateCore = this.add.ellipse(0, 0, 70, 104, 0x17203c, 0.75).setStrokeStyle(2, 0x8eeaff, 0.15);
+    const gateArt = createEntityImage(this, "stargate").setScale(0.94);
+    this.gateCore = this.add.ellipse(0, 0, 70, 104, 0x17203c, 0.18).setStrokeStyle(2, 0x8eeaff, 0.15);
     const sparks = [0, 1, 2, 3, 4].map((i) => this.add.rectangle(Math.cos(i) * 50, Math.sin(i * 1.7) * 62, 4, 28, 0x8eeaff, 0.55).setAngle(i * 31));
-    this.gate = this.add.container(1330, 494, [this.gateCore, ring1, ring2, ...sparks]).setDepth(11);
+    this.gate = this.add.container(1330, 494, [gateArt, this.gateCore, ...sparks]).setDepth(11);
     this.tweens.add({ targets: sparks, alpha: 0.05, duration: 160, yoyo: true, repeat: -1 });
     this.targets.push({ id: "gate", x: 1330, y: 494, radius: 95, action: () => this.inspectGate() });
   }
