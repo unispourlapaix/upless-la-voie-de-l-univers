@@ -626,8 +626,8 @@ export class OfficeScene extends Phaser.Scene {
       this.tweens.add({ targets: man, y: man.y - 12, duration: 180, yoyo: true, delay: index * 80 });
       this.add.text(man.x, man.y - 95, "HA !", { fontSize: "13px", color: "#ffd36a" }).setOrigin(0.5);
     });
-    const laughingMen = createEntityImage(this, "laughingBusinessmen", 500, 456).setDepth(13).setAlpha(0).setScale(0.9);
-    this.tweens.add({ targets: laughingMen, alpha: 1, y: 448, scale: 1, duration: 420, ease: "Back.out" });
+    const laughingMen = createEntityImage(this, "laughingBusinessmen", 500, 430).setDepth(13).setAlpha(0).setScale(0.92);
+    this.tweens.add({ targets: laughingMen, alpha: 1, y: 424, scale: 1, duration: 420, ease: "Back.out" });
     this.tweens.add({
       targets: this.director,
       angle: -8,
