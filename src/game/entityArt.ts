@@ -5,6 +5,7 @@ export type EntityArtKind =
   | "rustyRobot"
   | "beachGiraffe"
   | "sailingBoat"
+  | "repairedBoat"
   | "officeExecutive"
   | "officeDirector"
   | "moonBoat"
@@ -26,6 +27,7 @@ const textureKeys: Record<EntityArtKind, string> = {
   rustyRobot: "upless-entity-rusty-robot-comic",
   beachGiraffe: "upless-entity-beach-giraffe-comic",
   sailingBoat: "upless-entity-sailing-boat-comic",
+  repairedBoat: "upless-entity-repaired-boat-comic",
   officeExecutive: "upless-entity-office-executive-comic",
   officeDirector: "upless-entity-office-director-comic",
   moonBoat: "upless-entity-moon-boat-comic",
@@ -46,10 +48,14 @@ const textureKeys: Record<EntityArtKind, string> = {
 const mangaSheetKey = "upless-manga-sticker-sheet-v1";
 const giraffeBipedKey = "upless-giraffe-biped-tshirt-jeans-v1";
 const alienCyberOctopusKey = "upless-alien-cyber-octopus-vr-v1";
+const repairedBoatKey = "upless-boat-repaired-clean-v1";
+const galacticBoatKey = "upless-boat-galactic-futuristic-v1";
 
 const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidth: number; targetHeight: number }>> = {
   beachGiraffe: { key: giraffeBipedKey, targetWidth: 170, targetHeight: 235 },
   moonAlien: { key: alienCyberOctopusKey, targetWidth: 150, targetHeight: 185 },
+  repairedBoat: { key: repairedBoatKey, targetWidth: 360, targetHeight: 220 },
+  moonBoat: { key: galacticBoatKey, targetWidth: 230, targetHeight: 150 },
 };
 
 const mangaSources: Partial<Record<EntityArtKind, { x: number; y: number; width: number; height: number; targetWidth: number; targetHeight: number }>> = {
@@ -95,6 +101,7 @@ function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
   if (kind === "rustyRobot") drawRustyRobot(scene, textureKeys[kind]);
   if (kind === "beachGiraffe") drawBeachGiraffe(scene, textureKeys[kind]);
   if (kind === "sailingBoat") drawSailingBoat(scene, textureKeys[kind]);
+  if (kind === "repairedBoat") drawSailingBoat(scene, textureKeys[kind]);
   if (kind === "officeExecutive") drawOfficeExecutive(scene, textureKeys[kind]);
   if (kind === "officeDirector") drawOfficeDirector(scene, textureKeys[kind]);
   if (kind === "moonBoat") drawMoonBoat(scene, textureKeys[kind]);
