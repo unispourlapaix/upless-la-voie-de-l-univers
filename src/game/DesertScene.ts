@@ -3,6 +3,7 @@ import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { createDetailedMonkey } from "./characterKit";
 import { TouchInput } from "./input";
+import { createDetailedObject, type DetailObjectKind } from "./objectKit";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
 
@@ -341,44 +342,15 @@ export class DesertScene extends Phaser.Scene {
     solution = false,
     monkeyComment?: string,
   ): DesertItem {
-    const sticker =
-      id === "redWater"
-        ? this.add.ellipse(0, 7, 58, 24, 0xffffff, 0.16).setStrokeStyle(2, 0xffffff, 0.25)
-        : id === "rocket"
-          ? this.add.ellipse(0, 0, 46, 31, 0xffffff).setStrokeStyle(4, 0x302844)
-        : this.add.circle(0, 0, solution ? 20 : 18, 0xffffff).setStrokeStyle(3, 0x302844);
-    const parts: Phaser.GameObjects.GameObject[] = [sticker];
-
-    if (id === "rocket") {
-      parts.push(this.add.ellipse(2, 0, 50, 28, 0xe9edf6).setStrokeStyle(3, 0x302844).setAngle(-8));
-      parts.push(this.add.ellipse(15, -2, 18, 13, 0x78d7ff, 0.9).setStrokeStyle(2, 0x302844).setAngle(-8));
-      parts.push(this.add.rectangle(-18, 5, 18, 9, 0xd55f58).setStrokeStyle(2, 0x302844).setAngle(-8));
-      parts.push(this.add.triangle(-27, 5, -7, 7, 7, 7, 0, -12, 0xffa14d).setStrokeStyle(2, 0x302844).setAngle(-98));
-      parts.push(this.add.line(0, 0, -6, -13, 19, 11, 0x302844, 0.55).setLineWidth(2));
-    } else if (id === "plastic") {
-      parts.push(this.add.ellipse(0, 3, 34, 12, 0xdaf6ff, 0.9).setStrokeStyle(2, 0x5b7890));
-      parts.push(this.add.rectangle(0, -5, 20, 7, 0xdaf6ff, 0.86).setStrokeStyle(2, 0x5b7890).setAngle(-6));
-    } else if (id === "battery") {
-      parts.push(this.add.rectangle(0, 0, 26, 15, 0x3f4656).setStrokeStyle(2, 0x151923));
-      parts.push(this.add.rectangle(17, 0, 5, 8, 0x151923));
-      parts.push(this.add.text(0, 0, "⚡", { fontSize: "12px", color: "#f6d66c" }).setOrigin(0.5));
-    } else if (id === "virus") {
-      parts.push(this.add.circle(0, 0, 11, 0x8cf06a).setStrokeStyle(2, 0x244328));
-      for (let i = 0; i < 8; i += 1) {
-        const angle = (Math.PI * 2 * i) / 8;
-        parts.push(this.add.circle(Math.cos(angle) * 13, Math.sin(angle) * 13, 2.5, 0x8cf06a));
-      }
-    } else if (id === "redWater") {
-      parts.push(this.add.ellipse(0, 6, 72, 18, 0xb82539, 0.55).setStrokeStyle(2, 0x5b1523));
-      parts.push(this.add.circle(-18, 1, 5, 0xf05a68, 0.75));
-      parts.push(this.add.circle(21, 4, 4, 0xff8791, 0.65));
-    } else {
-      parts.push(this.add.rectangle(0, 0, 28, 24, 0xc8b080).setStrokeStyle(3, 0x302844));
-      parts.push(this.add.rectangle(0, -3, 31, 7, 0x807766).setStrokeStyle(2, 0x302844));
-      parts.push(this.add.text(0, 4, "OIL", { fontSize: "8px", color: "#302844", fontStyle: "bold" }).setOrigin(0.5));
-    }
-
-    const container = this.add.container(x, y, parts).setDepth(11);
+    const objectKind: Record<DesertItemId, DetailObjectKind> = {
+      rocket: "rocketPiece",
+      plastic: "plasticWaste",
+      battery: "smartBattery",
+      virus: "alienVirus",
+      redWater: "redPuddle",
+      oil: "rareOil",
+    };
+    const container = createDetailedObject(this, objectKind[id], x, y, { label, scale: id === "rocket" ? 1.12 : 1 }).setDepth(11);
     if (id === "plastic") {
       this.tweens.add({ targets: container, y: y + 3, angle: 4, duration: 900, yoyo: true, repeat: -1 });
     } else if (id === "virus") {
