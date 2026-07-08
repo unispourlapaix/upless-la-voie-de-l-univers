@@ -43,6 +43,28 @@ const textureKeys: Record<EntityArtKind, string> = {
   projectorScreen: "upless-entity-projector-screen-comic",
 };
 
+const mangaSheetKey = "upless-manga-sticker-sheet-v1";
+
+const mangaSources: Partial<Record<EntityArtKind, { x: number; y: number; width: number; height: number; targetWidth: number; targetHeight: number }>> = {
+  rustyRobot: { x: 34, y: 365, width: 258, height: 318, targetWidth: 180, targetHeight: 230 },
+  beachGiraffe: { x: 33, y: 972, width: 198, height: 345, targetWidth: 170, targetHeight: 215 },
+  sailingBoat: { x: 247, y: 966, width: 367, height: 267, targetWidth: 360, targetHeight: 205 },
+  officeExecutive: { x: 258, y: 704, width: 454, height: 268, targetWidth: 120, targetHeight: 150 },
+  officeDirector: { x: 726, y: 670, width: 265, height: 302, targetWidth: 150, targetHeight: 175 },
+  moonBoat: { x: 247, y: 966, width: 367, height: 267, targetWidth: 210, targetHeight: 135 },
+  moonDevice: { x: 554, y: 1190, width: 221, height: 330, targetWidth: 150, targetHeight: 160 },
+  moonAlien: { x: 344, y: 1210, width: 200, height: 312, targetWidth: 135, targetHeight: 150 },
+  stargate: { x: 762, y: 1175, width: 260, height: 340, targetWidth: 160, targetHeight: 205 },
+  coconutTree: { x: 33, y: 972, width: 198, height: 345, targetWidth: 190, targetHeight: 230 },
+  pinkwindkisPenguin: { x: 681, y: 374, width: 253, height: 310, targetWidth: 135, targetHeight: 145 },
+  sickFrog: { x: 760, y: 966, width: 240, height: 225, targetWidth: 150, targetHeight: 120 },
+  toxicPond: { x: 604, y: 962, width: 396, height: 258, targetWidth: 230, targetHeight: 90 },
+  desertBunker: { x: 762, y: 1175, width: 260, height: 340, targetWidth: 310, targetHeight: 250 },
+  officeCat: { x: 35, y: 705, width: 210, height: 270, targetWidth: 120, targetHeight: 120 },
+  controlPanel: { x: 554, y: 1190, width: 221, height: 330, targetWidth: 135, targetHeight: 155 },
+  projectorScreen: { x: 258, y: 704, width: 454, height: 268, targetWidth: 220, targetHeight: 165 },
+};
+
 export function createEntityImage(
   scene: Phaser.Scene,
   kind: EntityArtKind,
@@ -55,6 +77,10 @@ export function createEntityImage(
 
 function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
   if (scene.textures.exists(textureKeys[kind])) {
+    return;
+  }
+
+  if (tryDrawMangaCutout(scene, kind, textureKeys[kind])) {
     return;
   }
 
@@ -77,6 +103,44 @@ function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
   if (kind === "controlPanel") drawControlPanel(scene, textureKeys[kind]);
   if (kind === "powerSwitch") drawPowerSwitch(scene, textureKeys[kind]);
   if (kind === "projectorScreen") drawProjectorScreen(scene, textureKeys[kind]);
+}
+
+function tryDrawMangaCutout(scene: Phaser.Scene, kind: EntityArtKind, key: string): boolean {
+  const source = mangaSources[kind];
+  if (!source || !scene.textures.exists(mangaSheetKey)) {
+    return false;
+  }
+
+  const texture = scene.textures.createCanvas(key, source.targetWidth, source.targetHeight);
+  if (!texture) return false;
+
+  const canvas = texture.getSourceImage() as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return false;
+
+  const sheet = scene.textures.get(mangaSheetKey).getSourceImage() as CanvasImageSource;
+  ctx.clearRect(0, 0, source.targetWidth, source.targetHeight);
+
+  const scale = Math.min(source.targetWidth / source.width, source.targetHeight / source.height) * 0.96;
+  const drawWidth = source.width * scale;
+  const drawHeight = source.height * scale;
+  const dx = (source.targetWidth - drawWidth) / 2;
+  const dy = (source.targetHeight - drawHeight) / 2;
+  ctx.drawImage(sheet, source.x, source.y, source.width, source.height, dx, dy, drawWidth, drawHeight);
+
+  const pixels = ctx.getImageData(0, 0, source.targetWidth, source.targetHeight);
+  const data = pixels.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    if (r > 220 && g < 55 && b > 190) {
+      data[i + 3] = 0;
+    }
+  }
+  ctx.putImageData(pixels, 0, 0);
+  texture.refresh();
+  return true;
 }
 
 function makeCanvas(scene: Phaser.Scene, key: string, width: number, height: number): CanvasRenderingContext2D {
