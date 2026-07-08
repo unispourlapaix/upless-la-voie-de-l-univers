@@ -54,7 +54,7 @@ const giraffeBipedKey = "upless-giraffe-biped-tshirt-jeans-v1";
 const alienCyberOctopusKey = "upless-alien-cyber-octopus-vr-v1";
 const repairedBoatKey = "upless-boat-repaired-clean-v1";
 const galacticBoatKey = "upless-boat-galactic-futuristic-v1";
-const laughingBusinessmenKey = "upless-businessmen-laughing-cat-video-v1";
+const laughingBusinessmenKey = "upless-businessmen-laughing-cat-video-v2";
 const coconutTreeKey = "upless-coconut-tree-v1";
 const iceCraterKey = "upless-ice-crater-v1";
 
@@ -63,7 +63,7 @@ const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidt
   moonAlien: { key: alienCyberOctopusKey, targetWidth: 150, targetHeight: 185 },
   repairedBoat: { key: repairedBoatKey, targetWidth: 360, targetHeight: 220 },
   moonBoat: { key: galacticBoatKey, targetWidth: 230, targetHeight: 150 },
-  laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 330, targetHeight: 220 },
+  laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 300, targetHeight: 150 },
   coconutTree: { key: coconutTreeKey, targetWidth: 190, targetHeight: 245 },
   iceCrater: { key: iceCraterKey, targetWidth: 180, targetHeight: 115 },
 };
@@ -148,6 +148,8 @@ function tryDrawStandaloneCutout(scene: Phaser.Scene, kind: EntityArtKind, key: 
   const imageWidth = Number((image as HTMLImageElement).width ?? source.targetWidth);
   const imageHeight = Number((image as HTMLImageElement).height ?? source.targetHeight);
   ctx.clearRect(0, 0, source.targetWidth, source.targetHeight);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
   const scale = Math.min(source.targetWidth / imageWidth, source.targetHeight / imageHeight) * 0.98;
   const drawWidth = imageWidth * scale;
@@ -175,6 +177,8 @@ function tryDrawMangaCutout(scene: Phaser.Scene, kind: EntityArtKind, key: strin
 
   const sheet = scene.textures.get(mangaSheetKey).getSourceImage() as CanvasImageSource;
   ctx.clearRect(0, 0, source.targetWidth, source.targetHeight);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
   const scale = Math.min(source.targetWidth / source.width, source.targetHeight / source.height) * 0.96;
   const drawWidth = source.width * scale;
@@ -195,7 +199,8 @@ function removeMagentaKey(ctx: CanvasRenderingContext2D, width: number, height: 
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
-    if (r > 220 && g < 55 && b > 190) {
+    const isMagentaKey = r > 210 && g < 85 && b > 180 && r - g > 120 && b - g > 110;
+    if (isMagentaKey) {
       data[i + 3] = 0;
     }
   }
