@@ -112,22 +112,22 @@ export class MoonScene extends Phaser.Scene {
   }
 
   private createAtmosphereDevice(): void {
-    const device = createEntityImage(this, "moonDevice").setScale(0.86);
+    const device = createEntityImage(this, "moonDevice").setScale(0.96);
     this.deviceSmoke = this.add.container(0, -48, [
       this.add.circle(-24, 0, 16, 0xbff7ff, 0.25),
       this.add.circle(0, -12, 22, 0xdffcff, 0.22),
       this.add.circle(26, 2, 15, 0xffffff, 0.18),
     ]);
     this.tweens.add({ targets: this.deviceSmoke.list, y: "-=16", alpha: 0.08, duration: 900, yoyo: true, repeat: -1 });
-    this.add.container(620, 492, [device, this.deviceSmoke]).setDepth(12);
+    this.add.container(620, 462, [device, this.deviceSmoke]).setDepth(12);
     this.targets.push({ id: "device", x: 620, y: 500, radius: 95, action: () => this.inspectDevice() });
   }
 
   private createAlien(): void {
-    const alien = createEntityImage(this, "moonAlien").setScale(0.82);
-    this.alien = this.add.container(760, 500, [alien]).setDepth(13);
+    const alien = createEntityImage(this, "moonAlien").setScale(0.9);
+    this.alien = this.add.container(790, 490, [alien]).setDepth(13);
     this.tweens.add({ targets: this.alien, y: 492, duration: 780, yoyo: true, repeat: -1 });
-    this.targets.push({ id: "alien", x: 760, y: 500, radius: 82, action: () => this.talkAlien() });
+    this.targets.push({ id: "alien", x: 790, y: 500, radius: 92, action: () => this.talkAlien() });
   }
 
   private createIceCrater(): void {
