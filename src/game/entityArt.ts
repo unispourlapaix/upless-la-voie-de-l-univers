@@ -13,8 +13,10 @@ export type EntityArtKind =
   | "moonAlien"
   | "stargate"
   | "coconutTree"
+  | "laughingBusinessmen"
   | "pinkwindkisPenguin"
   | "sickFrog"
+  | "iceCrater"
   | "toxicPond"
   | "desertBunker"
   | "officeCat"
@@ -35,8 +37,10 @@ const textureKeys: Record<EntityArtKind, string> = {
   moonAlien: "upless-entity-moon-alien-comic",
   stargate: "upless-entity-stargate-comic",
   coconutTree: "upless-entity-coconut-tree-comic",
+  laughingBusinessmen: "upless-entity-laughing-businessmen-comic",
   pinkwindkisPenguin: "upless-entity-pinkwindkis-penguin-comic",
   sickFrog: "upless-entity-sick-frog-comic",
+  iceCrater: "upless-entity-ice-crater-comic",
   toxicPond: "upless-entity-toxic-pond-comic",
   desertBunker: "upless-entity-desert-bunker-comic",
   officeCat: "upless-entity-office-cat-comic",
@@ -50,12 +54,18 @@ const giraffeBipedKey = "upless-giraffe-biped-tshirt-jeans-v1";
 const alienCyberOctopusKey = "upless-alien-cyber-octopus-vr-v1";
 const repairedBoatKey = "upless-boat-repaired-clean-v1";
 const galacticBoatKey = "upless-boat-galactic-futuristic-v1";
+const laughingBusinessmenKey = "upless-businessmen-laughing-cat-video-v1";
+const coconutTreeKey = "upless-coconut-tree-v1";
+const iceCraterKey = "upless-ice-crater-v1";
 
 const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidth: number; targetHeight: number }>> = {
   beachGiraffe: { key: giraffeBipedKey, targetWidth: 170, targetHeight: 235 },
   moonAlien: { key: alienCyberOctopusKey, targetWidth: 150, targetHeight: 185 },
   repairedBoat: { key: repairedBoatKey, targetWidth: 360, targetHeight: 220 },
   moonBoat: { key: galacticBoatKey, targetWidth: 230, targetHeight: 150 },
+  laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 330, targetHeight: 220 },
+  coconutTree: { key: coconutTreeKey, targetWidth: 190, targetHeight: 245 },
+  iceCrater: { key: iceCraterKey, targetWidth: 180, targetHeight: 115 },
 };
 
 const mangaSources: Partial<Record<EntityArtKind, { x: number; y: number; width: number; height: number; targetWidth: number; targetHeight: number }>> = {
@@ -109,8 +119,10 @@ function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
   if (kind === "moonAlien") drawMoonAlien(scene, textureKeys[kind]);
   if (kind === "stargate") drawStargate(scene, textureKeys[kind]);
   if (kind === "coconutTree") drawCoconutTree(scene, textureKeys[kind]);
+  if (kind === "laughingBusinessmen") drawOfficeExecutive(scene, textureKeys[kind]);
   if (kind === "pinkwindkisPenguin") drawPinkwindkisPenguin(scene, textureKeys[kind]);
   if (kind === "sickFrog") drawSickFrog(scene, textureKeys[kind]);
+  if (kind === "iceCrater") drawToxicPond(scene, textureKeys[kind]);
   if (kind === "toxicPond") drawToxicPond(scene, textureKeys[kind]);
   if (kind === "desertBunker") drawDesertBunker(scene, textureKeys[kind]);
   if (kind === "officeCat") drawOfficeCat(scene, textureKeys[kind]);
