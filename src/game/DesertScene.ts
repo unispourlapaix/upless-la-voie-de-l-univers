@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
+import { createDetailedMonkey } from "./characterKit";
 import { TouchInput } from "./input";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
@@ -260,42 +261,23 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private createMonkey(): void {
-    const tail = this.add.arc(0, 8, 25, 40, 300, false, 0xf2efe4).setStrokeStyle(5, 0xf2efe4);
-    const shadow = this.add.ellipse(0, 42, 70, 14, 0x3f2530, 0.22);
-    const body = this.add.ellipse(0, 14, 38, 50, 0xf2efe4).setStrokeStyle(3, 0x302844);
-    const vest = this.add.rectangle(0, 18, 25, 34, 0x3f4b6d).setStrokeStyle(2, 0x302844);
-    const bowTie = this.add.triangle(-5, -5, -10, -11, -10, 1, 0, -5, 0xd95959).setStrokeStyle(1, 0x302844);
-    const bowTie2 = this.add.triangle(5, -5, 10, -11, 10, 1, 0, -5, 0xd95959).setStrokeStyle(1, 0x302844);
-    const head = this.add.circle(0, -21, 23, 0xf7f4ea).setStrokeStyle(3, 0x302844);
-    const face = this.add.ellipse(0, -16, 26, 21, 0xffdec0);
-    const ear1 = this.add.circle(-22, -22, 8, 0xf2efe4).setStrokeStyle(2, 0x302844);
-    const ear2 = this.add.circle(22, -22, 8, 0xf2efe4).setStrokeStyle(2, 0x302844);
-    const lens1 = this.add.circle(-7, -22, 7, 0xdff7ff, 0.72).setStrokeStyle(2, 0x111827);
-    const lens2 = this.add.circle(7, -22, 7, 0xdff7ff, 0.72).setStrokeStyle(2, 0x111827);
-    const bridge = this.add.rectangle(0, -22, 5, 2, 0x111827);
-    const eye1 = this.add.circle(-7, -21, 2, 0x302844);
-    const eye2 = this.add.circle(7, -21, 2, 0x302844);
-    const grin = this.add.arc(0, -12, 8, 12, 166, false, 0x302844).setStrokeStyle(2, 0x302844);
-    const book = this.add.rectangle(28, 10, 18, 24, 0xfff2c2).setStrokeStyle(2, 0x302844).setAngle(-12);
-    const monkey = this.add.container(96, 500, [
-      tail,
-      shadow,
-      ear1,
-      ear2,
-      body,
-      vest,
-      bowTie,
-      bowTie2,
-      head,
-      face,
-      lens1,
-      lens2,
-      bridge,
-      eye1,
-      eye2,
-      grin,
-      book,
-    ]).setDepth(14);
+    const monkey = createDetailedMonkey(this, 96, 500, {
+      fur: 0x8e929a,
+      face: 0xd7b18d,
+      outfit: "kimono",
+      belt: true,
+      sunglasses: true,
+      orangeJuice: true,
+      smile: true,
+      skinny: true,
+    }).setDepth(14);
+    this.add.text(96, 570, "singe sensei\njus d’orange", {
+      fontFamily: "system-ui",
+      fontSize: "8px",
+      color: "#5e3b43",
+      fontStyle: "bold",
+      align: "center",
+    }).setOrigin(0.5);
     this.tweens.add({ targets: monkey, y: 492, duration: 520, yoyo: true, repeat: -1 });
   }
 
