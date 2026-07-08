@@ -13,6 +13,9 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("upless-boat-repaired-clean-v1", "assets/artpacks/boat-repaired-clean-v1.png");
     this.load.image("upless-boat-galactic-futuristic-v1", "assets/artpacks/boat-galactic-futuristic-v1.png");
     this.load.image("upless-rocket-crashed-broken-v1", "assets/artpacks/rocket-crashed-broken-v1.png");
+    this.load.image("upless-businessmen-laughing-cat-video-v1", "assets/artpacks/businessmen-laughing-cat-video-v1.png");
+    this.load.image("upless-coconut-tree-v1", "assets/artpacks/coconut-tree-v1.png");
+    this.load.image("upless-ice-crater-v1", "assets/artpacks/ice-crater-v1.png");
   }
 
   create(): void {
