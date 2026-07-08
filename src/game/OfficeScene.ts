@@ -33,6 +33,7 @@ export class OfficeScene extends Phaser.Scene {
   private climbing = false;
   private executives: Phaser.GameObjects.Container[] = [];
   private director!: Phaser.GameObjects.Container;
+  private directorArt!: Phaser.GameObjects.Image;
   private directorBubble!: Phaser.GameObjects.Container;
   private rocketScreen!: Phaser.GameObjects.Container;
   private panelWire!: Phaser.GameObjects.Arc;
@@ -191,9 +192,9 @@ export class OfficeScene extends Phaser.Scene {
 
   private createDirector(): void {
     const x = 520;
-    const y = 258;
-    const directorArt = createEntityImage(this, "officeDirector").setScale(0.82);
-    this.director = this.add.container(x, y, [directorArt]).setDepth(14);
+    const y = 302;
+    this.directorArt = createEntityImage(this, "officeDirector").setScale(0.82);
+    this.director = this.add.container(x, y, [this.directorArt]).setDepth(14);
 
     const bubbleShadow = this.add.ellipse(4, 5, 150, 58, 0x302844, 0.2);
     const bubble = this.add.ellipse(0, 0, 150, 58, 0xffffff).setStrokeStyle(3, 0x302844);
@@ -208,7 +209,7 @@ export class OfficeScene extends Phaser.Scene {
         lineSpacing: 1,
       })
       .setOrigin(0.5);
-    this.directorBubble = this.add.container(x + 105, y - 98, [bubbleShadow, tail, bubble, text]).setDepth(15);
+    this.directorBubble = this.add.container(x + 108, y - 122, [bubbleShadow, tail, bubble, text]).setDepth(15);
     this.tweens.add({
       targets: this.director,
       angle: { from: -1, to: 1 },
@@ -628,10 +629,16 @@ export class OfficeScene extends Phaser.Scene {
     });
     const laughingMen = createEntityImage(this, "laughingBusinessmen", 500, 430).setDepth(13).setAlpha(0).setScale(0.92);
     this.tweens.add({ targets: laughingMen, alpha: 1, y: 424, scale: 1, duration: 420, ease: "Back.out" });
+    createEntityImage(this, "officeDirectorSurprised").destroy();
+    this.directorArt
+      .setTexture("upless-entity-office-director-surprised-comic")
+      .setScale(0.82)
+      .setPosition(4, 2);
     this.tweens.add({
       targets: this.director,
-      angle: -8,
-      y: this.director.y + 8,
+      angle: 7,
+      x: this.director.x + 14,
+      y: this.director.y + 4,
       duration: 250,
       ease: "Back.out",
     });
