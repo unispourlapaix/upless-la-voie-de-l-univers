@@ -226,18 +226,8 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private createControlPanel(): void {
-    this.add.rectangle(224, 462, 104, 122, 0x091224, 0.38);
-    const panel = this.add.rectangle(220, 455, 100, 116, 0x1a2943).setStrokeStyle(4, 0x7193c4);
-    this.add.rectangle(220, 455, 82, 96, 0x223957).setStrokeStyle(2, 0xa9bad5, 0.25);
-    const lights = [
-      this.add.circle(198, 427, 6, 0x71e69b),
-      this.add.circle(220, 427, 6, 0xffd36a),
-      this.add.circle(242, 427, 6, 0xff7185),
-    ];
-    this.add.rectangle(220, 475, 48, 28, 0x111b30).setStrokeStyle(2, 0x536c94);
-    this.panelWire = this.add.circle(220, 468, 12, 0xff5d76).setStrokeStyle(4, 0x7d2941);
-    this.add.circle(220, 468, 4, 0xffd9df);
-    this.add.container(0, 0, [panel, ...lights]);
+    createEntityImage(this, "controlPanel", 220, 455).setDepth(12);
+    this.panelWire = this.add.circle(220, 468, 12, 0xff5d76, 0.001).setDepth(13);
     this.add.text(220, 516, "ALIMENTATION", { fontSize: "8px", color: "#9fb4d3", letterSpacing: 1 }).setOrigin(0.5);
 
     const doorShadow = this.add.rectangle(4, 5, 100, 116, 0x302844, 0.22);
@@ -250,18 +240,7 @@ export class OfficeScene extends Phaser.Scene {
       .container(220, 455, [doorShadow, door, inset, warning, bolt, handle])
       .setDepth(18);
 
-    const switchShadow = this.add.rectangle(4, 5, 46, 48, 0x302844, 0.2);
-    const switchSticker = this.add.rectangle(0, 0, 52, 54, 0xffffff);
-    const switchBox = this.add.rectangle(0, 0, 44, 46, 0xff8cae).setStrokeStyle(3, 0x302844);
-    const switchButton = this.add.circle(0, -3, 11, 0xffd45f).setStrokeStyle(3, 0x302844);
-    const switchLabel = this.add.text(0, 18, "OPEN", {
-      fontSize: "7px",
-      color: "#302844",
-      fontStyle: "bold",
-    }).setOrigin(0.5);
-    this.treeSwitch = this.add
-      .container(115, 505, [switchShadow, switchSticker, switchBox, switchButton, switchLabel])
-      .setDepth(13);
+    this.treeSwitch = this.add.container(115, 505, [createEntityImage(this, "powerSwitch")]).setDepth(13);
     this.tweens.add({
       targets: this.treeSwitch,
       scale: { from: 0.96, to: 1.04 },
@@ -278,61 +257,11 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private createProjector(): void {
-    this.add.rectangle(668, 320, 188, 138, 0x08101f, 0.38);
-    const screen = this.add.rectangle(660, 310, 180, 130, 0xf5f0df).setStrokeStyle(8, 0x2d3b58);
-    const rocket = this.add.triangle(0, -8, -25, 35, 25, 35, 0, -48, 0x697997);
-    const moon = this.add.circle(45, -35, 15, 0xffd36a);
-    const label = this.add.text(0, 48, "DÉPART IMMÉDIAT", {
-      fontSize: "11px",
-      color: "#33405d",
-      fontStyle: "bold",
-    }).setOrigin(0.5);
-    this.projectorImage = this.add.container(660, 305, [rocket, moon, label]).setDepth(6);
-    this.add.container(0, 0, [screen]);
+    createEntityImage(this, "projectorScreen", 660, 310).setDepth(6);
+    this.projectorImage = this.add.container(660, 305).setDepth(7);
 
-    const catShadow = this.add.ellipse(0, 30, 58, 12, 0x080e1b, 0.28);
-    const catStickerBody = this.add.ellipse(0, 12, 46, 35, 0xffffff);
-    const catStickerHead = this.add.circle(0, -11, 25, 0xffffff);
-    const catStickerEar1 = this.add.triangle(-14, -28, -10, 4, 10, 4, 0, -16, 0xffffff);
-    const catStickerEar2 = this.add.triangle(14, -28, -10, 4, 10, 4, 0, -16, 0xffffff);
-    const catBody = this.add.ellipse(0, 12, 36, 25, 0xf0a05c).setStrokeStyle(2, 0x302844);
-    const catHead = this.add.circle(0, -11, 19, 0xffb86f).setStrokeStyle(2, 0x302844);
-    const ear1 = this.add.triangle(-12, -27, -8, 4, 8, 4, 0, -13, 0xffb86f).setStrokeStyle(2, 0x302844);
-    const ear2 = this.add.triangle(12, -27, -8, 4, 8, 4, 0, -13, 0xffb86f).setStrokeStyle(2, 0x302844);
-    const eye1 = this.add.arc(-7, -13, 4, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
-    const eye2 = this.add.arc(7, -13, 4, 0, 180, false, 0x302844).setStrokeStyle(2, 0x302844);
-    const blush1 = this.add.ellipse(-12, -7, 6, 3, 0xff7298, 0.65);
-    const blush2 = this.add.ellipse(12, -7, 6, 3, 0xff7298, 0.65);
-    const mouth = this.add.text(0, -5, "ω", { fontSize: "12px", color: "#6d4430" }).setOrigin(0.5);
-    const paw1 = this.add.ellipse(-9, 21, 10, 7, 0xffb86f).setStrokeStyle(2, 0x302844);
-    const paw2 = this.add.ellipse(9, 21, 10, 7, 0xffb86f).setStrokeStyle(2, 0x302844);
-    const tail = this.add.arc(19, 10, 14, 230, 75, false, 0xe7934f).setStrokeStyle(5, 0xe7934f);
-    const catLabel = this.add.text(0, 42, "TOUCHE-MOI", {
-      fontSize: "9px",
-      color: "#ffd36a",
-      fontStyle: "bold",
-    }).setOrigin(0.5);
     this.officeCat = this.add
-      .container(610, 515, [
-        catShadow,
-        catStickerBody,
-        catStickerHead,
-        catStickerEar1,
-        catStickerEar2,
-        tail,
-        catBody,
-        catHead,
-        ear1,
-        ear2,
-        eye1,
-        eye2,
-        blush1,
-        blush2,
-        mouth,
-        paw1,
-        paw2,
-        catLabel,
-      ])
+      .container(610, 515, [createEntityImage(this, "officeCat")])
       .setScale(0.82)
       .setDepth(12);
     this.tweens.add({
@@ -685,18 +614,13 @@ export class OfficeScene extends Phaser.Scene {
     this.hasFunnyDisc = false;
     audio.play("cat");
     this.projectorImage.removeAll(true);
-    const head = this.add.circle(0, -5, 34, 0xf3a45f);
-    const ear1 = this.add.triangle(-22, -30, -10, 0, 10, 0, 0, -22, 0xf3a45f);
-    const ear2 = this.add.triangle(22, -30, -10, 0, 10, 0, 0, -22, 0xf3a45f);
-    const eye1 = this.add.circle(-12, -8, 4, 0x25304a);
-    const eye2 = this.add.circle(12, -8, 4, 0x25304a);
-    const smile = this.add.text(0, 12, "ω", { fontSize: "23px", color: "#6d4430" }).setOrigin(0.5);
+    const catMeme = createEntityImage(this, "officeCat").setScale(0.9).setPosition(0, -12);
     const caption = this.add.text(0, 52, "MIAOU ORBITAL !", {
       fontSize: "12px",
       color: "#33405d",
       fontStyle: "bold",
     }).setOrigin(0.5);
-    this.projectorImage.add([head, ear1, ear2, eye1, eye2, smile, caption]);
+    this.projectorImage.add([catMeme, caption]);
     this.executives.forEach((man, index) => {
       this.tweens.add({ targets: man, y: man.y - 12, duration: 180, yoyo: true, delay: index * 80 });
       this.add.text(man.x, man.y - 95, "HA !", { fontSize: "13px", color: "#ffd36a" }).setOrigin(0.5);
