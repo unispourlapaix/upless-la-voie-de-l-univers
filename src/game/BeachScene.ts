@@ -29,12 +29,12 @@ export class BeachScene extends Phaser.Scene {
   private messageTimer?: Phaser.Time.TimerEvent;
   private items: BeachItem[] = [];
   private hasVrHeadset = false;
-  private pinwinkisFound = false;
-  private pinwinkisPenguinMode = false;
+  private pinkwindkisFound = false;
+  private pinkwindkisPenguinMode = false;
   private boatInspected = false;
   private boatRepaired = false;
   private departing = false;
-  private pinwinkis?: Phaser.GameObjects.Container;
+  private pinkwindkis?: Phaser.GameObjects.Container;
   private algae!: Phaser.GameObjects.Container;
   private boat!: Phaser.GameObjects.Container;
   private giraffe!: Phaser.GameObjects.Container;
@@ -160,7 +160,7 @@ export class BeachScene extends Phaser.Scene {
       y: 416,
       radius: 90,
       used: false,
-      interact: () => this.findPinwinkis(),
+      interact: () => this.findPinkwindkis(),
     });
   }
 
@@ -269,84 +269,84 @@ export class BeachScene extends Phaser.Scene {
     }
     this.hasVrHeadset = true;
     audio.play("confirm");
-    this.objectiveText.setText("🥽 PINWINKIS");
+    this.objectiveText.setText("🥽 PINKWINDKIS");
     this.showMessage("Tu ramasses un casque de réalité virtuelle.\nTrès utile, évidemment.", 2400);
   }
 
-  private findPinwinkis(): void {
-    if (!this.pinwinkisFound) {
-      this.pinwinkisFound = true;
-      this.pinwinkis = this.createPinwinkis(520, 350).setAlpha(0).setScale(0.35).setDepth(16);
-      this.tweens.add({ targets: this.pinwinkis, alpha: 1, y: 402, scale: 1, duration: 720, ease: "Bounce.out" });
+  private findPinkwindkis(): void {
+    if (!this.pinkwindkisFound) {
+      this.pinkwindkisFound = true;
+      this.pinkwindkis = this.createPinkwindkis(520, 350).setAlpha(0).setScale(0.35).setDepth(16);
+      this.tweens.add({ targets: this.pinkwindkis, alpha: 1, y: 402, scale: 1, duration: 720, ease: "Bounce.out" });
       audio.play("monkey");
-      this.playPinwinkisIntroDialogue();
+      this.playPinkwindkisIntroDialogue();
       this.objectiveText.setText("🥽 CASQUE VR");
       return;
     }
     if (!this.hasVrHeadset) {
-      this.showMessage("Pinwinkis : non.\nJe répare seulement en immersion.", 2100);
+      this.showMessage("Pinkwindkis : non.\nJe répare seulement en immersion.", 2100);
       return;
     }
     if (!this.boatInspected) {
-      this.showMessage("Pinwinkis renifle le casque.\n« Pourquoi faire ? Va voir le bateau d’abord. »", 2600);
+      this.showMessage("Pinkwindkis renifle le casque.\n« Pourquoi faire ? Va voir le bateau d’abord. »", 2600);
       this.objectiveText.setText("⛵ BATEAU");
       return;
     }
-    this.giveVrToPinwinkis();
+    this.giveVrToPinkwindkis();
   }
 
-  private createPinwinkis(x: number, y: number): Phaser.GameObjects.Container {
+  private createPinkwindkis(x: number, y: number): Phaser.GameObjects.Container {
     return createPinkwindkisSprite(this, x, y);
   }
 
-  private playPinwinkisIntroDialogue(): void {
+  private playPinkwindkisIntroDialogue(): void {
     const lines = [
       "Toi : D’où viens-tu, petit bonhomme ?",
-      "Pinwinkis : Moi ? Je viens de très, très loin.",
-      "Pinwinkis : Je cherche mon amie Origine.",
-      "Pinwinkis : Elle fait du SAV planétaire. Tu l’as vue ?",
-      "Pinwinkis : Wouww… bouge pas.",
-      "Pinwinkis : Il y a une image de mon skin.",
-      "Pinwinkis : Ils ont ajouté un doigt. MDR.",
-      "Pinwinkis : Ils sont fous, ces développeurs.",
+      "Pinkwindkis : Moi ? Je viens de très, très loin.",
+      "Pinkwindkis : Je cherche mon amie Origine.",
+      "Pinkwindkis : Elle fait du SAV planétaire. Tu l’as vue ?",
+      "Pinkwindkis : Wouww… bouge pas.",
+      "Pinkwindkis : Il y a une image de mon skin.",
+      "Pinkwindkis : Ils ont ajouté un doigt. MDR.",
+      "Pinkwindkis : Ils sont fous, ces développeurs.",
     ];
     lines.forEach((line, index) => {
       this.time.delayedCall(index * 2450, () => this.showMessage(line, 2250));
     });
   }
 
-  private giveVrToPinwinkis(): void {
-    if (!this.pinwinkis || this.boatRepaired) return;
+  private giveVrToPinkwindkis(): void {
+    if (!this.pinkwindkis || this.boatRepaired) return;
     this.hasVrHeadset = false;
     audio.play("confirm");
-    this.showMessage("Le casque charge Pinwinkis…\nMode pingouin en cours.", 2400);
-    this.transformPinwinkisIntoPenguin();
+    this.showMessage("Le casque charge Pinkwindkis…\nMode pingouin en cours.", 2400);
+    this.transformPinkwindkisIntoPenguin();
     this.time.delayedCall(1150, () => this.repairBoat());
   }
 
-  private transformPinwinkisIntoPenguin(): void {
-    if (!this.pinwinkis || this.pinwinkisPenguinMode) return;
-    this.pinwinkisPenguinMode = true;
-    const x = this.pinwinkis.x;
-    const y = this.pinwinkis.y;
+  private transformPinkwindkisIntoPenguin(): void {
+    if (!this.pinkwindkis || this.pinkwindkisPenguinMode) return;
+    this.pinkwindkisPenguinMode = true;
+    const x = this.pinkwindkis.x;
+    const y = this.pinkwindkis.y;
     this.tweens.add({
-      targets: this.pinwinkis,
+      targets: this.pinkwindkis,
       scale: 0.15,
       angle: 360,
       alpha: 0.25,
       duration: 430,
       ease: "Back.in",
       onComplete: () => {
-        this.pinwinkis?.destroy();
-        this.pinwinkis = this.createPinwinkisPenguin(x, y).setScale(0.2).setAlpha(0).setDepth(18);
-        this.tweens.add({ targets: this.pinwinkis, scale: 1, alpha: 1, angle: 0, duration: 520, ease: "Back.out" });
+        this.pinkwindkis?.destroy();
+        this.pinkwindkis = this.createPinkwindkisPenguin(x, y).setScale(0.2).setAlpha(0).setDepth(18);
+        this.tweens.add({ targets: this.pinkwindkis, scale: 1, alpha: 1, angle: 0, duration: 520, ease: "Back.out" });
         audio.play("confirm");
-        this.showMessage("Pinwinkis est chargé en pingouin.\nRéparation nautique en réalité virtuelle.", 2600);
+        this.showMessage("Pinkwindkis est chargé en pingouin.\nRéparation nautique en réalité virtuelle.", 2600);
       },
     });
   }
 
-  private createPinwinkisPenguin(x: number, y: number): Phaser.GameObjects.Container {
+  private createPinkwindkisPenguin(x: number, y: number): Phaser.GameObjects.Container {
     const body = this.add.ellipse(0, 13, 44, 60, 0x23283b).setStrokeStyle(4, 0xffffff);
     const belly = this.add.ellipse(0, 19, 27, 42, 0xffffff);
     const head = this.add.circle(0, -23, 24, 0x23283b).setStrokeStyle(4, 0xffffff);
@@ -363,10 +363,10 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private repairBoat(): void {
-    if (!this.pinwinkis) return;
+    if (!this.pinkwindkis) return;
     audio.play("bridge");
     this.tweens.add({
-      targets: this.pinwinkis,
+      targets: this.pinkwindkis,
       x: 1340,
       y: 535,
       duration: 900,
@@ -392,7 +392,7 @@ export class BeachScene extends Phaser.Scene {
   private tryBoat(): void {
     if (!this.boatRepaired) {
       this.boatInspected = true;
-      this.objectiveText.setText("🌴 PINWINKIS");
+      this.objectiveText.setText("🌴 PINKWINDKIS");
       this.showMessage("Le bateau ne marche pas.\nDes algues bloquent l’hélice.", 2200);
       return;
     }
@@ -401,7 +401,7 @@ export class BeachScene extends Phaser.Scene {
 
   private inspectPropeller(): void {
     this.boatInspected = true;
-    this.objectiveText.setText("🌴 PINWINKIS");
+    this.objectiveText.setText("🌴 PINKWINDKIS");
     this.showMessage("Des algues sont coincées sur l’hélice.\nIl faut quelqu’un de très petit.", 2300);
   }
 
@@ -414,7 +414,7 @@ export class BeachScene extends Phaser.Scene {
     this.showMessage("Au coucher du soleil,\nils partent tous au large.", 2600);
     this.cameras.main.fade(2600, 255, 156, 105);
     this.tweens.add({ targets: this.boat, x: 1620, y: 455, duration: 2600, ease: "Sine.inOut" });
-    if (this.pinwinkis) this.tweens.add({ targets: this.pinwinkis, x: 1240, y: 430, duration: 900, ease: "Sine.out" });
+    if (this.pinkwindkis) this.tweens.add({ targets: this.pinkwindkis, x: 1240, y: 430, duration: 900, ease: "Sine.out" });
     this.tweens.add({ targets: this.giraffe, x: 1180, y: 452, scale: 0.7, duration: 1200, ease: "Sine.inOut" });
     this.tweens.add({ targets: this.player.sprite, x: 1140, y: 500, alpha: 0.25, duration: 1100, ease: "Sine.inOut" });
     this.time.delayedCall(2700, () => {
@@ -427,7 +427,7 @@ export class BeachScene extends Phaser.Scene {
   private canMoveTo(fromX: number, targetX: number): boolean {
     if (!this.boatRepaired && fromX < 1120 && targetX > 1140) {
       this.boatInspected = true;
-      this.objectiveText.setText("🌴 PINWINKIS");
+      this.objectiveText.setText("🌴 PINKWINDKIS");
       this.showMessage("Le bateau est bloqué.\nIl faut d’abord libérer l’hélice.", 1600);
       return false;
     }
