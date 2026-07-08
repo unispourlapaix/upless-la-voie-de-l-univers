@@ -44,6 +44,7 @@ try {
     render: {
       antialias: true,
       pixelArt: false,
+      roundPixels: true,
     },
     callbacks: {
       postBoot: () => {
