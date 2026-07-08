@@ -55,6 +55,7 @@ const mangaSheetKey = "upless-manga-sticker-sheet-v1";
 const giraffeBipedKey = "upless-giraffe-biped-tshirt-jeans-v1";
 const alienCyberOctopusKey = "upless-alien-cyber-octopus-vr-v2";
 const atmosphereMachineKey = "upless-atmosphere-machine-sticker-v1";
+const crystalStargateKey = "upless-crystal-stargate-blue-v1";
 const repairedBoatKey = "upless-boat-repaired-clean-v1";
 const galacticBoatKey = "upless-boat-galactic-futuristic-v1";
 const laughingBusinessmenKey = "upless-businessmen-laughing-cat-video-v2";
@@ -67,6 +68,7 @@ const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidt
   beachGiraffe: { key: giraffeBipedKey, targetWidth: 170, targetHeight: 235 },
   moonAlien: { key: alienCyberOctopusKey, targetWidth: 180, targetHeight: 225 },
   moonDevice: { key: atmosphereMachineKey, targetWidth: 245, targetHeight: 275 },
+  stargate: { key: crystalStargateKey, targetWidth: 230, targetHeight: 310 },
   repairedBoat: { key: repairedBoatKey, targetWidth: 360, targetHeight: 220 },
   moonBoat: { key: galacticBoatKey, targetWidth: 320, targetHeight: 210 },
   laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 300, targetHeight: 150 },
