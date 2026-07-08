@@ -100,9 +100,8 @@ export class DesertScene extends Phaser.Scene {
       this.add.ellipse(x + 35, 615, 310, 60, 0xb7643f, 0.34);
     }
 
-    this.drawFallenLibertyBust();
-    this.drawBrokenTorchOnGround();
-    this.add.text(196, 356, "STATUE\nBRISÉE", {
+    this.drawBrokenLibertyStatue();
+    this.add.text(242, 356, "STATUE\nCOUPÉE EN 4", {
       fontFamily: "system-ui",
       fontSize: "10px",
       color: "#5e3b43",
@@ -118,55 +117,77 @@ export class DesertScene extends Phaser.Scene {
     this.drawSickFrog();
   }
 
-  private drawFallenLibertyBust(): void {
-    this.add.ellipse(266, 570, 300, 42, 0x3f2530, 0.18);
-    this.add.rectangle(244, 555, 224, 34, 0xc47448, 0.45).setAngle(-3);
-    this.add.ellipse(260, 536, 158, 70, 0x7da8a4).setStrokeStyle(5, 0x2f3c4c).setAngle(-8);
-    this.add.rectangle(226, 542, 82, 68, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c).setAngle(-8);
-    this.add.rectangle(292, 525, 70, 54, 0x6f9996).setStrokeStyle(4, 0x2f3c4c).setAngle(-8);
-    this.add.line(0, 0, 199, 520, 237, 568, 0x2f3c4c, 0.75).setLineWidth(3);
-    this.add.line(0, 0, 260, 503, 296, 558, 0x2f3c4c, 0.7).setLineWidth(3);
+  private drawBrokenLibertyStatue(): void {
+    const stone = 0x8db7b2;
+    const dark = 0x2f3c4c;
+    const moss = 0x6f9996;
+    this.add.ellipse(280, 575, 430, 45, 0x3f2530, 0.2);
+    this.add.rectangle(278, 565, 350, 18, 0xc47448, 0.28).setAngle(-2);
 
-    this.add.ellipse(188, 486, 88, 64, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c).setAngle(-14);
-    this.add.ellipse(172, 486, 12, 18, 0x2f3c4c, 0.3).setAngle(-14);
-    this.add.ellipse(200, 479, 10, 15, 0x2f3c4c, 0.3).setAngle(-14);
-    this.add.rectangle(189, 503, 34, 4, 0x2f3c4c, 0.55).setAngle(-14);
-    this.add.rectangle(152, 492, 22, 9, 0x7da8a4).setStrokeStyle(3, 0x2f3c4c).setAngle(20);
-    [-42, -25, -9, 8, 25, 42].forEach((offset, index) => {
-      this.add.triangle(190 + offset, 452 + Math.abs(offset) * 0.16, -7, 19, 7, 19, 0, -24 - (index % 2) * 5, 0x8db7b2)
-        .setStrokeStyle(3, 0x2f3c4c)
-        .setAngle(offset * 0.35 - 8);
-    });
-    this.add.triangle(146, 447, -9, 17, 9, 17, 0, -25, 0x8db7b2).setStrokeStyle(3, 0x2f3c4c).setAngle(-41);
-    this.add.line(0, 0, 206, 465, 238, 448, 0x2f3c4c, 0.8).setLineWidth(3);
-    this.add.circle(304, 566, 16, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c);
-    this.add.rectangle(335, 558, 62, 16, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c).setAngle(7);
-  }
+    const head = this.add.container(188, 487).setAngle(-13).setDepth(7);
+    head.add([
+      this.add.ellipse(0, 0, 88, 64, stone).setStrokeStyle(5, dark),
+      this.add.ellipse(-17, 0, 12, 18, dark, 0.28),
+      this.add.ellipse(12, -6, 10, 15, dark, 0.28),
+      this.add.rectangle(0, 18, 34, 4, dark, 0.55),
+      this.add.rectangle(-36, 7, 22, 9, moss).setStrokeStyle(3, dark).setAngle(25),
+      this.add.triangle(-42, -34, -7, 19, 7, 19, 0, -23, stone).setStrokeStyle(3, dark).setAngle(-18),
+      this.add.triangle(-24, -42, -7, 19, 7, 19, 0, -28, stone).setStrokeStyle(3, dark).setAngle(-10),
+      this.add.triangle(-4, -45, -7, 19, 7, 19, 0, -27, stone).setStrokeStyle(3, dark).setAngle(4),
+      this.add.triangle(17, -41, -7, 19, 7, 19, 0, -25, stone).setStrokeStyle(3, dark).setAngle(14),
+      this.add.triangle(37, -33, -7, 19, 7, 19, 0, -22, stone).setStrokeStyle(3, dark).setAngle(24),
+      this.add.line(0, 0, -15, 15, 20, -18, dark, 0.82).setLineWidth(3),
+    ]);
 
-  private drawBrokenTorchOnGround(): void {
-    this.add.ellipse(428, 575, 164, 23, 0x3f2530, 0.24);
-    this.add.rectangle(421, 558, 112, 22, 0x8db7b2).setStrokeStyle(4, 0x2f3c4c).setAngle(8);
-    this.add.rectangle(382, 552, 38, 26, 0x78a5a1).setStrokeStyle(4, 0x2f3c4c).setAngle(8);
-    this.add.rectangle(462, 564, 32, 18, 0x78a5a1).setStrokeStyle(3, 0x2f3c4c).setAngle(8);
-    this.add.circle(364, 547, 26, 0x8db7b2).setStrokeStyle(5, 0x2f3c4c);
-    this.add.circle(364, 547, 15, 0x6f9996).setStrokeStyle(3, 0x2f3c4c);
-    [-22, -11, 0, 11, 22].forEach((offset, index) => {
-      this.add.rectangle(364 + offset, 526 + Math.abs(offset) * 0.15, 8, 28 - index * 2, 0x8db7b2)
-        .setStrokeStyle(2, 0x2f3c4c)
-        .setAngle(offset * 0.55);
+    const bust = this.add.container(292, 532).setAngle(-6).setDepth(6);
+    bust.add([
+      this.add.ellipse(0, 5, 168, 72, stone).setStrokeStyle(5, dark),
+      this.add.rectangle(-37, 12, 70, 65, stone).setStrokeStyle(5, dark),
+      this.add.rectangle(42, -2, 68, 50, moss).setStrokeStyle(4, dark),
+      this.add.line(0, 0, -72, -11, -38, 45, dark, 0.7).setLineWidth(3),
+      this.add.line(0, 0, 8, -30, 58, 28, dark, 0.62).setLineWidth(3),
+      this.add.circle(70, 30, 14, stone).setStrokeStyle(4, dark),
+    ]);
+
+    const torch = this.add.container(430, 548).setAngle(7).setDepth(6);
+    torch.add([
+      this.add.rectangle(0, 13, 118, 22, stone).setStrokeStyle(4, dark),
+      this.add.rectangle(-45, 7, 38, 26, moss).setStrokeStyle(4, dark),
+      this.add.rectangle(42, 19, 32, 18, moss).setStrokeStyle(3, dark),
+      this.add.circle(-74, -2, 26, stone).setStrokeStyle(5, dark),
+      this.add.circle(-74, -2, 15, moss).setStrokeStyle(3, dark),
+      this.add.rectangle(-93, -28, 8, 30, stone).setStrokeStyle(2, dark).setAngle(-28),
+      this.add.rectangle(-80, -36, 8, 34, stone).setStrokeStyle(2, dark).setAngle(-8),
+      this.add.rectangle(-64, -35, 8, 30, stone).setStrokeStyle(2, dark).setAngle(13),
+      this.add.triangle(-106, -48, -13, 19, 13, 19, 0, -28, 0xe86b49).setStrokeStyle(3, dark).setAngle(-29),
+      this.add.triangle(-80, -62, -10, 16, 10, 16, 0, -23, 0xffb65f).setStrokeStyle(3, dark).setAngle(9),
+      this.add.triangle(-50, -49, -9, 15, 9, 15, 0, -20, 0xd94a3d).setStrokeStyle(3, dark).setAngle(31),
+      this.add.line(0, 0, -36, -5, -7, 26, dark, 0.78).setLineWidth(3),
+      this.add.line(0, 0, 23, 6, 55, 29, dark, 0.68).setLineWidth(2),
+    ]);
+
+    const foot = this.add.container(92, 558).setAngle(5).setDepth(6);
+    foot.add([
+      this.add.rectangle(0, 0, 95, 32, stone).setStrokeStyle(5, dark),
+      this.add.rectangle(-18, -20, 42, 32, moss).setStrokeStyle(4, dark),
+      this.add.ellipse(31, -18, 45, 22, stone).setStrokeStyle(4, dark),
+      this.add.line(0, 0, -36, -10, 22, 15, dark, 0.72).setLineWidth(3),
+      this.add.line(0, 0, 8, -33, 48, -12, dark, 0.58).setLineWidth(2),
+    ]);
+
+    [
+      { x: 188, y: 535, text: "tête" },
+      { x: 295, y: 589, text: "buste" },
+      { x: 432, y: 588, text: "torche" },
+      { x: 91, y: 598, text: "pied" },
+    ].forEach(({ x, y, text }) => {
+      this.add.text(x, y, text, {
+        fontFamily: "system-ui",
+        fontSize: "8px",
+        color: "#5e3b43",
+        fontStyle: "bold",
+      }).setOrigin(0.5);
     });
-    this.add.triangle(330, 520, -13, 19, 13, 19, 0, -28, 0xe86b49).setStrokeStyle(3, 0x2f3c4c).setAngle(-28);
-    this.add.triangle(354, 505, -10, 16, 10, 16, 0, -23, 0xffb65f).setStrokeStyle(3, 0x2f3c4c).setAngle(10);
-    this.add.triangle(381, 515, -9, 15, 9, 15, 0, -20, 0xd94a3d).setStrokeStyle(3, 0x2f3c4c).setAngle(31);
-    this.add.line(0, 0, 333, 541, 350, 555, 0x2f3c4c, 0.85).setLineWidth(3);
-    this.add.line(0, 0, 390, 548, 423, 567, 0x2f3c4c, 0.75).setLineWidth(3);
-    this.add.line(0, 0, 451, 555, 473, 571, 0x2f3c4c, 0.7).setLineWidth(2);
-    this.add.text(440, 525, "torche cassée", {
-      fontFamily: "system-ui",
-      fontSize: "9px",
-      color: "#5e3b43",
-      fontStyle: "bold",
-    }).setAngle(8);
   }
 
   private drawToxicPond(): void {
