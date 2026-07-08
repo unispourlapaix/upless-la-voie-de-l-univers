@@ -131,9 +131,7 @@ export class MoonScene extends Phaser.Scene {
   }
 
   private createIceCrater(): void {
-    this.add.ellipse(1040, 548, 128, 36, 0x3f465d, 0.5).setStrokeStyle(3, 0xdce3f3, 0.25);
-    this.add.circle(1018, 532, 15, 0xc9f5ff).setStrokeStyle(3, 0xffffff);
-    this.add.circle(1044, 536, 11, 0xa8e9ff).setStrokeStyle(2, 0xffffff);
+    createEntityImage(this, "iceCrater", 1040, 535).setScale(1.05).setDepth(10);
     this.add.text(1040, 576, t("cratère glacé", "ice crater"), { fontSize: "10px", color: "#eef6ff", fontStyle: "bold" }).setOrigin(0.5);
     this.targets.push({ id: "ice", x: 1040, y: 536, radius: 72, action: () => this.collectIce() });
   }
