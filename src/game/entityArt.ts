@@ -53,7 +53,8 @@ const textureKeys: Record<EntityArtKind, string> = {
 
 const mangaSheetKey = "upless-manga-sticker-sheet-v1";
 const giraffeBipedKey = "upless-giraffe-biped-tshirt-jeans-v1";
-const alienCyberOctopusKey = "upless-alien-cyber-octopus-vr-v1";
+const alienCyberOctopusKey = "upless-alien-cyber-octopus-vr-v2";
+const atmosphereMachineKey = "upless-atmosphere-machine-sticker-v1";
 const repairedBoatKey = "upless-boat-repaired-clean-v1";
 const galacticBoatKey = "upless-boat-galactic-futuristic-v1";
 const laughingBusinessmenKey = "upless-businessmen-laughing-cat-video-v2";
@@ -64,7 +65,8 @@ const iceCraterKey = "upless-ice-crater-v1";
 
 const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidth: number; targetHeight: number }>> = {
   beachGiraffe: { key: giraffeBipedKey, targetWidth: 170, targetHeight: 235 },
-  moonAlien: { key: alienCyberOctopusKey, targetWidth: 150, targetHeight: 185 },
+  moonAlien: { key: alienCyberOctopusKey, targetWidth: 180, targetHeight: 225 },
+  moonDevice: { key: atmosphereMachineKey, targetWidth: 245, targetHeight: 275 },
   repairedBoat: { key: repairedBoatKey, targetWidth: 360, targetHeight: 220 },
   moonBoat: { key: galacticBoatKey, targetWidth: 320, targetHeight: 210 },
   laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 300, targetHeight: 150 },
