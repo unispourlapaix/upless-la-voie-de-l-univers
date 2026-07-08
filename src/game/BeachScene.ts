@@ -3,6 +3,7 @@ import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { TouchInput } from "./input";
 import { createDetailedObject } from "./objectKit";
+import { createPinkwindkisSprite } from "./pinkwindkisArt";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
 
@@ -309,60 +310,7 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createPinwinkis(x: number, y: number): Phaser.GameObjects.Container {
-    const shadow = this.add.ellipse(0, 53, 58, 12, 0x10212a, 0.24);
-    const tail = this.add.arc(-20, 18, 22, 34, 270, false, 0xf7f4ea).setStrokeStyle(5, 0xf7f4ea);
-    const boot1 = this.add.rectangle(-11, 48, 12, 18, 0xe2762e).setStrokeStyle(3, 0x1f2a44).setAngle(3);
-    const boot2 = this.add.rectangle(12, 48, 12, 18, 0xe2762e).setStrokeStyle(3, 0x1f2a44).setAngle(-3);
-    const leg1 = this.add.rectangle(-11, 31, 12, 32, 0xf2efe4).setStrokeStyle(3, 0x1f2a44).setAngle(4);
-    const leg2 = this.add.rectangle(12, 31, 12, 32, 0xf2efe4).setStrokeStyle(3, 0x1f2a44).setAngle(-4);
-    const body = this.add.ellipse(0, 8, 42, 60, 0xf7f4ea).setStrokeStyle(4, 0x1f2a44);
-    const suitCore = this.add.ellipse(0, 12, 27, 43, 0xffffff).setStrokeStyle(2, 0xd8d1c6);
-    const orangeStrap1 = this.add.rectangle(-15, 9, 8, 52, 0xe2762e).setStrokeStyle(2, 0x1f2a44).setAngle(-12);
-    const orangeStrap2 = this.add.rectangle(15, 9, 8, 52, 0xe2762e).setStrokeStyle(2, 0x1f2a44).setAngle(12);
-    const belt = this.add.rectangle(0, 28, 40, 8, 0xe2762e).setStrokeStyle(2, 0x1f2a44);
-    const arm1 = this.add.rectangle(-28, 10, 10, 42, 0xf7f4ea).setStrokeStyle(3, 0x1f2a44).setAngle(18);
-    const arm2 = this.add.rectangle(29, 10, 10, 42, 0xf7f4ea).setStrokeStyle(3, 0x1f2a44).setAngle(-18);
-    const glove1 = this.add.circle(-34, 29, 7, 0x1f2a44);
-    const glove2 = this.add.circle(35, 29, 7, 0x1f2a44);
-    const helmetRing = this.add.ellipse(0, -25, 58, 50, 0xe2762e).setStrokeStyle(4, 0x1f2a44);
-    const head = this.add.circle(0, -28, 24, 0xf7f4ea).setStrokeStyle(4, 0x1f2a44);
-    const face = this.add.ellipse(0, -25, 31, 23, 0xffdec0).setStrokeStyle(2, 0x1f2a44, 0.45);
-    const ear1 = this.add.circle(-22, -29, 8, 0xf7f4ea).setStrokeStyle(2, 0x1f2a44);
-    const ear2 = this.add.circle(22, -29, 8, 0xf7f4ea).setStrokeStyle(2, 0x1f2a44);
-    const visor = this.add.arc(0, -35, 20, 190, 350, false, 0x8eeaff, 0.34).setStrokeStyle(3, 0x8eeaff, 0.75);
-    const lens = this.add.rectangle(0, -26, 33, 11, 0x1f2a44).setStrokeStyle(2, 0xffffff, 0.55);
-    const lensGlow = this.add.rectangle(-7, -29, 13, 3, 0xffffff, 0.45).setAngle(-8);
-    const grin = this.add.arc(0, -17, 8, 12, 166, false, 0xffffff).setStrokeStyle(2, 0xffffff);
-    const patch = this.add.circle(18, 10, 5, 0x8eeaff).setStrokeStyle(2, 0x1f2a44);
-    const label = this.add.text(0, 65, "P", { fontSize: "10px", color: "#e2762e", fontStyle: "bold" }).setOrigin(0.5);
-    return this.add.container(x, y, [
-      shadow,
-      tail,
-      boot1,
-      boot2,
-      leg1,
-      leg2,
-      arm1,
-      arm2,
-      body,
-      suitCore,
-      orangeStrap1,
-      orangeStrap2,
-      belt,
-      glove1,
-      glove2,
-      helmetRing,
-      ear1,
-      ear2,
-      head,
-      face,
-      visor,
-      lens,
-      lensGlow,
-      grin,
-      patch,
-      label,
-    ]);
+    return createPinkwindkisSprite(this, x, y);
   }
 
   private playPinwinkisIntroDialogue(): void {
