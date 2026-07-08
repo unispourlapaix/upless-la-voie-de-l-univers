@@ -10,7 +10,16 @@ export type EntityArtKind =
   | "moonBoat"
   | "moonDevice"
   | "moonAlien"
-  | "stargate";
+  | "stargate"
+  | "coconutTree"
+  | "pinkwindkisPenguin"
+  | "sickFrog"
+  | "toxicPond"
+  | "desertBunker"
+  | "officeCat"
+  | "controlPanel"
+  | "powerSwitch"
+  | "projectorScreen";
 
 const textureKeys: Record<EntityArtKind, string> = {
   ogre: "upless-entity-ogre-comic",
@@ -23,6 +32,15 @@ const textureKeys: Record<EntityArtKind, string> = {
   moonDevice: "upless-entity-moon-device-comic",
   moonAlien: "upless-entity-moon-alien-comic",
   stargate: "upless-entity-stargate-comic",
+  coconutTree: "upless-entity-coconut-tree-comic",
+  pinkwindkisPenguin: "upless-entity-pinkwindkis-penguin-comic",
+  sickFrog: "upless-entity-sick-frog-comic",
+  toxicPond: "upless-entity-toxic-pond-comic",
+  desertBunker: "upless-entity-desert-bunker-comic",
+  officeCat: "upless-entity-office-cat-comic",
+  controlPanel: "upless-entity-control-panel-comic",
+  powerSwitch: "upless-entity-power-switch-comic",
+  projectorScreen: "upless-entity-projector-screen-comic",
 };
 
 export function createEntityImage(
@@ -50,6 +68,15 @@ function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
   if (kind === "moonDevice") drawMoonDevice(scene, textureKeys[kind]);
   if (kind === "moonAlien") drawMoonAlien(scene, textureKeys[kind]);
   if (kind === "stargate") drawStargate(scene, textureKeys[kind]);
+  if (kind === "coconutTree") drawCoconutTree(scene, textureKeys[kind]);
+  if (kind === "pinkwindkisPenguin") drawPinkwindkisPenguin(scene, textureKeys[kind]);
+  if (kind === "sickFrog") drawSickFrog(scene, textureKeys[kind]);
+  if (kind === "toxicPond") drawToxicPond(scene, textureKeys[kind]);
+  if (kind === "desertBunker") drawDesertBunker(scene, textureKeys[kind]);
+  if (kind === "officeCat") drawOfficeCat(scene, textureKeys[kind]);
+  if (kind === "controlPanel") drawControlPanel(scene, textureKeys[kind]);
+  if (kind === "powerSwitch") drawPowerSwitch(scene, textureKeys[kind]);
+  if (kind === "projectorScreen") drawProjectorScreen(scene, textureKeys[kind]);
 }
 
 function makeCanvas(scene: Phaser.Scene, key: string, width: number, height: number): CanvasRenderingContext2D {
@@ -435,6 +462,259 @@ function drawStargate(scene: Phaser.Scene, key: string): void {
     roundRect(ctx, -4, -15, 8, 30, 4, "#8eeaff", "#20335d", 2);
     ctx.restore();
   }
+
+  finish(scene, key);
+}
+
+function drawCoconutTree(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 190, 230);
+  ctx.translate(95, 132);
+
+  ellipse(ctx, 0, 82, 72, 12, "rgba(20,40,35,0.2)", "rgba(0,0,0,0)", 0);
+  ctx.save();
+  ctx.rotate(-0.14);
+  roundRect(ctx, -14, -11, 28, 124, 13, "#a46b3d", "#5c3527", 6);
+  ctx.fillStyle = "rgba(255,220,150,0.28)";
+  for (let y = 3; y < 95; y += 22) {
+    ctx.beginPath();
+    ctx.moveTo(-12, y);
+    ctx.quadraticCurveTo(0, y + 10, 13, y + 3);
+    stroke(ctx, "#6f442f", 3);
+  }
+  ctx.restore();
+
+  const leaf = (angle: number, color: string, sx = 1) => {
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.scale(sx, 1);
+    ctx.beginPath();
+    ctx.moveTo(0, -74);
+    ctx.quadraticCurveTo(64, -112, 97, -73);
+    ctx.quadraticCurveTo(50, -65, 4, -46);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    stroke(ctx, "#1f6b4a", 5);
+    ctx.beginPath();
+    ctx.moveTo(7, -69);
+    ctx.quadraticCurveTo(42, -83, 78, -74);
+    stroke(ctx, "rgba(255,255,255,0.25)", 3);
+    ctx.restore();
+  };
+  leaf(-0.68, "#2fa66a");
+  leaf(0.58, "#3cc17a");
+  leaf(0.02, "#52c777", 1.08);
+  leaf(1.28, "#2fa66a", 0.86);
+  leaf(-1.25, "#42b870", 0.88);
+  ellipse(ctx, -15, -45, 10, 11, "#6a422c", "#3f281d", 4);
+  ellipse(ctx, 4, -49, 10, 11, "#6a422c", "#3f281d", 4);
+  ellipse(ctx, 23, -43, 9, 10, "#6a422c", "#3f281d", 4);
+
+  finish(scene, key);
+}
+
+function drawPinkwindkisPenguin(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 135, 145);
+  ctx.translate(68, 75);
+
+  ellipse(ctx, 0, 50, 38, 8, "rgba(0,0,0,0.22)", "rgba(0,0,0,0)", 0);
+  ellipse(ctx, -15, 44, 16, 7, "#ffb44a", "#2d1c12", 3);
+  ellipse(ctx, 15, 44, 16, 7, "#ffb44a", "#2d1c12", 3);
+  ellipse(ctx, -29, 13, 11, 33, "#23283b", "#ffffff", 4);
+  ellipse(ctx, 29, 13, 11, 33, "#23283b", "#ffffff", 4);
+  ellipse(ctx, 0, 13, 30, 43, "#23283b", "#ffffff", 5);
+  ellipse(ctx, 0, 19, 18, 31, "#ffffff", "#ffffff", 1);
+  ellipse(ctx, 0, -26, 28, 27, "#23283b", "#ffffff", 5);
+  ellipse(ctx, 0, -23, 19, 14, "#ffffff", "#ffffff", 1);
+  roundRect(ctx, -24, -34, 48, 19, 8, "#20263b", "#8eeaff", 4);
+  ellipse(ctx, -11, -25, 9, 7, "#8eeaff", "#20335d", 2);
+  ellipse(ctx, 11, -25, 9, 7, "#8eeaff", "#20335d", 2);
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.lineTo(-9, -3);
+  ctx.lineTo(9, -3);
+  ctx.closePath();
+  ctx.fillStyle = "#ffb44a";
+  ctx.fill();
+  stroke(ctx, "#2d1c12", 3);
+
+  finish(scene, key);
+}
+
+function drawSickFrog(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 150, 120);
+  ctx.translate(75, 64);
+
+  ellipse(ctx, 0, 36, 43, 8, "rgba(37,23,42,0.28)", "rgba(0,0,0,0)", 0);
+  ellipse(ctx, 0, 10, 37, 25, "#75b553", "#263b2b", 5);
+  ellipse(ctx, 0, -15, 43, 29, "#86c761", "#263b2b", 5);
+  ellipse(ctx, -22, -33, 13, 13, "#e8ffe0", "#263b2b", 4);
+  ellipse(ctx, 22, -33, 13, 13, "#e8ffe0", "#263b2b", 4);
+  ellipse(ctx, -22, -31, 4, 5, "#263b2b", "#263b2b", 1);
+  ellipse(ctx, 22, -31, 4, 5, "#263b2b", "#263b2b", 1);
+  ctx.beginPath();
+  ctx.arc(0, -10, 16, 0.12, Math.PI - 0.12);
+  stroke(ctx, "#263b2b", 4);
+  ellipse(ctx, -32, -4, 6, 12, "#8cf06a", "#2b7d45", 2);
+  ellipse(ctx, 32, 1, 5, 10, "#8cf06a", "#2b7d45", 2);
+  ellipse(ctx, 9, -45, 5, 9, "#8cf06a", "#2b7d45", 2);
+  ctx.fillStyle = "#5e3b43";
+  ctx.font = "bold 9px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("contaminée", 0, 54);
+
+  finish(scene, key);
+}
+
+function drawToxicPond(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 230, 90);
+  ctx.translate(115, 46);
+
+  ellipse(ctx, 0, 13, 98, 23, "rgba(94,23,38,0.4)", "rgba(0,0,0,0)", 0);
+  ctx.beginPath();
+  ctx.moveTo(-89, 0);
+  ctx.quadraticCurveTo(-45, -27, 19, -20);
+  ctx.quadraticCurveTo(85, -15, 94, 8);
+  ctx.quadraticCurveTo(62, 30, -22, 26);
+  ctx.quadraticCurveTo(-90, 24, -89, 0);
+  ctx.fillStyle = "#b82539";
+  ctx.fill();
+  stroke(ctx, "#5b1523", 6);
+  ellipse(ctx, -42, -7, 29, 8, "rgba(242,238,240,0.78)", "#5b7890", 3);
+  roundRect(ctx, -56, -15, 33, 9, 4, "rgba(218,246,255,0.9)", "#5b7890", 2);
+  ellipse(ctx, 44, 5, 22, 7, "rgba(255,106,118,0.4)", "rgba(0,0,0,0)", 0);
+  ellipse(ctx, -74, 10, 4, 4, "rgba(255,131,144,0.75)", "rgba(0,0,0,0)", 0);
+  ellipse(ctx, 73, -2, 3, 3, "rgba(255,156,165,0.6)", "rgba(0,0,0,0)", 0);
+
+  finish(scene, key);
+}
+
+function drawDesertBunker(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 310, 250);
+  ctx.translate(155, 130);
+
+  ellipse(ctx, 0, 92, 152, 19, "rgba(43,33,50,0.33)", "rgba(0,0,0,0)", 0);
+  roundRect(ctx, -125, -38, 250, 184, 16, "#394050", "#181b25", 8);
+  roundRect(ctx, -110, -122, 220, 41, 10, "#515a70", "#181b25", 6);
+  ellipse(ctx, -100, -101, 13, 13, "#d95959", "#5b1d25", 3);
+  ellipse(ctx, 100, -101, 13, 13, "#d95959", "#5b1d25", 3);
+  roundRect(ctx, -58, -10, 116, 132, 8, "#151a24", "#6f778d", 7);
+  roundRect(ctx, -39, 6, 78, 98, 6, "#252d3a", "#2e3547", 3);
+  ctx.fillStyle = "#fff2c2";
+  ctx.strokeStyle = "#1d1b27";
+  ctx.lineWidth = 6;
+  ctx.font = "bold 23px system-ui";
+  ctx.textAlign = "center";
+  ctx.strokeText("BUNKER 08", 0, -150);
+  ctx.fillText("BUNKER 08", 0, -150);
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(-96, -9);
+  ctx.lineTo(95, -32);
+  ctx.stroke();
+
+  finish(scene, key);
+}
+
+function drawOfficeCat(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 120, 120);
+  ctx.translate(60, 62);
+
+  ellipse(ctx, 0, 34, 37, 8, "rgba(8,14,27,0.24)", "rgba(0,0,0,0)", 0);
+  ellipse(ctx, 0, 13, 28, 21, "#f0a05c", "#302844", 4);
+  ctx.beginPath();
+  ctx.moveTo(-17, -23);
+  ctx.lineTo(-7, -46);
+  ctx.lineTo(3, -24);
+  ctx.moveTo(17, -23);
+  ctx.lineTo(7, -46);
+  ctx.lineTo(-3, -24);
+  ctx.fillStyle = "#ffb86f";
+  ctx.fill();
+  stroke(ctx, "#302844", 4);
+  ellipse(ctx, 0, -16, 24, 23, "#ffb86f", "#302844", 4);
+  ctx.beginPath();
+  ctx.arc(-8, -18, 5, 0, Math.PI);
+  ctx.arc(8, -18, 5, 0, Math.PI);
+  stroke(ctx, "#302844", 3);
+  ellipse(ctx, -13, -10, 6, 3, "rgba(255,114,152,0.65)", "rgba(0,0,0,0)", 0);
+  ellipse(ctx, 13, -10, 6, 3, "rgba(255,114,152,0.65)", "rgba(0,0,0,0)", 0);
+  ctx.fillStyle = "#6d4430";
+  ctx.font = "bold 13px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("ω", 0, -4);
+  ellipse(ctx, -10, 23, 8, 6, "#ffb86f", "#302844", 3);
+  ellipse(ctx, 10, 23, 8, 6, "#ffb86f", "#302844", 3);
+  ctx.beginPath();
+  ctx.arc(23, 9, 17, 1.2 * Math.PI, 0.25 * Math.PI);
+  stroke(ctx, "#e7934f", 7);
+  ctx.fillStyle = "#ffd36a";
+  ctx.font = "bold 10px system-ui";
+  ctx.fillText("TOUCHE-MOI", 0, 51);
+
+  finish(scene, key);
+}
+
+function drawControlPanel(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 135, 155);
+  ctx.translate(68, 78);
+
+  roundRect(ctx, -53, -61, 106, 125, 12, "#1a2943", "#7193c4", 6);
+  roundRect(ctx, -40, -48, 80, 92, 8, "#223957", "rgba(169,186,213,0.4)", 3);
+  ellipse(ctx, -25, -35, 7, 7, "#71e69b", "#20335d", 2);
+  ellipse(ctx, 0, -35, 7, 7, "#ffd36a", "#20335d", 2);
+  ellipse(ctx, 25, -35, 7, 7, "#ff7185", "#20335d", 2);
+  roundRect(ctx, -25, 4, 50, 29, 6, "#111b30", "#536c94", 3);
+  ellipse(ctx, 0, -3, 13, 13, "#ff5d76", "#7d2941", 5);
+  ellipse(ctx, 0, -3, 4, 4, "#ffd9df", "#ffd9df", 1);
+  ctx.fillStyle = "#9fb4d3";
+  ctx.font = "bold 8px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("ALIMENTATION", 0, 69);
+
+  finish(scene, key);
+}
+
+function drawPowerSwitch(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 82, 86);
+  ctx.translate(41, 42);
+
+  roundRect(ctx, -28, -27, 56, 58, 10, "#ffffff", "rgba(48,40,68,0.22)", 4);
+  roundRect(ctx, -23, -23, 46, 48, 9, "#ff8cae", "#302844", 5);
+  ellipse(ctx, 0, -5, 12, 12, "#ffd45f", "#302844", 4);
+  ctx.fillStyle = "#302844";
+  ctx.font = "bold 8px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("OPEN", 0, 22);
+
+  finish(scene, key);
+}
+
+function drawProjectorScreen(scene: Phaser.Scene, key: string): void {
+  const ctx = makeCanvas(scene, key, 220, 165);
+  ctx.translate(110, 82);
+
+  roundRect(ctx, -94, -68, 188, 138, 8, "#f5f0df", "#2d3b58", 9);
+  ctx.beginPath();
+  ctx.moveTo(0, -51);
+  ctx.lineTo(-28, 36);
+  ctx.lineTo(28, 36);
+  ctx.closePath();
+  ctx.fillStyle = "#697997";
+  ctx.fill();
+  stroke(ctx, "#33405d", 5);
+  ellipse(ctx, 48, -35, 16, 16, "#ffd36a", "#ad7a28", 3);
+  ctx.fillStyle = "#33405d";
+  ctx.font = "bold 12px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("DÉPART IMMÉDIAT", 0, 54);
+  ctx.strokeStyle = "rgba(255,255,255,0.42)";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(-77, -51);
+  ctx.lineTo(78, -61);
+  ctx.stroke();
 
   finish(scene, key);
 }
