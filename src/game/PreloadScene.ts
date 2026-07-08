@@ -6,6 +6,10 @@ export class PreloadScene extends Phaser.Scene {
     super("PreloadScene");
   }
 
+  preload(): void {
+    this.load.image("upless-manga-sticker-sheet-v1", "assets/artpacks/upless-manga-sticker-sheet-v1.png");
+  }
+
   create(): void {
     generateArtTextures(this);
     const graphics = this.make.graphics({ x: 0, y: 0 });
