@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
+import { createDetailedMonkey } from "./characterKit";
 import { TouchInput } from "./input";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
@@ -844,19 +845,15 @@ export class OfficeScene extends Phaser.Scene {
 
   private summonMonkey(): void {
     audio.play("monkey");
-    const stickerHead = this.add.circle(0, 0, 32, 0xffffff);
-    const stickerEar1 = this.add.circle(-29, 0, 13, 0xffffff);
-    const stickerEar2 = this.add.circle(29, 0, 13, 0xffffff);
-    const head = this.add.circle(0, 0, 25, 0x8a5e3c);
-    const face = this.add.ellipse(0, 4, 28, 23, 0xd6a77e);
-    const ear1 = this.add.circle(-25, 0, 9, 0x9a6845);
-    const ear2 = this.add.circle(25, 0, 9, 0x9a6845);
-    const eye1 = this.add.circle(-7, 1, 3, 0x24202a);
-    const eye2 = this.add.circle(7, 1, 3, 0x24202a);
-    const smile = this.add.arc(0, 8, 8, 12, 168, false, 0x4e3329).setStrokeStyle(3, 0x4e3329);
-    this.monkey = this.add
-      .container(1325, 340, [stickerEar1, stickerEar2, stickerHead, ear1, ear2, head, face, eye1, eye2, smile])
-      .setDepth(20);
+    this.monkey = createDetailedMonkey(this, 1325, 340, {
+      fur: 0x8a5e3c,
+      face: 0xd6a77e,
+      outfit: "none",
+      sunglasses: false,
+      orangeJuice: false,
+      smile: true,
+      skinny: true,
+    }).setScale(0.64).setDepth(20);
     this.tweens.add({
       targets: this.monkey,
       y: 300,
