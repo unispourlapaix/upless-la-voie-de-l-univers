@@ -145,15 +145,8 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createCoconutTree(): void {
-    const trunk = this.add.rectangle(0, 35, 24, 142, 0xa46b3d).setStrokeStyle(4, 0x5c3527).setAngle(-8);
-    const leaves = [
-      this.add.ellipse(-42, -45, 100, 28, 0x2fa66a).setStrokeStyle(3, 0x1f6b4a).setAngle(-24),
-      this.add.ellipse(44, -45, 104, 28, 0x2fa66a).setStrokeStyle(3, 0x1f6b4a).setAngle(24),
-      this.add.ellipse(0, -64, 112, 30, 0x3cc17a).setStrokeStyle(3, 0x1f6b4a).setAngle(0),
-      this.add.ellipse(-8, -39, 92, 24, 0x52c777).setStrokeStyle(3, 0x1f6b4a).setAngle(65),
-    ];
-    const coconuts = [this.add.circle(-14, -34, 8, 0x6a422c), this.add.circle(5, -36, 8, 0x6a422c), this.add.circle(20, -30, 7, 0x6a422c)];
-    this.add.container(520, 455, [trunk, ...leaves, ...coconuts]).setDepth(9);
+    const tree = createEntityImage(this, "coconutTree").setScale(0.86);
+    this.add.container(520, 455, [tree]).setDepth(9);
     this.items.push({
       id: "tree",
       x: 520,
@@ -347,19 +340,7 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private createPinkwindkisPenguin(x: number, y: number): Phaser.GameObjects.Container {
-    const body = this.add.ellipse(0, 13, 44, 60, 0x23283b).setStrokeStyle(4, 0xffffff);
-    const belly = this.add.ellipse(0, 19, 27, 42, 0xffffff);
-    const head = this.add.circle(0, -23, 24, 0x23283b).setStrokeStyle(4, 0xffffff);
-    const face = this.add.ellipse(0, -21, 29, 20, 0xffffff);
-    const headset = this.add.rectangle(0, -25, 39, 16, 0x20263b).setStrokeStyle(3, 0x8eeaff);
-    const lens1 = this.add.ellipse(-10, -25, 12, 9, 0x8eeaff, 0.9);
-    const lens2 = this.add.ellipse(10, -25, 12, 9, 0x8eeaff, 0.9);
-    const beak = this.add.triangle(0, -14, -8, -4, 8, -4, 0, 8, 0xffb44a).setStrokeStyle(2, 0x2d1c12);
-    const foot1 = this.add.ellipse(-13, 46, 21, 9, 0xffb44a);
-    const foot2 = this.add.ellipse(13, 46, 21, 9, 0xffb44a);
-    const flipper1 = this.add.ellipse(-28, 12, 14, 42, 0x23283b).setStrokeStyle(3, 0xffffff).setAngle(20);
-    const flipper2 = this.add.ellipse(28, 12, 14, 42, 0x23283b).setStrokeStyle(3, 0xffffff).setAngle(-20);
-    return this.add.container(x, y, [foot1, foot2, flipper1, flipper2, body, belly, head, face, headset, lens1, lens2, beak]);
+    return this.add.container(x, y, [createEntityImage(this, "pinkwindkisPenguin").setScale(0.9)]);
   }
 
   private repairBoat(): void {
