@@ -3,6 +3,7 @@ import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { createDetailedMonkey } from "./characterKit";
 import { createBrokenLibertyStatue } from "./decorKit";
+import { createEntityImage } from "./entityArt";
 import { TouchInput } from "./input";
 import { createDetailedObject, type DetailObjectKind } from "./objectKit";
 import { PlayerController } from "./player";
@@ -180,37 +181,11 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private createRobot(): void {
-    const shadow = this.add.ellipse(0, 42, 78, 16, 0x1b1725, 0.35);
-    const body = this.add.rectangle(0, 0, 58, 78, 0x8b7b69).setStrokeStyle(5, 0x312831);
-    const rust1 = this.add.circle(-18, -15, 7, 0xc25f32, 0.85);
-    const rust2 = this.add.circle(16, 17, 9, 0x9e4b31, 0.75);
-    const head = this.add.rectangle(0, -58, 66, 44, 0x9a8c77).setStrokeStyle(5, 0x312831);
-    const antenna = this.add.line(0, -91, 0, 0, 0, -24, 0x312831).setLineWidth(4);
-    const antennaTip = this.add.circle(0, -116, 6, 0xd95959);
+    const body = createEntityImage(this, "rustyRobot").setScale(0.82).setPosition(0, -16);
     const eye1 = this.add.circle(-16, -59, 6, 0x4b1010);
     const eye2 = this.add.circle(16, -59, 6, 0x4b1010);
-    const mouth = this.add.rectangle(0, -42, 32, 5, 0x312831);
-    const arm1 = this.add.rectangle(-43, -8, 16, 70, 0x776a5c).setStrokeStyle(3, 0x312831).setAngle(9);
-    const arm2 = this.add.rectangle(43, -8, 16, 70, 0x776a5c).setStrokeStyle(3, 0x312831).setAngle(-9);
-    const leg1 = this.add.rectangle(-17, 50, 17, 32, 0x716457).setStrokeStyle(3, 0x312831);
-    const leg2 = this.add.rectangle(17, 50, 17, 32, 0x716457).setStrokeStyle(3, 0x312831);
     this.robotEyes = [eye1, eye2];
-    this.robot = this.add.container(1276, 493, [
-      shadow,
-      arm1,
-      arm2,
-      body,
-      rust1,
-      rust2,
-      head,
-      antenna,
-      antennaTip,
-      eye1,
-      eye2,
-      mouth,
-      leg1,
-      leg2,
-    ]).setDepth(12);
+    this.robot = this.add.container(1276, 493, [body, eye1, eye2]).setDepth(12);
     this.tweens.add({ targets: this.robot, angle: 1.4, duration: 410, yoyo: true, repeat: -1 });
   }
 
