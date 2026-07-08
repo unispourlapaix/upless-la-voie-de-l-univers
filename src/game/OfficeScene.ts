@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
 import { createDetailedMonkey } from "./characterKit";
+import { createEntityImage } from "./entityArt";
 import { TouchInput } from "./input";
 import { PlayerController } from "./player";
 import { loadSave, writeSave } from "./types";
@@ -169,59 +170,13 @@ export class OfficeScene extends Phaser.Scene {
 
   private createExecutives(): void {
     [
-      { x: 390, tie: 0xe66565 },
-      { x: 485, tie: 0x5e8ce6 },
-      { x: 580, tie: 0xe6b85e },
-      { x: 690, tie: 0x9c6ee6 },
-    ].forEach(({ x, tie }, index) => {
-      const shadow = this.add.ellipse(0, 28, 48, 11, 0x0a1020, 0.28);
-      const stickerBody = this.add.rectangle(0, 5, 52, 67, 0xffffff);
-      const stickerHead = this.add.ellipse(0, -50, 39, 45, 0xffffff);
-      const stickerEar1 = this.add.circle(-20, -49, 6, 0xffffff);
-      const stickerEar2 = this.add.circle(20, -49, 6, 0xffffff);
-      const suit = this.add.rectangle(0, 0, 42, 58, index % 2 ? 0x334e8a : 0x51447b).setStrokeStyle(3, 0x302844);
-      const shoulder = this.add.ellipse(0, -16, 48, 23, index % 2 ? 0x334e8a : 0x51447b).setStrokeStyle(2, 0x302844);
-      const shirt = this.add.triangle(0, -18, -10, 0, 10, 0, 0, 20, 0xf3f4f7);
-      const necktie = this.add.triangle(0, 0, -5, -12, 5, -12, 0, 19, tie);
-      const neck = this.add.rectangle(0, -35, 13, 14, index % 2 ? 0xd5a77f : 0xb97f5d);
-      const head = this.add.ellipse(0, -50, 31, 37, index % 2 ? 0xf0bf91 : 0xc98a66).setStrokeStyle(2, 0x302844);
-      const ear1 = this.add.circle(-16, -49, 4, index % 2 ? 0xd5a77f : 0xb97f5d);
-      const ear2 = this.add.circle(16, -49, 4, index % 2 ? 0xd5a77f : 0xb97f5d);
-      const hair = this.add.arc(0, -56, 16, 180, 360, false, index % 2 ? 0x413329 : 0x2e2521);
-      const eye1 = this.add.ellipse(-6, -50, 5, 7, 0xffffff).setStrokeStyle(1, 0x302844);
-      const eye2 = this.add.ellipse(6, -50, 5, 7, 0xffffff).setStrokeStyle(1, 0x302844);
-      const pupil1 = this.add.circle(-6, -50, 1.5, 0x302844);
-      const pupil2 = this.add.circle(6, -50, 1.5, 0x302844);
-      const brow1 = this.add.rectangle(-7, -57, 9, 2, 0x302844).setAngle(index % 2 ? 13 : -13);
-      const brow2 = this.add.rectangle(7, -57, 9, 2, 0x302844).setAngle(index % 2 ? -13 : 13);
-      const worriedMouth = this.add.arc(0, -39, 6, 195, 345, false, 0x7b4051).setStrokeStyle(2, 0x7b4051);
-      const sweat = this.add.ellipse(18, -55, 5, 9, 0x8edfff, 0.9).setAngle(12);
-      const man = this.add
-        .container(x, 486, [
-          shadow,
-          stickerBody,
-          stickerHead,
-          stickerEar1,
-          stickerEar2,
-          suit,
-          shoulder,
-          shirt,
-          necktie,
-          neck,
-          head,
-          ear1,
-          ear2,
-          hair,
-          eye1,
-          eye2,
-          pupil1,
-          pupil2,
-          brow1,
-          brow2,
-          worriedMouth,
-          sweat,
-        ])
-        .setDepth(9);
+      { x: 390, tint: 0xffffff },
+      { x: 485, tint: 0xdbe8ff },
+      { x: 580, tint: 0xffefd1 },
+      { x: 690, tint: 0xeadcff },
+    ].forEach(({ x, tint }, index) => {
+      const drawing = createEntityImage(this, "officeExecutive").setScale(0.74).setTint(tint);
+      const man = this.add.container(x, 486, [drawing]).setDepth(9);
       this.executives.push(man);
       this.tweens.add({
         targets: man,
@@ -237,48 +192,8 @@ export class OfficeScene extends Phaser.Scene {
   private createDirector(): void {
     const x = 520;
     const y = 258;
-    const shadow = this.add.ellipse(4, 42, 68, 13, 0x302844, 0.18);
-    const stickerTorso = this.add.rectangle(0, 8, 58, 76, 0xffffff);
-    const stickerHead = this.add.ellipse(0, -42, 45, 51, 0xffffff);
-    const stickerArm = this.add.rectangle(-35, -25, 24, 76, 0xffffff).setAngle(-28);
-    const torso = this.add.rectangle(0, 8, 48, 68, 0x222f50).setStrokeStyle(3, 0x302844);
-    const shoulder = this.add.ellipse(0, -11, 54, 25, 0x222f50).setStrokeStyle(2, 0x302844);
-    const shirt = this.add.triangle(0, -14, -11, 0, 11, 0, 0, 22, 0xf7f4ee);
-    const tie = this.add.triangle(0, 4, -6, -11, 6, -11, 0, 22, 0xd94867);
-    const raisedArm = this.add.rectangle(-32, -29, 16, 67, 0x222f50).setStrokeStyle(3, 0x302844).setAngle(-28);
-    const hand = this.add.circle(-48, -61, 10, 0xd99b72).setStrokeStyle(2, 0x302844);
-    const finger = this.add.rectangle(-50, -76, 7, 25, 0xd99b72).setStrokeStyle(2, 0x302844).setAngle(-5);
-    const neck = this.add.rectangle(0, -26, 15, 16, 0xd99b72);
-    const head = this.add.ellipse(0, -45, 37, 43, 0xd99b72).setStrokeStyle(3, 0x302844);
-    const hair = this.add.arc(0, -54, 19, 180, 360, false, 0x262332);
-    const brow1 = this.add.rectangle(-8, -51, 11, 3, 0x302844).setAngle(15);
-    const brow2 = this.add.rectangle(8, -51, 11, 3, 0x302844).setAngle(-15);
-    const eye1 = this.add.circle(-7, -45, 2.5, 0x302844);
-    const eye2 = this.add.circle(7, -45, 2.5, 0x302844);
-    const mouth = this.add.ellipse(0, -34, 12, 8, 0x6e2e3e).setStrokeStyle(2, 0x302844);
-    this.director = this.add
-      .container(x, y, [
-        shadow,
-        stickerArm,
-        stickerTorso,
-        stickerHead,
-        torso,
-        shoulder,
-        shirt,
-        tie,
-        raisedArm,
-        hand,
-        finger,
-        neck,
-        head,
-        hair,
-        brow1,
-        brow2,
-        eye1,
-        eye2,
-        mouth,
-      ])
-      .setDepth(14);
+    const directorArt = createEntityImage(this, "officeDirector").setScale(0.82);
+    this.director = this.add.container(x, y, [directorArt]).setDepth(14);
 
     const bubbleShadow = this.add.ellipse(4, 5, 150, 58, 0x302844, 0.2);
     const bubble = this.add.ellipse(0, 0, 150, 58, 0xffffff).setStrokeStyle(3, 0x302844);
