@@ -82,14 +82,50 @@ function drawHeadIcon(ctx: CanvasRenderingContext2D): void {
   face(ctx);
   ctx.stroke();
 
-  ctx.fillStyle = "rgba(39,59,70,.35)";
-  ellipse(ctx, -15, 5, 11, 17);
-  ellipse(ctx, 13, 0, 10, 16);
-  ctx.fill();
-  ctx.fillStyle = dark;
-  round(ctx, -17, 22, 36, 5, 3);
-  ctx.fill();
+  drawAngryComicFace(ctx, dark);
   crack(ctx, -25, -10, -6, 11, -18, 29);
+}
+
+function drawAngryComicFace(ctx: CanvasRenderingContext2D, dark: string): void {
+  ctx.save();
+  ctx.strokeStyle = dark;
+  ctx.fillStyle = dark;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(-28, -8);
+  ctx.lineTo(-10, 0);
+  ctx.moveTo(24, -10);
+  ctx.lineTo(8, 1);
+  ctx.stroke();
+
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(-21, 8);
+  ctx.quadraticCurveTo(-15, 13, -7, 9);
+  ctx.moveTo(8, 9);
+  ctx.quadraticCurveTo(16, 13, 22, 8);
+  ctx.stroke();
+
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(-17, 25);
+  ctx.quadraticCurveTo(0, 16, 19, 25);
+  ctx.stroke();
+
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(32, -24);
+  ctx.lineTo(42, -24);
+  ctx.moveTo(37, -30);
+  ctx.lineTo(37, -18);
+  ctx.moveTo(30, -31);
+  ctx.lineTo(44, -17);
+  ctx.stroke();
+
+  ctx.font = "bold 12px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("-'-", 0, -22);
+  ctx.restore();
 }
 
 function drawBustIcon(ctx: CanvasRenderingContext2D): void {
