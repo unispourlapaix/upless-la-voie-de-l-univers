@@ -66,7 +66,7 @@ const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidt
   beachGiraffe: { key: giraffeBipedKey, targetWidth: 170, targetHeight: 235 },
   moonAlien: { key: alienCyberOctopusKey, targetWidth: 150, targetHeight: 185 },
   repairedBoat: { key: repairedBoatKey, targetWidth: 360, targetHeight: 220 },
-  moonBoat: { key: galacticBoatKey, targetWidth: 230, targetHeight: 150 },
+  moonBoat: { key: galacticBoatKey, targetWidth: 320, targetHeight: 210 },
   laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 300, targetHeight: 150 },
   officeDirectorSurprised: { key: directorSurprisedKey, targetWidth: 155, targetHeight: 190 },
   controlPanel: { key: launchPanelKey, targetWidth: 150, targetHeight: 170 },
