@@ -15,10 +15,10 @@ export function createBrokenLibertyStatue(scene: Phaser.Scene, x: number, y: num
   });
 
   const layout = [
-    { piece: "foot" as const, x: -190, y: 62, angle: 5, label: "pied" },
-    { piece: "head" as const, x: -92, y: -10, angle: -13, label: "tête" },
-    { piece: "bust" as const, x: 28, y: 48, angle: -6, label: "buste" },
-    { piece: "torch" as const, x: 165, y: 42, angle: 8, label: "torche" },
+    { piece: "foot" as const, x: -188, y: 63, angle: 5, label: "pied" },
+    { piece: "head" as const, x: -92, y: -12, angle: -12, label: "tête" },
+    { piece: "bust" as const, x: 28, y: 44, angle: -5, label: "buste" },
+    { piece: "torch" as const, x: 171, y: 37, angle: 8, label: "torche" },
   ];
 
   const children: Phaser.GameObjects.GameObject[] = [
@@ -44,8 +44,13 @@ export function createBrokenLibertyStatue(scene: Phaser.Scene, x: number, y: num
 }
 
 function drawPieceTexture(scene: Phaser.Scene, piece: LibertyPiece): void {
-  const width = piece === "torch" ? 220 : 170;
-  const height = 160;
+  const sizes: Record<LibertyPiece, { width: number; height: number }> = {
+    head: { width: 210, height: 180 },
+    bust: { width: 240, height: 190 },
+    torch: { width: 260, height: 190 },
+    foot: { width: 220, height: 170 },
+  };
+  const { width, height } = sizes[piece];
   const texture = scene.textures.createCanvas(pieceKeys[piece], width, height);
   if (!texture) return;
   const canvas = texture.getSourceImage() as HTMLCanvasElement;
@@ -74,10 +79,22 @@ function drawPieceTexture(scene: Phaser.Scene, piece: LibertyPiece): void {
 function drawHead(ctx: CanvasRenderingContext2D): void {
   const green = "#8fc4bc";
   const dark = "#273b46";
+  ctx.fillStyle = "rgba(28,55,66,.2)";
+  rounded(ctx, -42, 6, 84, 48, 24);
+  ctx.fill();
   outline(ctx, () => crown(ctx));
   fillStroke(ctx, green, dark, () => crown(ctx), 5);
   outline(ctx, () => face(ctx));
   fillStroke(ctx, green, dark, () => face(ctx), 4);
+  ctx.fillStyle = "#a8d7b2";
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = 4;
+  hairBand(ctx);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,.25)";
+  rounded(ctx, -20, -25, 42, 11, 7);
+  ctx.fill();
   angryFace(ctx, dark);
   crack(ctx, -25, -10, -6, 11, -18, 29);
 }
@@ -87,18 +104,33 @@ function drawBust(ctx: CanvasRenderingContext2D): void {
   const dark = "#273b46";
   outline(ctx, () => bustShape(ctx));
   fillStroke(ctx, green, dark, () => bustShape(ctx), 5);
-  ctx.fillStyle = "#6ea8a3";
-  rounded(ctx, -18, -18, 68, 54, 8);
+  ctx.fillStyle = "#9ed0ac";
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = 5;
+  robePanel(ctx);
   ctx.fill();
   ctx.stroke();
+  ctx.fillStyle = "#6ea8a3";
+  tabletShape(ctx);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = dark;
+  ctx.font = "bold 17px system-ui";
+  ctx.fillText("IV", 49, -6);
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = 4;
+  fold(ctx, -56, -18, -7, 18, -47, 55);
+  fold(ctx, -18, 5, 23, 38, -5, 70);
+  fold(ctx, 17, -30, 67, 14, 54, 55);
   crack(ctx, -62, -12, -30, 16, -48, 40);
   crack(ctx, 8, -31, 36, 2, 67, 24);
-  crack(ctx, -2, 11, 17, 36, 4, 55);
 }
 
 function drawTorch(ctx: CanvasRenderingContext2D): void {
   const green = "#8fc4bc";
   const dark = "#273b46";
+  outline(ctx, () => raisedArm(ctx));
+  fillStroke(ctx, green, dark, () => raisedArm(ctx), 5);
   outline(ctx, () => torchShape(ctx));
   fillStroke(ctx, green, dark, () => torchShape(ctx), 5);
   ctx.strokeStyle = dark;
@@ -115,10 +147,14 @@ function drawTorch(ctx: CanvasRenderingContext2D): void {
 function drawFoot(ctx: CanvasRenderingContext2D): void {
   const green = "#8fc4bc";
   const dark = "#273b46";
+  outline(ctx, () => pedestalShape(ctx));
+  fillStroke(ctx, "#f3bd68", dark, () => pedestalShape(ctx), 5);
+  outline(ctx, () => stepShape(ctx));
+  fillStroke(ctx, green, dark, () => stepShape(ctx), 5);
   outline(ctx, () => footShape(ctx));
   fillStroke(ctx, green, dark, () => footShape(ctx), 5);
   ctx.fillStyle = "#6ea8a3";
-  rounded(ctx, -34, -42, 46, 35, 7);
+  legShape(ctx);
   ctx.fill();
   ctx.stroke();
   crack(ctx, -39, -12, -7, 9, 29, -1);
@@ -156,6 +192,16 @@ function face(ctx: CanvasRenderingContext2D): void {
   ctx.roundRect(-43, -31, 86, 70, 28);
 }
 
+function hairBand(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.moveTo(-44, -14);
+  ctx.quadraticCurveTo(-18, -35, 0, -18);
+  ctx.quadraticCurveTo(21, -36, 44, -13);
+  ctx.quadraticCurveTo(23, -3, 0, -8);
+  ctx.quadraticCurveTo(-22, -2, -44, -14);
+  ctx.closePath();
+}
+
 function bustShape(ctx: CanvasRenderingContext2D): void {
   ctx.beginPath();
   ctx.moveTo(-89, 38);
@@ -163,6 +209,40 @@ function bustShape(ctx: CanvasRenderingContext2D): void {
   ctx.quadraticCurveTo(45, -55, 91, 8);
   ctx.quadraticCurveTo(71, 55, -18, 61);
   ctx.quadraticCurveTo(-70, 58, -89, 38);
+  ctx.closePath();
+}
+
+function robePanel(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.moveTo(-78, 10);
+  ctx.lineTo(-16, -32);
+  ctx.lineTo(35, 68);
+  ctx.lineTo(-39, 72);
+  ctx.closePath();
+}
+
+function tabletShape(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.moveTo(28, -44);
+  ctx.lineTo(88, -22);
+  ctx.lineTo(68, 36);
+  ctx.lineTo(18, 18);
+  ctx.closePath();
+}
+
+function fold(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(x2, y2, x3, y3);
+  ctx.stroke();
+}
+
+function raisedArm(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.moveTo(-72, 61);
+  ctx.lineTo(-43, 47);
+  ctx.lineTo(-92, -36);
+  ctx.lineTo(-118, -23);
   ctx.closePath();
 }
 
@@ -179,6 +259,25 @@ function footShape(ctx: CanvasRenderingContext2D): void {
   ctx.quadraticCurveTo(4, -38, 65, -7);
   ctx.lineTo(51, 25);
   ctx.quadraticCurveTo(-25, 35, -66, 13);
+  ctx.closePath();
+}
+
+function pedestalShape(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.roundRect(-82, 33, 164, 29, 8);
+}
+
+function stepShape(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.roundRect(-72, 3, 144, 32, 5);
+}
+
+function legShape(ctx: CanvasRenderingContext2D): void {
+  ctx.beginPath();
+  ctx.moveTo(-35, -46);
+  ctx.lineTo(18, -42);
+  ctx.lineTo(37, 2);
+  ctx.lineTo(-49, 4);
   ctx.closePath();
 }
 
