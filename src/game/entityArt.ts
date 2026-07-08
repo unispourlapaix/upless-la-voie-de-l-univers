@@ -8,6 +8,7 @@ export type EntityArtKind =
   | "repairedBoat"
   | "officeExecutive"
   | "officeDirector"
+  | "officeDirectorSurprised"
   | "moonBoat"
   | "moonDevice"
   | "moonAlien"
@@ -32,6 +33,7 @@ const textureKeys: Record<EntityArtKind, string> = {
   repairedBoat: "upless-entity-repaired-boat-comic",
   officeExecutive: "upless-entity-office-executive-comic",
   officeDirector: "upless-entity-office-director-comic",
+  officeDirectorSurprised: "upless-entity-office-director-surprised-comic",
   moonBoat: "upless-entity-moon-boat-comic",
   moonDevice: "upless-entity-moon-device-comic",
   moonAlien: "upless-entity-moon-alien-comic",
@@ -55,6 +57,7 @@ const alienCyberOctopusKey = "upless-alien-cyber-octopus-vr-v1";
 const repairedBoatKey = "upless-boat-repaired-clean-v1";
 const galacticBoatKey = "upless-boat-galactic-futuristic-v1";
 const laughingBusinessmenKey = "upless-businessmen-laughing-cat-video-v2";
+const directorSurprisedKey = "upless-director-surprised-right-v1";
 const coconutTreeKey = "upless-coconut-tree-v1";
 const iceCraterKey = "upless-ice-crater-v1";
 
@@ -64,6 +67,7 @@ const standaloneSources: Partial<Record<EntityArtKind, { key: string; targetWidt
   repairedBoat: { key: repairedBoatKey, targetWidth: 360, targetHeight: 220 },
   moonBoat: { key: galacticBoatKey, targetWidth: 230, targetHeight: 150 },
   laughingBusinessmen: { key: laughingBusinessmenKey, targetWidth: 300, targetHeight: 150 },
+  officeDirectorSurprised: { key: directorSurprisedKey, targetWidth: 155, targetHeight: 190 },
   coconutTree: { key: coconutTreeKey, targetWidth: 190, targetHeight: 245 },
   iceCrater: { key: iceCraterKey, targetWidth: 180, targetHeight: 115 },
 };
@@ -114,6 +118,7 @@ function ensureEntityTexture(scene: Phaser.Scene, kind: EntityArtKind): void {
   if (kind === "repairedBoat") drawSailingBoat(scene, textureKeys[kind]);
   if (kind === "officeExecutive") drawOfficeExecutive(scene, textureKeys[kind]);
   if (kind === "officeDirector") drawOfficeDirector(scene, textureKeys[kind]);
+  if (kind === "officeDirectorSurprised") drawOfficeDirector(scene, textureKeys[kind]);
   if (kind === "moonBoat") drawMoonBoat(scene, textureKeys[kind]);
   if (kind === "moonDevice") drawMoonDevice(scene, textureKeys[kind]);
   if (kind === "moonAlien") drawMoonAlien(scene, textureKeys[kind]);
