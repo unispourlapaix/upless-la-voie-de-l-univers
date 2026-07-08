@@ -8,6 +8,7 @@ export class PreloadScene extends Phaser.Scene {
 
   preload(): void {
     this.load.image("upless-manga-sticker-sheet-v1", "assets/artpacks/upless-manga-sticker-sheet-v1.png");
+    this.load.image("upless-giraffe-biped-tshirt-jeans-v1", "assets/artpacks/giraffe-biped-tshirt-jeans-v1.png");
   }
 
   create(): void {
