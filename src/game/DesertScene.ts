@@ -175,7 +175,7 @@ export class DesertScene extends Phaser.Scene {
         "rocket",
         "Bout de fusée",
         540,
-        545,
+        562,
         "Un gros morceau de fusée moderne.\nMême la technologie la plus brillante a fini dans le sable.",
         false,
         "Singe : Hm. Très bel exemple d’arrogance aérodynamique.",
@@ -238,7 +238,9 @@ export class DesertScene extends Phaser.Scene {
       oil: "rareOil",
     };
     const container = createDetailedObject(this, objectKind[id], x, y, { label, scale: id === "rocket" ? 1.12 : 1 }).setDepth(11);
-    if (id === "plastic") {
+    if (id === "rocket") {
+      container.setAngle(-2);
+    } else if (id === "plastic") {
       this.tweens.add({ targets: container, y: y + 3, angle: 4, duration: 900, yoyo: true, repeat: -1 });
     } else if (id === "virus") {
       this.tweens.add({ targets: container, scale: 1.12, duration: 620, yoyo: true, repeat: -1 });
