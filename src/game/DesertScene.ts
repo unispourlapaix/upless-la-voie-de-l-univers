@@ -103,13 +103,6 @@ export class DesertScene extends Phaser.Scene {
     }
 
     this.drawBrokenLibertyStatue();
-    this.add.text(242, 356, "STATUE\nCOUPÉE EN 4", {
-      fontFamily: "system-ui",
-      fontSize: "10px",
-      color: "#5e3b43",
-      fontStyle: "bold",
-      align: "center",
-    }).setAngle(-9);
 
     for (let x = 560; x < 1070; x += 130) {
       this.add.rectangle(x, 548, 70, 6, 0x6f493e, 0.4).setAngle(Phaser.Math.Between(-8, 8));
