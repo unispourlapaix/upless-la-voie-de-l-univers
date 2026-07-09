@@ -9,7 +9,21 @@ const pieceKeys: Record<LibertyPiece, string> = {
   foot: "upless-liberty-piece-foot",
 };
 
+const generatedBrokenLibertyKey = "upless-broken-liberty-statue-pieces-v1";
+const generatedBrokenLibertyTexture = "upless-liberty-generated-broken-pieces-comic";
+
 export function createBrokenLibertyStatue(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Container {
+  if (scene.textures.exists(generatedBrokenLibertyKey)) {
+    ensureGeneratedBrokenLibertyTexture(scene);
+    const shadow = scene.add.ellipse(0, 82, 370, 42, 0x3f2530, 0.19);
+    const statue = scene.add.image(0, -150, generatedBrokenLibertyTexture).setAngle(-2);
+    return scene.add
+      .container(x, y, [shadow, statue])
+      .setDepth(7)
+      .setData("renderMode", "generated-sticker-pieces")
+      .setData("decorKind", "complete-liberty-sticker-broken-into-ground-pieces");
+  }
+
   (Object.keys(pieceKeys) as LibertyPiece[]).forEach((piece) => {
     if (!scene.textures.exists(pieceKeys[piece])) drawPieceTexture(scene, piece);
   });
@@ -41,6 +55,48 @@ export function createBrokenLibertyStatue(scene: Phaser.Scene, x: number, y: num
     .setDepth(7)
     .setData("renderMode", "separate-sticker-piece-textures")
     .setData("decorKind", "complete-liberty-sticker-broken-into-ground-pieces");
+}
+
+function ensureGeneratedBrokenLibertyTexture(scene: Phaser.Scene): void {
+  if (scene.textures.exists(generatedBrokenLibertyTexture)) return;
+
+  const targetWidth = 430;
+  const targetHeight = 520;
+  const texture = scene.textures.createCanvas(generatedBrokenLibertyTexture, targetWidth, targetHeight);
+  if (!texture) return;
+
+  const canvas = texture.getSourceImage() as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const source = scene.textures.get(generatedBrokenLibertyKey).getSourceImage() as CanvasImageSource;
+  const sourceWidth = Number((source as HTMLImageElement).width ?? targetWidth);
+  const sourceHeight = Number((source as HTMLImageElement).height ?? targetHeight);
+  const scale = Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight) * 0.98;
+  const drawWidth = sourceWidth * scale;
+  const drawHeight = sourceHeight * scale;
+  const dx = (targetWidth - drawWidth) / 2;
+  const dy = (targetHeight - drawHeight) / 2;
+
+  ctx.clearRect(0, 0, targetWidth, targetHeight);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(source, dx, dy, drawWidth, drawHeight);
+  removeMagentaKey(ctx, targetWidth, targetHeight);
+  texture.refresh();
+}
+
+function removeMagentaKey(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+  const pixels = ctx.getImageData(0, 0, width, height);
+  const data = pixels.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const isMagentaKey = r > 210 && g < 85 && b > 180 && r - g > 120 && b - g > 110;
+    if (isMagentaKey) data[i + 3] = 0;
+  }
+  ctx.putImageData(pixels, 0, 0);
 }
 
 function drawPieceTexture(scene: Phaser.Scene, piece: LibertyPiece): void {
