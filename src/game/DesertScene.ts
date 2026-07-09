@@ -175,7 +175,7 @@ export class DesertScene extends Phaser.Scene {
         "rocket",
         "Bout de fusée",
         540,
-        562,
+        576,
         "Un gros morceau de fusée moderne.\nMême la technologie la plus brillante a fini dans le sable.",
         false,
         "Singe : Hm. Très bel exemple d’arrogance aérodynamique.",
