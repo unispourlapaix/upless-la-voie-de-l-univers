@@ -20,7 +20,7 @@ export type DetailObjectOptions = {
 const texturePrefix = "upless-drawn-object";
 
 const standaloneSources: Partial<Record<DetailObjectKind, { key: string; width: number; height: number; scale: number }>> = {
-  rocketPiece: { key: "upless-rocket-crashed-broken-v1", width: 230, height: 150, scale: 0.72 },
+  rocketPiece: { key: "upless-rocket-crashed-broken-v2", width: 300, height: 185, scale: 0.82 },
 };
 
 export function createDetailedObject(
