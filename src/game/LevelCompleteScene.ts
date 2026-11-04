@@ -25,7 +25,9 @@ export class LevelCompleteScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     this.add
-      .text(180, 315, t("Le petit héros avance\nsur la voie de l’univers.", "The tiny hero walks on\nthe way of the universe."), {
+      .text(180, 315, this.completedLevel === 2
+        ? t("La porte s’ouvre sur le désert.\nLe singe vient avec toi.", "The door opens onto the desert.\nThe monkey comes with you.")
+        : t("Le petit héros avance\nsur la voie de l’univers.", "The tiny hero walks on\nthe way of the universe."), {
         fontFamily: "system-ui",
         align: "center",
         fontSize: "17px",

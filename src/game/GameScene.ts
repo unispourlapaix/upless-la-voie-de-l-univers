@@ -1,7 +1,6 @@
 import Phaser from "phaser";
 import { addReliefBlock, addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
-import { createEntityImage } from "./entityArt";
 import { TouchInput } from "./input";
 import { levels } from "./levels";
 import { PlayerController } from "./player";
@@ -33,6 +32,12 @@ export class GameScene extends Phaser.Scene {
   private actionZones: ActionZone[] = [];
   private rockSprite?: Phaser.Physics.Arcade.Image;
   private ogre?: Phaser.GameObjects.Container;
+  private bridgeLift?: Phaser.GameObjects.Container;
+  private liftTween?: Phaser.Tweens.Tween;
+  private encounter: "idle" | "throwing" | "launching" | "attacking" | "over" | "exiting" = "idle";
+  private launchedByOgre = false;
+  private familyCalled = false;
+  private ogreFamily: Phaser.GameObjects.Container[] = [];
   private exitGlow?: Phaser.GameObjects.Arc;
   private windowFrame?: Phaser.GameObjects.Container;
   private bee?: Phaser.GameObjects.Container;
@@ -44,12 +49,22 @@ export class GameScene extends Phaser.Scene {
     super("GameScene");
   }
 
-  init(data: { levelId?: number }): void {
+  private timeGateTrap = false;
+
+  init(data: { levelId?: number; timeGateTrap?: boolean }): void {
+    this.timeGateTrap = data.timeGateTrap === true;
     this.level = levels.find((candidate) => candidate.id === (data.levelId ?? 1)) ?? levels[0];
     this.blocks = 0;
     this.flowers = 0;
     this.hasRock = false;
     this.ogreDefeated = false;
+    this.encounter = "idle";
+    this.launchedByOgre = false;
+    this.familyCalled = false;
+    this.ogreFamily = [];
+    this.bridgeLift = undefined;
+    this.liftTween = undefined;
+    this.uiBounds = [];
     this.ladderReady = false;
     this.isClimbing = false;
     this.secretDiscovered = false;
@@ -82,6 +97,12 @@ export class GameScene extends Phaser.Scene {
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.touchInput?.destroy());
     this.showMessage("Touche le chemin… et ose tomber", 2400);
+    if (this.timeGateTrap && this.ogre) {
+      this.player.sprite.setPosition(this.ogre.x - 30, this.ogre.y - 10);
+      this.cameras.main.centerOn(this.player.sprite.x, this.player.sprite.y);
+      this.spawnOgreFamily();
+      this.startFamilyAttack();
+    }
   }
 
   private drawWorld(): void {
@@ -137,6 +158,20 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.level.dangers.forEach((danger) => {
+      if (danger.x > this.level.enemies[0].x) {
+        const sign = this.add.graphics().setDepth(15);
+        const cx = danger.x + danger.width / 2;
+        const cy = danger.y - 28;
+        sign.fillStyle(0x293344).fillRect(cx - 3, cy + 20, 6, 35);
+        sign.fillStyle(0xffcf75).fillTriangle(cx, cy - 36, cx - 35, cy + 25, cx + 35, cy + 25);
+        sign.lineStyle(4, 0x63394a).strokeTriangle(cx, cy - 36, cx - 35, cy + 25, cx + 35, cy + 25);
+        // Pixel hand and a red diagonal strike: no emoji/font dependency.
+        sign.fillStyle(0x293344).fillRect(cx - 9, cy - 2, 20, 18);
+        for (let finger = 0; finger < 4; finger++) sign.fillRect(cx - 10 + finger * 6, cy - 15 + Math.abs(finger - 1) * 3, 4, 19);
+        sign.fillRect(cx - 15, cy + 1, 7, 8);
+        sign.lineStyle(5, 0xcb4960).lineBetween(cx - 22, cy + 18, cx + 20, cy - 20);
+        return;
+      }
       const triangle = this.add.triangle(
         danger.x + danger.width / 2,
         danger.y + danger.height / 2,
@@ -193,6 +228,7 @@ export class GameScene extends Phaser.Scene {
 
     const enemy = this.level.enemies[0];
     this.ogre = this.createOgre(enemy.x, enemy.y);
+    this.createBridgeWorkout();
     this.createSecretGarden();
     this.createExit();
   }
@@ -257,9 +293,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   handleTap(screenX: number, screenY: number): void {
-    if (this.isClimbing) return;
+    if (this.isClimbing || this.encounter !== "idle") return;
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
     audio.play("tap");
+    if (this.tryStartFamilyAttack(world.x, world.y)) return;
+    if (this.tryCallOgreFamily(world.x, world.y)) return;
+    if (this.tryHitOgre(world.x, world.y)) return;
     if (this.ladderReady && this.player.sprite.y > 650 && world.x > 415) {
       this.climbLadder();
       return;
@@ -268,7 +307,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   handleDoubleTap(screenX: number, screenY: number): void {
+    if (this.isClimbing || this.encounter !== "idle") return;
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
+    if (this.tryStartFamilyAttack(world.x, world.y)) return;
+    if (this.tryCallOgreFamily(world.x, world.y)) return;
+    if (this.tryHitOgre(world.x, world.y)) return;
     const zone = this.actionZones.find(
       (candidate) =>
         !candidate.used &&
@@ -353,26 +396,160 @@ export class GameScene extends Phaser.Scene {
     carried.setDepth(21);
     this.tweens.add({ targets: this.player.sprite, scaleY: 1.22, duration: 120, yoyo: true });
     this.updateObjective();
-    this.showMessage("Caillou récupéré !", 1600);
+    this.showMessage("Rocher récupéré !\nTouche le monstre pour l’assommer", 2400);
   }
 
-  private dropRock(zone: ActionZone): void {
+  private tryHitOgre(x: number, y: number): boolean {
+    if (!this.ogre) return false;
+    // Graphics has no geometry-derived bounds: use the drawn silhouette plus touch padding.
+    const bounds = new Phaser.Geom.Rectangle(this.ogre.x - 52, this.ogre.y - 48, 104, 106);
+    if (!bounds.contains(x, y)) return false;
+    if (this.ogreDefeated) {
+      this.showMessage("Le monstre est sonné. La voie est libre !", 1800);
+      return true;
+    }
+    if (!this.hasRock) {
+      this.showMessage("Récupère le rocher, puis touche le monstre", 2200);
+      return true;
+    }
+    this.dropRock(this.actionZones.find((zone) => zone.type === "dropRock"));
+    return true;
+  }
+
+  private tryCallOgreFamily(x: number, y: number): boolean {
+    const enemy = this.level.enemies[0];
+    const triangle = this.level.dangers.find((danger) => danger.x > enemy.x);
+    if (!triangle) return false;
+    const hit = new Phaser.Geom.Rectangle(triangle.x + triangle.width / 2 - 45, triangle.y - 74, 90, 108);
+    if (!hit.contains(x, y)) return false;
+    this.player.stop();
+    if (this.familyCalled) {
+      this.showMessage("Sa famille est déjà là… Grrr… !", 1800);
+      return true;
+    }
+    this.familyCalled = true;
+    this.showMessage("Le triangle appelle sa famille…\nIls ne sont pas contents !", 3200);
+    audio.play("danger");
+    this.spawnOgreFamily();
+    this.time.addEvent({ delay: 1600, repeat: 4, callback: () => audio.play("ogre") });
+    return true;
+  }
+
+  private spawnOgreFamily(): void {
+    const family = [
+      { x: 46, scale: 1.1, delay: 200, tint: 0xd9b485 },
+      { x: 133, scale: 1.35, delay: 850, tint: 0xb4c885 },
+      { x: 225, scale: 0.85, delay: 1500, tint: 0xc4accc },
+      { x: 313, scale: 1.05, delay: 2100, tint: 0x91b9af },
+    ];
+    family.forEach(({ x: screenX, scale, delay, tint }, index) => {
+      const relative = this.createOgre(screenX, 750).setScrollFactor(0).setDepth(85).setScale(scale);
+      this.ogreFamily.push(relative);
+      const face = this.add.graphics();
+      // Slanted brows and clenched teeth make their mood readable at native resolution.
+      face.fillStyle(0x293344).fillRect(-23, -23, 8, 3).fillRect(-15, -20, 10, 3);
+      face.fillRect(6, -20, 10, 3).fillRect(16, -23, 8, 3);
+      face.fillStyle(tint).fillRect(-21, 18, 42, 13);
+      face.fillStyle(0xffefd0).fillRect(-12, 4, 25, 5);
+      face.fillStyle(0x293344);
+      for (let px = -7; px < 12; px += 6) face.fillRect(px, 4, 2, 5);
+      relative.add(face);
+      const growl = this.add.text(0, -60, index % 2 ? "GRRR… !" : "Grrr…", {
+        fontFamily: "monospace", fontStyle: "bold", fontSize: "12px", color: "#ffcf91",
+        backgroundColor: "#293344", padding: { x: 5, y: 4 },
+      }).setOrigin(0.5);
+      relative.add(growl);
+      this.tweens.add({
+        targets: relative, y: 554 + (index % 2) * 15, delay, duration: 5200,
+        ease: "Sine.out",
+        onStart: () => audio.play("ogre"),
+        onComplete: () => {
+          this.tweens.add({ targets: relative, y: relative.y - 3, duration: 950 + index * 100, yoyo: true, repeat: -1 });
+        },
+      });
+    });
+  }
+
+  private tryStartFamilyAttack(x: number, y: number): boolean {
+    const last = this.level.dangers[this.level.dangers.length - 1];
+    if (!last) return false;
+    const cx = last.x + last.width / 2;
+    if (!new Phaser.Geom.Rectangle(cx - 45, last.y - 74, 90, 108).contains(x, y)) return false;
+    if (!this.familyCalled) {
+      const call = this.level.dangers.find((danger) => danger.x > this.level.enemies[0].x);
+      if (call) this.tryCallOgreFamily(call.x + call.width / 2, call.y + call.height / 2);
+    }
+    this.startFamilyAttack();
+    return true;
+  }
+
+  private startFamilyAttack(): void {
+    this.encounter = "attacking";
+    this.player.stop();
+    this.player.sprite.setVelocity(0, 0);
+    this.player.sprite.body!.enable = false;
+    this.stopBridgeWorkout();
+    this.cameras.main.stopFollow();
+    this.showMessage("GRRR… ! Toute la famille arrive !", 3000);
+    audio.play("ogre");
+    const targetX = this.player.sprite.x - this.cameras.main.scrollX;
+    const targetY = this.player.sprite.y - this.cameras.main.scrollY;
+    this.ogreFamily.forEach((relative, index) => {
+      this.tweens.killTweensOf(relative);
+      const direction = index % 2 ? 1 : -1;
+      relative.setPosition(direction < 0 ? -70 - index * 25 : 430 + index * 25, Math.min(590, targetY + 60));
+      this.tweens.add({
+        targets: relative, x: targetX + direction * (20 + index * 8), y: targetY + 8,
+        delay: index * 250, duration: 3600 + index * 200, ease: "Sine.in",
+        onStart: () => audio.play("ogre"),
+        onUpdate: () => relative.setAngle(Math.sin(this.time.now / 110 + index) * 5),
+        onComplete: () => {
+          relative.setAngle(0);
+          if (index !== 0) return;
+          const mouth = this.add.ellipse(0, -8, 43, 33, 0x251c31).setStrokeStyle(4, 0xa7bc7e);
+          relative.add(mouth);
+          this.tweens.add({
+            targets: this.player.sprite,
+            x: relative.x + this.cameras.main.scrollX,
+            y: relative.y - 8 + this.cameras.main.scrollY,
+            scaleX: 0, scaleY: 0, angle: 180, duration: 500,
+            onComplete: () => {
+              this.player.sprite.setVisible(false);
+              mouth.setScale(1, 0.15);
+              this.cameras.main.shake(200, 0.012);
+              this.time.delayedCall(700, () => this.showOgreGameOver(true));
+            },
+          });
+        },
+      });
+    });
+  }
+
+  private dropRock(zone?: ActionZone): void {
+    if (this.ogreDefeated || this.encounter !== "idle") return;
     if (!this.hasRock) {
       this.showMessage("Il te faut le caillou", 1400);
       return;
     }
-    zone.used = true;
+    if (zone) zone.used = true;
     this.hasRock = false;
+    const carried = this.player.sprite.getData("carriedRock") as Phaser.GameObjects.Image | undefined;
+    carried?.destroy();
+    this.player.sprite.setData("carriedRock", undefined);
+    this.player.stop();
+    this.encounter = "throwing";
+    this.updateObjective();
     const fallingRock = this.add.image(this.player.sprite.x, this.player.sprite.y - 30, "rock").setDepth(30);
     this.tweens.add({
       targets: fallingRock,
-      x: this.level.enemies[0].x,
-      y: this.level.enemies[0].y - 20,
+      x: this.ogre?.x ?? this.level.enemies[0].x,
+      y: (this.ogre?.y ?? this.level.enemies[0].y) - 25,
       angle: 250,
       duration: 460,
       ease: "Quad.in",
       onComplete: () => {
         fallingRock.destroy();
+        this.encounter = "idle";
         this.defeatOgre();
       },
     });
@@ -380,6 +557,7 @@ export class GameScene extends Phaser.Scene {
 
   private defeatOgre(): void {
     this.ogreDefeated = true;
+    this.stopBridgeWorkout();
     audio.play("ogre");
     this.cameras.main.shake(180, 0.009);
     if (this.ogre) {
@@ -405,10 +583,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   private enterExit(): void {
+    if (this.encounter !== "idle") return;
     if (!this.ogreDefeated) {
-      this.showMessage("Le chemin n’est pas encore sûr", 1600);
+      this.ogreSwallowsPlayer();
       return;
     }
+    this.encounter = "exiting";
     const save = loadSave();
     writeSave({ ...save, lastLevel: 1, unlockedLevel: Math.max(save.unlockedLevel, 2) });
     this.player.stop();
@@ -434,16 +614,19 @@ export class GameScene extends Phaser.Scene {
       }
       return false;
     }
-    if (!this.ogreDefeated && forward && fromX < 650 && targetX > 700) {
-      this.showMessage("Le pont tremble…", 1200);
-      this.cameras.main.shake(260, 0.012);
-      this.time.delayedCall(280, () => this.respawn());
-      return false;
-    }
     return true;
   }
 
   update(): void {
+    if (this.encounter !== "idle") return;
+    const bridge = this.bridges.get("bridge-2")?.definition;
+    const heroBody = this.player.sprite.body as Phaser.Physics.Arcade.Body;
+    if (bridge && !this.ogreDefeated && !this.launchedByOgre && !this.isClimbing &&
+      this.player.sprite.x >= bridge.x + 36 && this.player.sprite.x <= bridge.x + bridge.width - 16 &&
+      Math.abs(heroBody.bottom - bridge.y) < 6 && heroBody.blocked.down) {
+      this.launchPlayerToDoor();
+      return;
+    }
     if (!this.isClimbing) {
       this.player.update((fromX, targetX) => this.canMoveTo(fromX, targetX));
     }
@@ -518,6 +701,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private respawn(): void {
+    if (this.encounter !== "idle") return;
     this.player.stop();
     audio.play("window");
     this.player.sprite.setPosition(this.checkpoint.x, this.checkpoint.y).setVelocity(0, 0);
@@ -657,8 +841,162 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createOgre(x: number, y: number): Phaser.GameObjects.Container {
-    const ogre = createEntityImage(this, "ogre").setScale(0.78);
-    return this.add.container(x, y - 26, [ogre]).setDepth(8);
+    const g = this.add.graphics();
+    const rect = (px: number, py: number, w: number, h: number, color: number) => g.fillStyle(color).fillRect(px, py, w, h);
+    const ink = 0x293344;
+    rect(-32, -30, 64, 55, ink);
+    rect(-28, -34, 56, 55, 0x77976a);
+    rect(-24, -34, 45, 47, 0xa2ba7b);
+    rect(-24, -31, 36, 8, 0xc5d597);
+    rect(-38, -23, 10, 16, ink); rect(-36, -21, 8, 10, 0x96b276);
+    rect(28, -23, 10, 16, ink); rect(28, -21, 8, 10, 0x77976a);
+    rect(-29, 15, 58, 24, ink); rect(-25, 16, 50, 18, 0x68556b);
+    rect(-24, 35, 17, 8, ink); rect(9, 35, 17, 8, ink);
+    rect(-21, -17, 15, 10, 0xfff3ce); rect(7, -17, 15, 10, 0xfff3ce);
+    rect(-13, -15, 5, 6, ink); rect(9, -15, 5, 6, ink);
+    rect(-23, -21, 18, 4, 0x56725a); rect(6, -21, 18, 4, 0x56725a);
+    rect(-6, -7, 13, 6, 0x789361);
+    rect(-16, 4, 33, 7, ink); rect(-14, 2, 5, 6, 0xfff3ce); rect(10, 2, 5, 6, 0xfff3ce);
+    for (let i = 0; i < 18; i++) {
+      const px = -24 + (i * 17 % 47), py = -29 + (i * 13 % 33);
+      if (py < -22 || px < -19 || px > 20) rect(px, py, 2, 2, i % 2 ? 0x829f68 : 0xc5d597);
+    }
+    return this.add.container(x, y + 12, [g]).setDepth(8);
+  }
+
+  private createBridgeWorkout(): void {
+    const bridge = this.bridges.get("bridge-2");
+    if (!bridge?.body || !this.ogre) return;
+    bridge.body.setVisible(false);
+    const { x, y, width, height } = bridge.definition;
+    const art = this.add.graphics();
+    art.fillStyle(0x27243c).fillRect(-4, -3, width + 8, height + 6);
+    art.fillStyle(0x805b58).fillRect(0, 0, width, height);
+    for (let px = 0; px < width; px += 16) {
+      art.fillStyle(0xc59a76).fillRect(px + 1, 0, 13, 4);
+      art.fillStyle(0xa77960).fillRect(px + 2, 7, 11, 2);
+      art.fillStyle(0x473b4d).fillRect(px + 13, 4, 2, height - 4);
+      art.fillStyle(0xe1bc8a).fillRect(px + 5, 4, 2, 2);
+    }
+    // Raised hands travel with the bridge; its invisible walking surface stays stable.
+    const hands = [-49, 49].map((offset) => {
+      const hand = this.add.rectangle(width / 2 + offset, height + 5, 19, 13, 0x94ae72);
+      hand.setStrokeStyle(3, 0x303646);
+      return hand;
+    });
+    this.bridgeLift = this.add.container(x, y, [art, ...hands]).setDepth(10);
+    this.liftTween = this.tweens.add({
+      targets: this.bridgeLift, y: y - 17, duration: 680,
+      ease: "Sine.inOut", yoyo: true, repeat: -1,
+    });
+  }
+
+  private stopBridgeWorkout(): void {
+    this.liftTween?.stop();
+    const bridge = this.bridges.get("bridge-2");
+    if (this.bridgeLift && bridge) {
+      this.tweens.add({ targets: this.bridgeLift, y: bridge.definition.y, duration: 180 });
+      this.bridgeLift.list.slice(1).forEach((hand) => (hand as Phaser.GameObjects.Rectangle).setVisible(false));
+    }
+  }
+
+  private launchPlayerToDoor(): void {
+    if (!this.bridgeLift || !this.ogre) return;
+    this.encounter = "launching";
+    this.launchedByOgre = true;
+    this.player.stop();
+    this.player.sprite.setVelocity(0, 0);
+    this.player.sprite.body!.enable = false;
+    this.liftTween?.stop();
+    const bridgeY = this.bridges.get("bridge-2")!.definition.y;
+    const growl = this.add.text(this.ogre.x, this.ogre.y - 66, "GRRR… !", {
+      fontFamily: "monospace", fontSize: "19px", fontStyle: "bold",
+      color: "#ffdf9e", backgroundColor: "#293344", padding: { x: 8, y: 5 },
+    }).setOrigin(0.5).setDepth(40);
+    audio.play("ogre");
+    this.showMessage("Grrr… ! Le monstre te propulse !", 2200);
+    this.cameras.main.shake(200, 0.008);
+    this.tweens.add({ targets: this.bridgeLift, y: bridgeY - 42, duration: 180, ease: "Back.out" });
+    const startX = this.player.sprite.x;
+    const startY = this.player.sprite.y;
+    const landingX = this.level.exit.x - 68;
+    const landingY = this.level.playerStart.y;
+    this.tweens.addCounter({
+      from: 0, to: 1, duration: 1550, ease: "Linear",
+      onUpdate: (tween) => {
+        const t = tween.getValue() ?? 0;
+        this.player.sprite.setPosition(
+          Phaser.Math.Linear(startX, landingX, t),
+          Phaser.Math.Linear(startY, landingY, t) - Math.sin(t * Math.PI) * 175,
+        );
+        this.player.sprite.setAngle(360 * t);
+        const carried = this.player.sprite.getData("carriedRock") as Phaser.GameObjects.Image | undefined;
+        carried?.setPosition(this.player.sprite.x, this.player.sprite.y - 29);
+      },
+      onComplete: () => {
+        growl.destroy();
+        this.player.sprite.setPosition(landingX, landingY).setAngle(0).setVelocity(0, 0);
+        this.player.sprite.body!.enable = true;
+        this.encounter = "idle";
+        this.cameras.main.shake(140, 0.005);
+        this.showMessage("Devant la porte… Attention au monstre !", 2400);
+        this.tweens.add({ targets: this.bridgeLift, y: bridgeY, duration: 350 });
+      },
+    });
+  }
+
+  private ogreSwallowsPlayer(): void {
+    if (!this.ogre) return;
+    this.encounter = "attacking";
+    this.stopBridgeWorkout();
+    this.player.stop();
+    this.player.sprite.setVelocity(0, 0);
+    this.player.sprite.body!.enable = false;
+    this.ogre.setDepth(35);
+    this.showMessage("La porte grince… Le monstre arrive !", 1800);
+    audio.play("ogre");
+    this.tweens.add({
+      targets: this.ogre, x: this.player.sprite.x + 26, y: this.player.sprite.y,
+      duration: 1200, ease: "Quad.in",
+      onComplete: () => {
+        const mouth = this.add.ellipse(-12, -8, 44, 34, 0x251c31).setStrokeStyle(4, 0xa7bc7e);
+        this.ogre!.add(mouth);
+        this.tweens.add({
+          targets: this.player.sprite, x: this.ogre!.x - 12, y: this.ogre!.y - 8,
+          scaleX: 0, scaleY: 0, angle: 160, duration: 440, ease: "Back.in",
+          onComplete: () => {
+            this.player.sprite.setVisible(false);
+            mouth.setScale(1, 0.15);
+            this.cameras.main.shake(220, 0.012);
+            this.time.delayedCall(450, () => this.showOgreGameOver());
+          },
+        });
+      },
+    });
+  }
+
+  private showOgreGameOver(familyAttack = false): void {
+    this.encounter = "over";
+    this.messageText.setAlpha(0);
+    this.add.rectangle(180, 320, 360, 640, 0x101526, 0.94).setScrollFactor(0).setDepth(200);
+    this.add.text(180, 230, "GAME OVER", {
+      fontFamily: "monospace", fontSize: "32px", color: "#ffcf91", fontStyle: "bold",
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
+    this.add.text(180, 308, this.timeGateTrap
+      ? "La porte temporelle t’a ramené\nchez les monstres. Ils t’ont avalé !"
+      : familyAttack
+      ? "La famille t’a avalé !\n\nAttention au panneau\navec la main barrée…"
+      : "Le monstre t’a avalé !\n\nUtilise le rocher sur le pont\navant d’ouvrir la porte.", {
+      fontFamily: "monospace", fontSize: "13px", color: "#e0e8da", align: "center", lineSpacing: 6,
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
+    const retry = this.add.text(180, 418, "↻ RECOMMENCER", {
+      fontFamily: "monospace", fontSize: "16px", color: "#ffffff",
+      backgroundColor: "#365e68", padding: { x: 22, y: 16 },
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setInteractive({ useHandCursor: true });
+    retry.on("pointerdown", () => {
+      if (this.timeGateTrap) this.scene.start("BeachScene");
+      else this.scene.restart({ levelId: this.level.id });
+    });
   }
 
   private createExit(): void {

@@ -49,6 +49,47 @@ class UplessAudio {
     return loadSave().sound;
   }
 
+  whisper(duration: number, pitch = 1): () => void {
+    if (!this.isEnabled()) return () => {};
+    this.ensureContext();
+    if (!this.context || !this.effectsBus) return () => {};
+    const context = this.context;
+    if (context.state === "suspended") void context.resume();
+    const sources: AudioBufferSourceNode[] = [];
+    const sample = context.createBuffer(1, Math.ceil(context.sampleRate * 0.5), context.sampleRate);
+    const data = sample.getChannelData(0);
+    let breath = 0;
+    for (let i = 0; i < data.length; i++) {
+      breath = breath * 0.88 + (Math.random() * 2 - 1) * 0.12;
+      data[i] = breath * 2;
+    }
+    const start = context.currentTime + 0.03;
+    // Soft breath clusters with rounded attacks and small, irregular pauses.
+    for (let offset = 0, syllable = 0; offset < duration; syllable++) {
+      const source = context.createBufferSource();
+      const filter = context.createBiquadFilter();
+      const envelope = context.createGain();
+      const length = 0.23 + Math.random() * 0.14;
+      const at = start + offset;
+      source.buffer = sample;
+      filter.type = "bandpass";
+      filter.frequency.value = (650 + Math.random() * 350) * pitch;
+      filter.Q.value = 0.65;
+      envelope.gain.setValueAtTime(0.0001, at);
+      envelope.gain.exponentialRampToValueAtTime(0.065, at + 0.09);
+      envelope.gain.exponentialRampToValueAtTime(0.0001, at + length);
+      source.connect(filter);
+      filter.connect(envelope);
+      envelope.connect(this.effectsBus);
+      source.onended = () => { source.disconnect(); filter.disconnect(); envelope.disconnect(); };
+      source.start(at);
+      source.stop(at + length + 0.02);
+      sources.push(source);
+      offset += length + (syllable % 4 === 3 ? 0.35 : 0.08 + Math.random() * 0.08);
+    }
+    return () => { sources.forEach((source) => source.stop()); };
+  }
+
   play(
     name:
       | "tap"

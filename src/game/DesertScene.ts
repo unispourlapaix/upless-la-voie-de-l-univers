@@ -1,12 +1,17 @@
 import Phaser from "phaser";
-import { addReliefBlock, addWorldGrain } from "./artEngine";
+import { addWorldGrain } from "./artEngine";
 import { audio } from "./audio";
-import { createDetailedMonkey } from "./characterKit";
+import { createCompanionMonkey } from "./companionArt";
+import { drawDesertTerrain, drawDesertRubble, createPixelSalvage, createPixelPond, createPixelFrog, setPixelPondState, setPixelFrogState } from "./desertArt";
 import { createBrokenLibertyStatue } from "./decorKit";
-import { createEntityImage } from "./entityArt";
 import { TouchInput } from "./input";
 import { createDetailedObject, type DetailObjectKind } from "./objectKit";
 import { PlayerController } from "./player";
+import { createDesertRobot } from "./robotArt";
+import { createRepairedRocket } from "./flightArt";
+import { createDesertStargate } from "./stargateArt";
+import { createBeachCharacter } from "./beachArt";
+import { createRocketCrashDetails } from "./desertArt";
 import { loadSave, writeSave } from "./types";
 
 type DesertItemId = "rocket" | "plastic" | "battery" | "virus" | "redWater" | "oil";
@@ -32,29 +37,61 @@ export class DesertScene extends Phaser.Scene {
   private objectiveText!: Phaser.GameObjects.Text;
   private items: DesertItem[] = [];
   private robot!: Phaser.GameObjects.Container;
-  private robotEyes!: Phaser.GameObjects.Arc[];
-  private pondWater!: Phaser.GameObjects.Ellipse;
+  private robotEyes!: Phaser.GameObjects.Rectangle[];
+  private pondWater!: Phaser.GameObjects.Container;
   private frog!: Phaser.GameObjects.Container;
   private robotNoCount = 0;
   private triedBunker = false;
   private smartphoneEventDone = false;
   private rocketLaunched = false;
+  private rocketAnimating = false;
+  private rocketNose!: Phaser.GameObjects.Container;
+  private rocketWing!: Phaser.GameObjects.Container;
   private pondHealed = false;
   private hasOil = false;
   private robotLubricated = false;
   private bunkerOpen = false;
-  private bunkerDoor!: Phaser.GameObjects.Rectangle;
+  private bunkerDoor!: Phaser.GameObjects.Container;
   private giraffe?: Phaser.GameObjects.Container;
+  private giraffeArriving = false;
   private finishing = false;
   private messageTimer?: Phaser.Time.TimerEvent;
+  private monkey!: Phaser.GameObjects.Container;
+  private introTimers: Phaser.Time.TimerEvent[] = [];
+  private introOpen = false;
+  private introIndex = -1;
+  private readonly introLines = [
+    "Vous franchissez la porte du bureau ensemble.\nDevant vous : le désert des derniers signes.",
+    "TOI : Non !! Ils l’ont fait…\nRegarde la statue. Regarde ce qu’il reste !",
+    "SINGE : Hm. Charmant accueil.\nCes ruines sont celles de leurs anciens exploits.",
+    "SINGE : Tu as empêché une nouvelle salve.\nLe comité n’efface pas ses dégâts en fermant la porte.",
+    "SINGE : Je reste avec toi. Allons au bunker.\nLe robot grince… Cherchons de quoi l’aider.",
+  ];
+  private companionHint = 0;
 
   constructor() {
     super("DesertScene");
   }
 
   create(): void {
-    this.physics.world.setBounds(0, 0, 1600, 760);
-    this.cameras.main.setBounds(0, 0, 1600, 760).setBackgroundColor("#f2b96d");
+    this.robotNoCount = 0;
+    this.triedBunker = false;
+    this.smartphoneEventDone = false;
+    this.rocketLaunched = false;
+    this.rocketAnimating = false;
+    this.pondHealed = false;
+    this.hasOil = false;
+    this.robotLubricated = false;
+    this.bunkerOpen = false;
+    this.giraffe = undefined;
+    this.giraffeArriving = false;
+    this.finishing = false;
+    this.companionHint = 0;
+    this.introTimers = [];
+    this.introOpen = false;
+    this.introIndex = -1;
+    this.physics.world.setBounds(0, 0, 2000, 760);
+    this.cameras.main.setBounds(0, 0, 2000, 760).setBackgroundColor("#f2b96d");
 
     this.drawWorld();
     this.createPlatforms();
@@ -74,13 +111,27 @@ export class DesertScene extends Phaser.Scene {
       onDoubleTap: (x, y) => this.handleDoubleTap(x, y),
       isUiHit: (_x, y) => y < 58,
     });
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.inputController?.destroy());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.inputController?.destroy();
+      this.introTimers.forEach((timer) => timer.remove(false));
+    });
 
     this.showIntro();
   }
 
-  update(): void {
+  update(_time: number, delta: number): void {
+    if (this.introOpen || this.rocketAnimating) return;
     if (!this.finishing) this.player.update((fromX, targetX) => this.canMoveTo(fromX, targetX));
+    if (this.finishing || this.rocketAnimating) return;
+    const hero = this.player.sprite;
+    const targetX = Phaser.Math.Clamp(hero.x - (hero.flipX ? -64 : 64), 28, 1960);
+    const distance = targetX - this.monkey.x;
+    if (Math.abs(distance) > 8) {
+      const step = Math.sign(distance) * Math.min(Math.abs(distance), delta * 0.16);
+      this.monkey.x += step;
+      this.monkey.setScale(step < 0 ? -1 : 1, 1);
+      this.monkey.y = 511 + Math.sin(this.time.now / 95) * 2;
+    } else this.monkey.y = 511;
   }
 
   private drawWorld(): void {
@@ -97,76 +148,61 @@ export class DesertScene extends Phaser.Scene {
       dust.fillCircle(Phaser.Math.Between(0, 360), Phaser.Math.Between(70, 590), Phaser.Math.FloatBetween(0.7, 1.8));
     }
 
-    for (let x = 0; x < 1600; x += 180) {
-      this.add.ellipse(x + 80, 584, 260, 66, x % 360 === 0 ? 0xd9924f : 0xc97845, 0.8);
-      this.add.ellipse(x + 35, 615, 310, 60, 0xb7643f, 0.34);
+    const dunes = this.add.graphics().setDepth(1);
+    for (let layer = 0; layer < 3; layer++) {
+      dunes.fillStyle([0xc88a68, 0xc58157, 0xce955e][layer]);
+      for (let x = 0; x < 2000; x += 4) {
+        const y = 475 + layer * 24 + Math.floor((Math.sin(x / 135 + layer * 2) * 22 + Math.sin(x / 47) * 5) / 4) * 4;
+        dunes.fillRect(x, y, 4, 551 - y);
+      }
     }
-
+    drawDesertRubble(this);
+    const crash = createRocketCrashDetails(this, 770, 532);
+    this.rocketNose = crash.nose;
+    this.rocketWing = crash.wing;
     this.drawBrokenLibertyStatue();
-
-    for (let x = 560; x < 1070; x += 130) {
-      this.add.rectangle(x, 548, 70, 6, 0x6f493e, 0.4).setAngle(Phaser.Math.Between(-8, 8));
-    }
 
     this.drawToxicPond();
     this.drawSickFrog();
   }
 
   private drawBrokenLibertyStatue(): void {
-    createBrokenLibertyStatue(this, 280, 492);
+    createBrokenLibertyStatue(this, 430, 492).setDepth(30);
   }
 
   private drawToxicPond(): void {
-    createEntityImage(this, "toxicPond", 1065, 541).setDepth(8);
-    this.pondWater = this.add.ellipse(1065, 541, 165, 38, 0xb82539, 0.001).setDepth(8);
+    this.pondWater = createPixelPond(this, 1340, 541);
   }
 
   private drawSickFrog(): void {
-    this.frog = this.add.container(1182, 530).setDepth(10);
-    const frogArt = createEntityImage(this, "sickFrog");
-    this.frog.add([frogArt]);
-    this.tweens.add({ targets: frogArt, y: "+=5", duration: 650, yoyo: true, repeat: -1 });
+    this.frog = createPixelFrog(this, 1470, 530);
   }
 
   private createPlatforms(): void {
     this.platforms = this.physics.add.staticGroup();
-    const ground = addReliefBlock(this, 800, 580, 1600, 58, 0xa95d39, { texture: "sand", stroke: 0xffd08b, strokeAlpha: 0.45, depth: 2 });
+    drawDesertTerrain(this);
+    const ground = this.add.rectangle(1000, 580, 2000, 58, 0xa95d39, 0);
     this.platforms.add(ground);
   }
 
   private createBunker(): void {
-    createEntityImage(this, "desertBunker", 1330, 482).setDepth(9);
-    this.bunkerDoor = this.add.rectangle(1330, 512, 112, 124, 0x151a24, 0.001).setDepth(10);
+    this.bunkerDoor = createDesertStargate(this, 1850, 450);
   }
 
   private createRobot(): void {
-    const body = createEntityImage(this, "rustyRobot").setScale(0.82).setPosition(0, -16);
-    const eye1 = this.add.circle(-16, -59, 6, 0x4b1010);
-    const eye2 = this.add.circle(16, -59, 6, 0x4b1010);
-    this.robotEyes = [eye1, eye2];
-    this.robot = this.add.container(1276, 493, [body, eye1, eye2]).setDepth(12);
-    this.tweens.add({ targets: this.robot, angle: 1.4, duration: 410, yoyo: true, repeat: -1 });
+    const art = createDesertRobot(this, 1640, 493);
+    this.robot = art.robot;
+    this.robotEyes = art.eyes;
+    this.tweens.add({ targets: this.robot, angle: 1.2, duration: 800, yoyo: true, repeat: -1 });
   }
 
   private createMonkey(): void {
-    const monkey = createDetailedMonkey(this, 96, 500, {
-      fur: 0x8e929a,
-      face: 0xd7b18d,
-      outfit: "kimono",
-      belt: true,
-      sunglasses: true,
-      orangeJuice: true,
-      smile: true,
-      skinny: true,
-    }).setDepth(14);
-    this.add.text(96, 570, "singe sensei\njus d’orange", {
-      fontFamily: "system-ui",
-      fontSize: "8px",
-      color: "#5e3b43",
-      fontStyle: "bold",
-      align: "center",
-    }).setOrigin(0.5);
-    this.tweens.add({ targets: monkey, y: 492, duration: 520, yoyo: true, repeat: -1 });
+    this.monkey = createCompanionMonkey(this, 140, 511);
+    const door = this.add.graphics().setDepth(7);
+    door.fillStyle(0x253144).fillRect(15, 425, 49, 126);
+    door.fillStyle(0x0e1c2b).fillRect(20, 430, 39, 121);
+    door.fillStyle(0x4d7c71).fillRect(59, 430, 5, 121);
+    this.add.text(41, 410, "BUREAU", {fontFamily: "monospace", fontSize: "8px", color: "#5e3b43"}).setOrigin(0.5).setDepth(8);
   }
 
   private createItems(): void {
@@ -174,8 +210,8 @@ export class DesertScene extends Phaser.Scene {
       this.addItem(
         "rocket",
         "Bout de fusée",
-        540,
-        576,
+        770,
+        532,
         "Un gros morceau de fusée moderne.\nMême la technologie la plus brillante a fini dans le sable.",
         false,
         "Singe : Hm. Très bel exemple d’arrogance aérodynamique.",
@@ -183,7 +219,7 @@ export class DesertScene extends Phaser.Scene {
       this.addItem(
         "plastic",
         "Déchet plastique",
-        1024,
+        1260,
         532,
         "Un vieux sac plastique flotte dans la mare rouge.\nLéger, inutile… et toujours vivant.",
         false,
@@ -192,7 +228,7 @@ export class DesertScene extends Phaser.Scene {
       this.addItem(
         "battery",
         "Batterie smartphone",
-        850,
+        1110,
         532,
         "Une batterie gonflée. À côté, un vieux smartphone poussiéreux attend encore un doigt.",
         false,
@@ -201,7 +237,7 @@ export class DesertScene extends Phaser.Scene {
       this.addItem(
         "virus",
         "Virus alien",
-        1188,
+        1490,
         505,
         "Cette grenouille transpire quelque chose de vivant…",
         false,
@@ -210,13 +246,13 @@ export class DesertScene extends Phaser.Scene {
       this.addItem(
         "redWater",
         "Mare rouge",
-        1070,
+        1375,
         540,
         "L’eau elle-même a changé de couleur.",
         false,
         "Singe : Une soupe toxique. Quelle civilisation raffinée.",
       ),
-      this.addItem("oil", "Huile rare", 625, 536, "De l’huile rare… précieuse pour les vieilles machines.", true),
+      this.addItem("oil", "Huile rare", 945, 536, "De l’huile rare… précieuse pour les vieilles machines.", true),
     ];
   }
 
@@ -237,14 +273,18 @@ export class DesertScene extends Phaser.Scene {
       redWater: "redPuddle",
       oil: "rareOil",
     };
-    const container = createDetailedObject(this, objectKind[id], x, y, { label, scale: id === "rocket" ? 1.12 : 1 }).setDepth(11);
+    const container = (id === "redWater" ? this.add.container(x, y) : id === "rocket" || id === "battery" || id === "oil" || id === "plastic"
+      ? createPixelSalvage(this, id, x, y)
+      : createDetailedObject(this, objectKind[id], x, y, { label, scale: 1 })).setDepth(11);
     if (id === "rocket") {
-      container.setAngle(-2);
+      container.setScale(1.5);
+      container.setData("buriedDebris", true);
     } else if (id === "plastic") {
-      this.tweens.add({ targets: container, y: y + 3, angle: 4, duration: 900, yoyo: true, repeat: -1 });
+      this.tweens.add({ targets: container, y: y + 2, duration: 1200, yoyo: true, repeat: -1, ease: "Sine.inOut" });
     } else if (id === "virus") {
-      this.tweens.add({ targets: container, scale: 1.12, duration: 620, yoyo: true, repeat: -1 });
-    } else {
+      container.setScale(0.38);
+      this.tweens.add({ targets: container, scale: 0.42, duration: 900, yoyo: true, repeat: -1 });
+    } else if (id !== "battery" && id !== "oil") {
       this.tweens.add({ targets: container, scale: 1.05, duration: 900 + (x % 4) * 80, yoyo: true, repeat: -1 });
     }
     return { id, label, x, y, phrase, monkeyComment, solution, found: false, container };
@@ -294,19 +334,57 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private showIntro(): void {
-    this.showMessage("Niveau 3 — Le désert des derniers signes", 2400);
-    this.time.delayedCall(2700, () => this.showMessage("Non !! Ils l’ont fait…", 2100));
-    this.time.delayedCall(5100, () => {
-      audio.play("monkey");
-      this.showMessage("Singe : Hm. Charmant accueil.", 1900);
+    this.introOpen = true;
+    this.player.stop();
+    this.player.sprite.setX(35);
+    this.monkey.setX(40);
+    this.objectiveText.setText("SORTIE DU BUREAU");
+    this.messagePanel.setSize(326, 108).setY(575);
+    this.messageText.setFontSize(12).setY(577);
+    this.tweens.add({targets: this.monkey, x: 140, duration: 900, ease: "Sine.out"});
+    this.tweens.add({targets: this.player.sprite, x: 70, duration: 700, ease: "Sine.out",
+      onComplete: () => this.advanceIntro(),
     });
   }
 
+  private advanceIntro(): void {
+    this.introTimers.forEach((timer) => timer.remove(false));
+    this.introTimers = [];
+    this.introIndex++;
+    if (this.introIndex >= this.introLines.length) {
+      this.introOpen = false;
+      this.messagePanel.setSize(326, 66).setY(588);
+      this.messageText.setFontSize(13).setY(590);
+      this.objectiveText.setText("🔎 ENQUÊTE");
+      this.showMessage("Touche le chemin pour avancer.\nDouble-touche les débris pour les examiner.", 3300);
+      return;
+    }
+    this.showMessage(this.introLines[this.introIndex] + "\n[ toucher pour la suite ]", 120000);
+  }
+
+  private talkToCompanion(x: number, y: number): boolean {
+    if (Math.abs(x - this.monkey.x) > 29 || Math.abs(y - (this.monkey.y - 4)) > 48) return false;
+    this.player.stop();
+    audio.play("monkey");
+    const lines = this.bunkerOpen
+      ? ["SINGE : La porte est ouverte. Après toi.\nJ’ai déjà fait les présentations au bureau."]
+      : this.hasOil
+        ? ["SINGE : Cette huile est pour le robot.\nPas pour le comité : eux glissent déjà assez."]
+        : ["SINGE : Oui, c’est toujours moi. Même queue,\nmême mauvais pressentiment. Je reste avec toi.", "SINGE : Regarde les débris, puis le robot.\nOn va réparer un passage, pas relancer une guerre."];
+    this.showMessage(lines[this.companionHint++ % lines.length], 3600);
+    return true;
+  }
+
   private handleTap(screenX: number, screenY: number): void {
-    if (this.finishing) return;
+    if (this.finishing || this.rocketAnimating) return;
+    if (this.introOpen) {
+      if (this.introIndex >= 0) this.advanceIntro();
+      return;
+    }
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
+    if (this.talkToCompanion(world.x, world.y)) return;
     audio.play("tap");
-    if (this.bunkerOpen && world.x > 1270) {
+    if (this.bunkerOpen && world.x > 1745 && world.x < 1960 && world.y > 340 && world.y < 570) {
       this.enterBunker();
       return;
     }
@@ -314,10 +392,19 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private handleDoubleTap(screenX: number, screenY: number): void {
-    if (this.finishing) return;
+    if (this.finishing || this.rocketAnimating) return;
+    if (this.introOpen) {
+      if (this.introIndex >= 0) this.advanceIntro();
+      return;
+    }
     const world = this.cameras.main.getWorldPoint(screenX, screenY);
+    if (this.talkToCompanion(world.x, world.y)) return;
 
-    const item = this.items.find((candidate) => Phaser.Math.Distance.Between(world.x, world.y, candidate.x, candidate.y) < 58);
+    // Choose the closest target where water, plastic and frog interaction areas meet.
+    const item = this.items
+      .map((candidate) => ({candidate, distance: Phaser.Math.Distance.Between(world.x, world.y, candidate.x, candidate.y)}))
+      .filter(({candidate, distance}) => distance < (candidate.id === "rocket" ? 112 : 58))
+      .sort((a, b) => a.distance - b.distance)[0]?.candidate;
     if (item) {
       this.interactWithItem(item);
       return;
@@ -328,15 +415,15 @@ export class DesertScene extends Phaser.Scene {
       return;
     }
 
-    if (world.x > 1240 && world.x < 1455 && world.y > 355 && world.y < 590) {
+    if (world.x > 1745 && world.x < 1960 && world.y > 340 && world.y < 570) {
       this.triedBunker = true;
-      if (this.bunkerOpen) this.showMessage("Le bunker s’est ouvert…", 1500);
+      if (this.bunkerOpen) this.enterBunker();
       else if (this.robotLubricated) this.showMessage("La porte glisse lentement.", 1400);
       else this.showMessage("Cette porte est trop lourde…\nLe robot garde l’entrée.", 1900);
       return;
     }
 
-    if (world.x > 210 && world.x < 390 && world.y > 320 && world.y < 570) {
+    if (world.x > 300 && world.x < 540 && world.y > 320 && world.y < 570) {
       this.showMessage("Quelque chose s’est passé ici…", 1700);
       return;
     }
@@ -487,88 +574,59 @@ export class DesertScene extends Phaser.Scene {
       this.showMessage("La fusée est déjà partie.\nTrop tard pour réserver.", 1500);
       return;
     }
-    const rocketItem = this.items.find((item) => item.id === "rocket");
-    if (!rocketItem) return;
+    const item = this.items.find((candidate) => candidate.id === "rocket");
+    if (!item) return;
     this.rocketLaunched = true;
-    rocketItem.found = true;
-    audio.play("portal");
-    this.showMessage("La fusée se reconstruit…\nElle est beaucoup trop moderne.", 2400);
-    this.cameras.main.shake(320, 0.006);
-
-    const rocket = this.createFuturisticRocket(rocketItem.x, rocketItem.y - 72).setAlpha(0).setScale(0.28).setDepth(24);
-    const beam = this.add.rectangle(rocketItem.x, rocketItem.y - 62, 7, 130, 0x80f3ff, 0.4).setDepth(23);
-    const rings = [0, 1, 2].map((index) =>
-      this.add.ellipse(rocketItem.x, rocketItem.y - 62, 52 + index * 28, 18 + index * 10, 0x80f3ff, 0)
-        .setStrokeStyle(2, 0x80f3ff, 0.8)
-        .setDepth(23),
-    );
-
-    this.tweens.add({ targets: rocketItem.container, alpha: 0.15, scale: 0.25, duration: 520, ease: "Back.in" });
-    this.tweens.add({ targets: rings, scaleX: 1.7, scaleY: 1.7, alpha: 0, duration: 700, repeat: 2, ease: "Sine.out" });
-    this.tweens.add({ targets: beam, alpha: 0, scaleY: 1.4, duration: 1100, ease: "Sine.out" });
-    this.tweens.add({
-      targets: rocket,
-      alpha: 1,
-      scale: 1.18,
-      y: rocket.y - 28,
-      duration: 900,
-      ease: "Back.out",
-      onComplete: () => {
-        this.showMessage("Décollage futuriste !", 1200);
-        const flame = this.add.container(rocket.x, rocket.y + 92).setDepth(23);
-        flame.add([
-          this.add.triangle(0, 24, -27, 0, 27, 0, 0, 84, 0xff8a2a),
-          this.add.triangle(0, 18, -15, 0, 15, 0, 0, 56, 0xfff0a0),
-          this.add.ellipse(0, 72, 72, 28, 0x80f3ff, 0.28),
-        ]);
-        this.tweens.add({ targets: flame, scaleY: 1.35, alpha: 0.65, duration: 110, yoyo: true, repeat: 10 });
-        this.tweens.add({
-          targets: [rocket, flame],
-          x: rocket.x + 105,
-          y: rocket.y - 540,
-          scale: 1.45,
-          duration: 1650,
-          ease: "Sine.in",
-          onComplete: () => {
-            rocket.destroy();
-            flame.destroy();
-            rings.forEach((ring) => ring.destroy());
-            beam.destroy();
-          },
-        });
-      },
+    this.rocketAnimating = true;
+    item.found = true;
+    this.player.stop();
+    this.cameras.main.stopFollow();
+    this.cameras.main.pan(item.x, 320, 650, Phaser.Math.Easing.Sine.InOut);
+    this.showMessage("Les pièces se soulèvent…\nLe nez et l’aile retrouvent leur place.", 2300);
+    audio.play("wire");
+    const {rocket, flame} = createRepairedRocket(this, item.x, 477);
+    rocket.setAngle(-90).setAlpha(0).setScale(0.8);
+    const shadow = this.add.rectangle(item.x, 552, 124, 5, 0x664b49, 0.5).setDepth(5);
+    const pieces = [item.container, this.rocketNose, this.rocketWing];
+    pieces.forEach((piece, index) => {
+      this.tweens.killTweensOf(piece);
+      this.tweens.add({targets: piece, x: item.x + [0, 52, -35][index], y: 478 + [0, -10, 20][index],
+        angle: [0, 90, -90][index], duration: 1000, ease: "Sine.inOut"});
     });
-  }
-
-  private createFuturisticRocket(x: number, y: number): Phaser.GameObjects.Container {
-    const shadow = this.add.ellipse(0, 118, 92, 18, 0x20182b, 0.18);
-    const hull = this.add.ellipse(0, 0, 58, 166, 0xf4f7ff).setStrokeStyle(5, 0x18223b);
-    const nose = this.add.triangle(0, -100, -27, 12, 27, 12, 0, -48, 0x9feaff).setStrokeStyle(4, 0x18223b);
-    const glass = this.add.ellipse(0, -34, 34, 42, 0x68ddff, 0.92).setStrokeStyle(4, 0x18223b);
-    const shine = this.add.ellipse(-7, -43, 10, 16, 0xffffff, 0.72).setAngle(28);
-    const stripe = this.add.rectangle(0, 21, 56, 13, 0xff4f8b).setStrokeStyle(3, 0x18223b);
-    const core = this.add.circle(0, 55, 14, 0x80f3ff, 0.9).setStrokeStyle(3, 0x18223b);
-    const wing1 = this.add.triangle(-35, 59, -8, -23, 9, 23, -31, 54, 0x6757d8).setStrokeStyle(4, 0x18223b);
-    const wing2 = this.add.triangle(35, 59, -9, 23, 8, -23, 31, 54, 0x6757d8).setStrokeStyle(4, 0x18223b);
-    const engine1 = this.add.rectangle(-17, 89, 17, 30, 0x4b5878).setStrokeStyle(3, 0x18223b);
-    const engine2 = this.add.rectangle(17, 89, 17, 30, 0x4b5878).setStrokeStyle(3, 0x18223b);
-    const antenna = this.add.line(0, 0, 0, -122, 0, -101, 0x18223b, 1).setLineWidth(3);
-    const antennaTip = this.add.circle(0, -126, 5, 0xffd36a).setStrokeStyle(2, 0x18223b);
-    return this.add.container(x, y, [
-      shadow,
-      wing1,
-      wing2,
-      hull,
-      nose,
-      glass,
-      shine,
-      stripe,
-      core,
-      engine1,
-      engine2,
-      antenna,
-      antennaTip,
-    ]);
+    this.time.delayedCall(850, () => {
+      audio.play("bridge");
+      this.tweens.add({targets: pieces, alpha: 0, duration: 500});
+      this.tweens.add({targets: rocket, alpha: 1, angle: 0, scale: 1, duration: 850, ease: "Sine.inOut"});
+    });
+    this.time.delayedCall(1850, () => {
+      this.showMessage("Réparation terminée. Allumage…\nSINGE : Elle n’a même pas demandé un budget.", 2900);
+      audio.play("portal");
+      flame.setAlpha(1);
+      this.tweens.add({targets: flame, scaleY: 0.65, scaleX: 0.8, duration: 95, yoyo: true, repeat: -1});
+      this.tweens.add({targets: rocket, y: 473, duration: 130, yoyo: true, repeat: 3});
+      this.cameras.main.shake(700, 0.003);
+      for (let i = 0; i < 12; i++) {
+        const dust = this.add.rectangle(item.x + (i % 2 ? 12 : -12), 549, 8 + i % 3 * 4, 4, 0xe8be86, 0.8).setDepth(35);
+        this.tweens.add({targets: dust, x: item.x + (i % 2 ? 1 : -1) * (35 + i * 9),
+          y: 537 - i % 3 * 7, alpha: 0, scaleX: 2, duration: 1000 + i * 30,
+          delay: i * 35, onComplete: () => dust.destroy()});
+      }
+    });
+    this.time.delayedCall(3000, () => {
+      this.showMessage("Décollage !\nSINGE : Voilà. Un départ sans missiles.", 2600);
+      this.tweens.add({targets: shadow, scaleX: 0.25, alpha: 0, duration: 1700});
+      this.tweens.add({targets: rocket, x: item.x + 130, y: -350, angle: 12, scale: 0.72,
+        duration: 2400, ease: "Cubic.in", onComplete: () => {
+          this.tweens.killTweensOf(flame);
+          rocket.destroy(true);
+          shadow.destroy();
+          pieces.forEach((piece) => piece.setVisible(false));
+          this.rocketAnimating = false;
+          this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -55, 50);
+          this.cameras.main.setDeadzone(90, 180);
+          this.updateObjective();
+        }});
+    });
   }
 
   private healFrogAndPond(): void {
@@ -578,27 +636,31 @@ export class DesertScene extends Phaser.Scene {
     }
     this.pondHealed = true;
     const virusItem = this.items.find((item) => item.id === "virus");
+    if (virusItem) this.tweens.killTweensOf(virusItem.container);
     virusItem?.container.setVisible(true).setAlpha(1).setDepth(16);
     if (virusItem) virusItem.found = true;
     audio.play("flower");
     this.tweens.add({
       targets: this.frog,
-      x: 1084,
+      x: this.pondWater.x + 19,
       y: 522,
       angle: -18,
       duration: 760,
       ease: "Back.out",
       onComplete: () => {
         this.frog.setAngle(0);
-        this.pondWater.setFillStyle(0x58c86a, 0.9).setStrokeStyle(4, 0x2e7b45, 0.8);
+        setPixelPondState(this.pondWater, this.pondHealed);
+        setPixelFrogState(this.frog, this.pondHealed);
         this.tweens.add({ targets: this.pondWater, scaleX: 1.08, scaleY: 1.16, duration: 240, yoyo: true });
-        this.time.delayedCall(650, () => this.showMessage("La grenouille saute dans la mare.\nL’eau redevient verte.", 2300));
+        this.time.delayedCall(650, () => {
+          if (this.pondHealed) this.showMessage("La grenouille saute dans la mare.\nL’eau redevient verte.", 2300);
+        });
       },
     });
     if (virusItem) {
       this.tweens.add({
         targets: virusItem.container,
-        x: 1104,
+        x: this.pondWater.x + 39,
         y: 512,
         angle: 35,
         scale: 1.28,
@@ -624,7 +686,8 @@ export class DesertScene extends Phaser.Scene {
     item.found = true;
     this.pondHealed = false;
     this.tweens.add({ targets: item.container, y: item.y + 7, angle: -6, scale: 1.16, duration: 220, yoyo: true });
-    this.pondWater.setFillStyle(0xb82539, 0.92).setStrokeStyle(4, 0x5b1523, 0.9);
+    setPixelPondState(this.pondWater, false);
+    setPixelFrogState(this.frog, false);
     this.tweens.add({ targets: this.pondWater, scaleX: 1.13, scaleY: 1.22, duration: 260, yoyo: true });
     this.showMessage("Le plastique flotte encore…\nLa mare redevient rouge.", 2200);
     this.time.delayedCall(2250, () => this.showMessage("Singe : Bravo. Retour à la case pollution.", 2300));
@@ -700,37 +763,54 @@ export class DesertScene extends Phaser.Scene {
     if (this.bunkerOpen) return;
     this.bunkerOpen = true;
     audio.play("portal");
-    this.objectiveText.setText("🚪 BUNKER");
+    this.objectiveText.setText("⬡ PORTE STELLAIRE");
     this.tweens.add({
       targets: this.bunkerDoor,
-      x: this.bunkerDoor.x + 72,
-      alpha: 0.55,
+      scaleX: 0.08,
+      alpha: 0,
       duration: 1100,
       ease: "Sine.inOut",
     });
     this.cameras.main.shake(350, 0.005);
-    this.showMessage("Le bunker s’ouvre…", 1800);
-    this.time.delayedCall(1200, () => this.createGiraffe());
+    this.showMessage("La porte stellaire s’ouvre…", 1800);
   }
 
   private createGiraffe(): void {
     if (this.giraffe) return;
-    this.giraffe = this.add.container(1360, 522, [createEntityImage(this, "beachGiraffe").setScale(0.74)])
+    this.giraffeArriving = true;
+    this.player.stop();
+    audio.play("portal");
+    this.giraffe = createBeachCharacter(this, 1880, 506, "giraffe")
       .setDepth(18)
       .setAlpha(0)
       .setScale(0.85);
-    this.tweens.add({ targets: this.giraffe, alpha: 1, x: 1308, duration: 850, ease: "Sine.out" });
-    this.time.delayedCall(900, () => this.showMessage("Girafe : Entre. Il reste encore des réponses.", 2600));
+    this.tweens.add({ targets: this.giraffe, alpha: 1, x: 1780, duration: 850, ease: "Sine.out",
+      onComplete: () => {
+        this.giraffeArriving = false;
+        this.showMessage("GIRAFE : Tu as frappé ? Me voilà.\nTouche encore la porte pour entrer.", 4000);
+      },
+    });
   }
 
   private enterBunker(): void {
     if (!this.bunkerOpen || this.finishing) return;
+    if (Math.abs(this.player.sprite.x - this.bunkerDoor.x) > 145) {
+      this.player.moveTo(this.bunkerDoor.x - 40, 520);
+      this.showMessage("Approche-toi de la porte stellaire.", 1800);
+      return;
+    }
+    if (!this.giraffe) {
+      this.showMessage("Une silhouette apparaît dans le voile bleu…", 1800);
+      this.createGiraffe();
+      return;
+    }
+    if (this.giraffeArriving) return;
     this.finishing = true;
     this.player.stop();
     this.player.sprite.body!.enable = false;
     this.tweens.add({
       targets: this.player.sprite,
-      x: 1330,
+      x: this.bunkerDoor.x,
       y: 515,
       alpha: 0,
       duration: 1000,
@@ -746,7 +826,7 @@ export class DesertScene extends Phaser.Scene {
   }
 
   private canMoveTo(fromX: number, targetX: number): boolean {
-    if (!this.bunkerOpen && fromX < 1230 && targetX > 1250) {
+    if (!this.bunkerOpen && fromX < 1594 && targetX > 1614) {
       this.triedBunker = true;
       this.showMessage("Le robot garde l’entrée.", 1400);
       return false;
@@ -772,3 +852,7 @@ export class DesertScene extends Phaser.Scene {
     });
   }
 }
+
+
+
+

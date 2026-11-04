@@ -5,6 +5,8 @@ import { DesertScene } from "./game/DesertScene";
 import { GameScene } from "./game/GameScene";
 import { LevelCompleteScene } from "./game/LevelCompleteScene";
 import { MenuScene } from "./game/MenuScene";
+import { InvestigationScene } from "./game/InvestigationScene";
+import { OmegaScene } from "./game/OmegaScene";
 import { MoonScene } from "./game/MoonScene";
 import { OfficeScene } from "./game/OfficeScene";
 import { PreloadScene } from "./game/PreloadScene";
@@ -13,6 +15,12 @@ const bootScreen = document.querySelector<HTMLDivElement>("#boot-screen");
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
+    if (["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+      void navigator.serviceWorker.getRegistrations().then(registrations =>
+        Promise.all(registrations.map(registration => registration.unregister())),
+      );
+      return;
+    }
     navigator.serviceWorker.register("./sw.js").catch((error: unknown) => {
       console.warn("Upless web app install helper unavailable", error);
     });
@@ -40,10 +48,10 @@ try {
       width: 360,
       height: 640,
     },
-    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, DesertScene, BeachScene, MoonScene, LevelCompleteScene],
+    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, DesertScene, BeachScene, MoonScene, OmegaScene, InvestigationScene, LevelCompleteScene],
     render: {
-      antialias: true,
-      pixelArt: false,
+      antialias: false,
+      pixelArt: true,
       roundPixels: true,
     },
     callbacks: {
@@ -63,3 +71,4 @@ try {
   }
   console.error("Upless boot error", error);
 }
+

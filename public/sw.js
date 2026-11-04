@@ -1,4 +1,4 @@
-const CACHE_NAME = "upless-app-v1";
+const CACHE_NAME = "upless-app-v2";
 const APP_SHELL = ["./", "./manifest.webmanifest", "./favicon.svg", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -17,7 +17,17 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.pathname.startsWith("/src/") || url.pathname.startsWith("/@") || url.pathname.includes("/node_modules/")) return;
   event.respondWith(
-    caches.match(event.request).then((cached) => cached ?? fetch(event.request).catch(() => caches.match("./"))),
+    fetch(event.request).catch(async () => {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
+      if (event.request.mode === "navigate") {
+        const shell = await caches.match("./");
+        if (shell) return shell;
+      }
+      return Response.error();
+    }),
   );
 });

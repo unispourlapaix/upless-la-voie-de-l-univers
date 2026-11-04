@@ -1,451 +1,351 @@
 import Phaser from "phaser";
-import { addReliefBlock, addWorldGrain } from "./artEngine";
-import { audio } from "./audio";
-import { createEntityImage } from "./entityArt";
-import { TouchInput } from "./input";
-import { createDetailedObject } from "./objectKit";
-import { createPinkwindkisSprite } from "./pinkwindkisArt";
-import { PlayerController } from "./player";
-import { loadSave, writeSave } from "./types";
+import {audio} from "./audio";
+import {TouchInput} from "./input";
+import {PlayerController} from "./player";
+import {createCompanionMonkey} from "./companionArt";
+import {createDesertStargate} from "./stargateArt";
+import {createBeachCharacter,createBeachBoat,createBeachObject,createBeachPalm,drawBeach} from "./beachArt";
+import {loadSave,writeSave} from "./types";
 
-type BeachItemId = "vr" | "underwear" | "dinoBook" | "antenna" | "tree" | "boat" | "propeller" | "giraffe";
-
-type BeachItem = {
-  id: BeachItemId;
-  x: number;
-  y: number;
-  radius: number;
-  used: boolean;
-  interact: () => void;
-};
+type BeachPhase="explore"|"falling"|"dialogue"|"repair"|"boarding"|"sailing"|"teleport";
+type BeachTarget={id:string;x:number;y:number;rx:number;ry:number;action:()=>void};
 
 export class BeachScene extends Phaser.Scene {
-  private player!: PlayerController;
-  private platforms!: Phaser.Physics.Arcade.StaticGroup;
-  private inputController?: TouchInput;
-  private messagePanel!: Phaser.GameObjects.Rectangle;
-  private messageText!: Phaser.GameObjects.Text;
-  private objectiveText!: Phaser.GameObjects.Text;
-  private messageTimer?: Phaser.Time.TimerEvent;
-  private items: BeachItem[] = [];
-  private hasVrHeadset = false;
-  private pinkwindkisFound = false;
-  private pinkwindkisPenguinMode = false;
-  private boatInspected = false;
-  private boatRepaired = false;
-  private departing = false;
-  private pinkwindkis?: Phaser.GameObjects.Container;
-  private algae!: Phaser.GameObjects.Container;
-  private boatArt!: Phaser.GameObjects.Image;
-  private boat!: Phaser.GameObjects.Container;
-  private giraffe!: Phaser.GameObjects.Container;
+  private player!:PlayerController;
+  private platforms!:Phaser.Physics.Arcade.StaticGroup;
+  private controls?:TouchInput;
+  private phase:BeachPhase="explore";
+  private message!:Phaser.GameObjects.Text;
+  private objective!:Phaser.GameObjects.Text;
+  private messageTimer?:Phaser.Time.TimerEvent;
+  private targets:BeachTarget[]=[];
+  private giraffe!:Phaser.GameObjects.Container;
+  private monkey!:Phaser.GameObjects.Container;
+  private boat!:Phaser.GameObjects.Container;
+  private algae!:Phaser.GameObjects.Container;
+  private headset!:Phaser.GameObjects.Container;
+  private palm!:Phaser.GameObjects.Container;
+  private belongings:Phaser.GameObjects.Container[]=[];
+  private helperFallen=false;
+  private helper?:Phaser.GameObjects.Container;
+  private boatInspected=false;
+  private propellerInspected=false;
+  private allBelongingsFound=false;
+  private transformed=false;
+  private coconutTradeOffered=false;
+  private hasCoconut=false;
+  private helperFound=false;
+  private repaired=false;
+  private dialogueLines:string[]=[];
+  private dialogueIndex=0;
+  private dialogueDone?:()=>void;
+  private dialoguePanel?:Phaser.GameObjects.Container;
+  private dialogueText!:Phaser.GameObjects.Text;
+  private stopWhispers?:()=>void;
 
-  constructor() {
-    super("BeachScene");
-  }
+  constructor(){super("BeachScene");}
 
-  create(): void {
-    this.physics.world.setBounds(0, 0, 1520, 760);
-    this.cameras.main.setBounds(0, 0, 1520, 760).setBackgroundColor("#8fe3ff");
-
-    this.drawParadise();
-    this.createPlatforms();
-    this.createGiraffe();
-    this.createBoat();
-    this.createCoconutTree();
-    this.createStrangeObjects();
-
-    this.player = new PlayerController(this, 70, 520);
-    this.physics.add.collider(this.player.sprite, this.platforms);
-    this.cameras.main.startFollow(this.player.sprite, true, 0.08, 0.08, -55, 50);
-    this.cameras.main.setDeadzone(90, 180);
-
-    this.createHud();
-    this.inputController = new TouchInput(this, {
-      onTap: (x, y) => this.handleTap(x, y),
-      onDoubleTap: (x, y) => this.handleDoubleTap(x, y),
-      isUiHit: (_x, y) => y < 58,
-    });
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.inputController?.destroy());
-
-    this.showMessage("Niveau 4 — La plage des objets suspects", 2400);
-    this.time.delayedCall(2600, () => this.showMessage("La girafe t’attend devant la mer.", 1900));
-  }
-
-  update(): void {
-    if (!this.departing) this.player.update((fromX, targetX) => this.canMoveTo(fromX, targetX));
-  }
-
-  private drawParadise(): void {
-    const sky = this.add.graphics().setScrollFactor(0);
-    sky.fillGradientStyle(0x91e7ff, 0x91e7ff, 0xffd79a, 0xff8d76, 1);
-    sky.fillRect(0, 0, 360, 640);
-    addWorldGrain(this, "sand", 0.1);
-    this.add.circle(292, 116, 45, 0xfff1a3, 0.9).setScrollFactor(0);
-    this.add.circle(292, 116, 72, 0xfff1a3, 0.16).setScrollFactor(0);
-
-    for (let x = 0; x < 1520; x += 160) {
-      this.add.ellipse(x + 70, 610, 270, 76, 0xf2c572, 0.96);
-      this.add.ellipse(x + 20, 570, 260, 52, 0xffd98a, 0.75);
-    }
-
-    const sea = this.add.rectangle(760, 455, 1520, 142, 0x3ac6d7, 0.82);
-    sea.setStrokeStyle(3, 0x1b92aa, 0.24);
-    this.add.tileSprite(760, 455, 1520, 132, "upless-texture-water").setAlpha(0.12).setBlendMode(Phaser.BlendModes.ADD).setDepth(0.8);
-    for (let x = 0; x < 1520; x += 85) {
-      this.add.arc(x, 438, 35, 0, 180, false, 0xe7ffff, 0.22).setStrokeStyle(3, 0xe7ffff, 0.55);
-      this.add.arc(x + 42, 491, 30, 0, 180, false, 0xe7ffff, 0.15).setStrokeStyle(2, 0xe7ffff, 0.42);
-    }
-  }
-
-  private createPlatforms(): void {
-    this.platforms = this.physics.add.staticGroup();
-    this.platforms.add(addReliefBlock(this, 760, 580, 1520, 60, 0xd8994a, { texture: "sand", stroke: 0xffe3a8, strokeAlpha: 0.48, depth: 2 }));
-  }
-
-  private createGiraffe(): void {
-    const giraffe = createEntityImage(this, "beachGiraffe").setScale(0.74).setPosition(0, -8);
-    this.giraffe = this.add.container(180, 500, [giraffe]).setDepth(13);
-    this.tweens.add({ targets: this.giraffe, y: 493, duration: 1200, yoyo: true, repeat: -1 });
-    this.items.push({
-      id: "giraffe",
-      x: 180,
-      y: 500,
-      radius: 70,
-      used: false,
-      interact: () => this.showMessage("Girafe : Je ne sais pas nager.\nIl nous faut ce bateau.", 2300),
-    });
-  }
-
-  private createBoat(): void {
-    this.boatArt = createEntityImage(this, "sailingBoat").setPosition(0, 0);
-    createEntityImage(this, "repairedBoat").setVisible(false).destroy();
-    this.algae = this.add.container(132, 75, [
-      this.add.arc(0, 0, 29, 210, 20, false, 0x2d9b5f).setStrokeStyle(8, 0x2d9b5f),
-      this.add.arc(5, 2, 22, 180, 50, false, 0x4abf68).setStrokeStyle(7, 0x4abf68),
-      this.add.circle(-14, -5, 6, 0x3dbb60),
+  create():void {
+    this.phase="explore";this.targets=[];this.boatInspected=false;this.allBelongingsFound=false;this.helperFound=false;this.repaired=false;
+    this.helper=undefined;this.dialoguePanel=undefined;this.dialogueDone=undefined;
+    this.transformed=false;
+    this.coconutTradeOffered=false;
+    this.hasCoconut=false;
+    this.helperFallen=false;this.belongings=[];
+    this.physics.world.setBounds(0,0,1920,640);
+    this.cameras.main.setBounds(0,0,1920,640).setBackgroundColor("#9cabb1");
+    drawBeach(this);
+    this.platforms=this.physics.add.staticGroup();
+    this.platforms.add(this.add.rectangle(960,580,1920,60,0xd5b581,0));
+    createDesertStargate(this,55,450);
+    this.giraffe=createBeachCharacter(this,232,506,"giraffe");
+    this.monkey=createCompanionMonkey(this,135,511);
+    this.palm=createBeachPalm(this,575,551);
+    const craft=createBeachBoat(this,1670,510);this.boat=craft.boat;this.algae=craft.algae;
+    this.headset=createBeachObject(this,1340,536,"vr");
+    this.belongings=[this.headset,createBeachObject(this,365,538,"cloth"),createBeachObject(this,1070,536,"book"),createBeachObject(this,1535,530,"radio")];
+    this.belongings.forEach((object)=>object.setVisible(false));
+    this.player=new PlayerController(this,92,525);
+    this.physics.add.collider(this.player.sprite,this.platforms);
+    this.cameras.main.startFollow(this.player.sprite,true,0.08,0.08,-55,0).setDeadzone(90,180);
+    this.createHud();this.registerTargets();
+    this.controls=new TouchInput(this,{onTap:(x,y)=>this.handleTap(x,y),onDoubleTap:(x,y)=>this.handleDoubleTap(x,y),isUiHit:(_x,y)=>y<62});
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN,()=>{this.controls?.destroy();this.stopWhispers?.();this.messageTimer?.remove(false);});
+    this.openDialogue([
+      "Vous ressortez du voile bleu. La même girafe vous attend sur une plage presque trop calme.",
+      "GIRAFE : Bienvenue sur la côte. Ici, la mer monte. Les responsabilités, beaucoup moins.",
+      "TOI : On est arrivés où, exactement ?",
+      "GIRAFE : Sur une plage. Pour le reste, j’attends encore la brochure.",
+      "SINGE : Ça a l’air calme. Restons prudents avec les apparences.",
     ]);
-    this.boat = this.add.container(1220, 486, [this.boatArt, this.algae]).setDepth(12);
-    this.items.push(
-      {
-        id: "boat",
-        x: 1220,
-        y: 505,
-        radius: 140,
-        used: false,
-        interact: () => this.tryBoat(),
-      },
-      {
-        id: "propeller",
-        x: 1352,
-        y: 562,
-        radius: 62,
-        used: false,
-        interact: () => this.inspectPropeller(),
-      },
-    );
   }
 
-  private createCoconutTree(): void {
-    const tree = createEntityImage(this, "coconutTree").setScale(0.86);
-    this.add.container(520, 455, [tree]).setDepth(9);
-    this.items.push({
-      id: "tree",
-      x: 520,
-      y: 416,
-      radius: 90,
-      used: false,
-      interact: () => this.findPinkwindkis(),
+  update(_time:number,delta:number):void {
+    if(this.phase!=="explore")return;
+    this.player.update(()=>true);
+    const goal=Phaser.Math.Clamp(this.player.sprite.x-(this.player.sprite.flipX?-65:65),105,1830);
+    const difference=goal-this.monkey.x;
+    if(Math.abs(difference)>8){this.monkey.x+=Math.sign(difference)*Math.min(Math.abs(difference),delta*0.15);this.monkey.setScale(difference<0?-1:1,1);this.monkey.y=511+Math.sin(this.time.now/100)*2;}
+    else this.monkey.y=511;
+  }
+
+  private createHud():void {
+    this.add.rectangle(180,29,340,49,0x203845,0.97).setStrokeStyle(2,0x90b8aa).setScrollFactor(0).setDepth(100);
+    this.add.text(22,12,"IV · LA PLAGE DES ÉCHOUÉS",{fontFamily:"monospace",fontSize:"11px",color:"#f4dfb2"}).setScrollFactor(0).setDepth(101);
+    this.objective=this.add.text(22,33,"EXPLORER LA PLAGE",{fontFamily:"monospace",fontSize:"10px",color:"#b9daca"}).setScrollFactor(0).setDepth(101);
+    const sound=this.add.text(321,23,audio.isEnabled()?"♪":"×",{fontSize:"17px",color:"#f4dfb2"}).setScrollFactor(0).setDepth(102).setInteractive({useHandCursor:true});
+    sound.on("pointerdown",()=>{const on=audio.toggle();sound.setText(on?"♪":"×");if(!on)this.stopWhispers?.();});
+    this.message=this.add.text(180,140,"",{fontFamily:"monospace",fontSize:"11px",color:"#f3e4c6",align:"center",lineSpacing:5,wordWrap:{width:300},backgroundColor:"#203845",padding:{x:12,y:10}}).setOrigin(0.5).setScrollFactor(0).setDepth(110).setAlpha(0);
+  }
+
+  private registerTargets():void {
+    const target=(id:string,x:number,y:number,rx:number,ry:number,action:()=>void)=>this.targets.push({id,x,y,rx,ry,action});
+    target("timeGate",55,450,45,65,()=>this.say("La porte temporelle vibre encore."));
+    target("giraffe",232,485,30,68,()=>{
+      if(this.helperFound&&this.belongings[2].visible){
+        if(this.hasCoconut){
+          this.openDialogue([
+            "TOI : Voilà ta noix de coco !",
+            "GIRAFE : Marché conclu. Tenez, voilà le livre. Dites à Pinkwindkis que j’en étais au troisième coup.",
+          ],()=>{
+            this.hasCoconut=false;
+            this.takeBelonging(2);
+          });
+          return;
+        }
+        if(this.coconutTradeOffered){
+          this.say("GIRAFE : Une noix de coco contre le livre.\nIl en reste dans le cocotier.");
+          return;
+        }
+        this.openDialogue([
+          "TOI : Tu as trouvé quelque chose sur la plage ?",
+          "GIRAFE : Oui, plein de coquillages et du sable. À part le cocotier, il n’y a pas grand-chose ici. Laissez-moi maintenant, j’ai une lecture à terminer.",
+          "TOI : Une lecture ? Tu as trouvé un livre ?",
+          "GIRAFE : Oui, j’aime lire. Je l’ai trouvé sur la plage. « Les 12 coups de fouet de l’apocalypse », par Pinkwindkis.",
+          "TOI : C’est justement son livre qu’on cherche. Tu peux nous le rendre ?",
+          "GIRAFE : Je veux finir mon chapitre. Mais si vous me rapportez une noix de coco, je vous laisse le livre. J’ai beau tirer sur les noix, aucune ne tombe.",
+        ],()=>{this.coconutTradeOffered=true;});
+        return;
+      }
+      this.say(this.repaired?"GIRAFE : Cette fois, je crois qu’on peut partir.":"GIRAFE : Je garde mon calme et mes pieds au sec.\nChacun ses ambitions.");
     });
-  }
-
-  private createStrangeObjects(): void {
-    this.createVrHeadset(720, 545);
-    this.createUnderwear(835, 548);
-    this.createDinoBook(950, 543);
-    this.createAntenna(1060, 527);
-  }
-
-  private createVrHeadset(x: number, y: number): void {
-    createDetailedObject(this, "vrHeadset", x, y, { label: "casque VR" }).setDepth(12);
-    this.items.push({
-      id: "vr",
-      x,
-      y,
-      radius: 45,
-      used: false,
-      interact: () => this.takeVrHeadset(),
-    });
-  }
-
-  private createUnderwear(x: number, y: number): void {
-    createDetailedObject(this, "pinkUnderwear", x, y, { label: "slip rose fraise" }).setDepth(12);
-    this.items.push({
-      id: "underwear",
-      x,
-      y,
-      radius: 50,
-      used: false,
-      interact: () => this.showMessage("Un slip rose bonbon parfum fraise.\nLa mer refuse de commenter.", 2400),
-    });
-  }
-
-  private createDinoBook(x: number, y: number): void {
-    createDetailedObject(this, "dinoBook", x, y, { label: "livre dinosaures" }).setDepth(12);
-    this.items.push({
-      id: "dinoBook",
-      x,
-      y,
-      radius: 50,
-      used: false,
-      interact: () => this.showMessage("Un livre ancien sur les dinosaures.\nPage 12 : « éviter les météorites ».", 2500),
-    });
-  }
-
-  private createAntenna(x: number, y: number): void {
-    createDetailedObject(this, "satelliteAntenna", x, y, { label: "antenne satellite", scale: 1.05 }).setDepth(12);
-    this.items.push({
-      id: "antenna",
-      x,
-      y,
-      radius: 58,
-      used: false,
-      interact: () => this.showMessage("L’antenne retransmet :\n« krr… zzz… pwi… nk… »\nMessage inaudible.", 2800),
-    });
-  }
-
-  private createHud(): void {
-    this.add.rectangle(180, 27, 332, 42, 0x163647, 0.86).setScrollFactor(0).setDepth(100);
-    this.add.text(27, 18, "NIV. 4", { fontFamily: "system-ui", fontSize: "13px", color: "#ffd36a", fontStyle: "bold" }).setScrollFactor(0).setDepth(101);
-    this.objectiveText = this.add.text(328, 18, "⛵ BATEAU", {
-      fontFamily: "system-ui",
-      fontSize: "12px",
-      color: "#ffffff",
-      fontStyle: "bold",
-    }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
-    this.messagePanel = this.add.rectangle(180, 588, 326, 66, 0x163647, 0.94).setStrokeStyle(3, 0xffd36a, 0.35).setScrollFactor(0).setDepth(109).setAlpha(0);
-    this.messageText = this.add.text(180, 590, "", {
-      fontFamily: "system-ui",
-      fontSize: "13px",
-      color: "#fffdf2",
-      fontStyle: "bold",
-      align: "center",
-      lineSpacing: 4,
-      wordWrap: { width: 292 },
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(110).setAlpha(0);
-  }
-
-  private handleTap(screenX: number, screenY: number): void {
-    if (this.departing) return;
-    const world = this.cameras.main.getWorldPoint(screenX, screenY);
-    audio.play("tap");
-    if (this.boatRepaired && world.x > 1150) {
-      this.departAtSunset();
-      return;
-    }
-    this.player.moveTo(world.x, world.y);
-  }
-
-  private handleDoubleTap(screenX: number, screenY: number): void {
-    if (this.departing) return;
-    const world = this.cameras.main.getWorldPoint(screenX, screenY);
-    const item = this.items.find((candidate) => Phaser.Math.Distance.Between(world.x, world.y, candidate.x, candidate.y) < candidate.radius);
-    if (item) {
-      item.interact();
-      return;
-    }
-    this.showMessage("Rien d’étrange ici.\nEnfin… presque rien.", 1400);
-  }
-
-  private takeVrHeadset(): void {
-    if (this.hasVrHeadset) {
-      this.showMessage("Tu as déjà le casque VR.", 1200);
-      return;
-    }
-    this.hasVrHeadset = true;
-    audio.play("confirm");
-    this.objectiveText.setText("🥽 PINKWINDKIS");
-    this.showMessage("Tu ramasses un casque de réalité virtuelle.\nTrès utile, évidemment.", 2400);
-  }
-
-  private findPinkwindkis(): void {
-    if (!this.pinkwindkisFound) {
-      this.pinkwindkisFound = true;
-      this.pinkwindkis = this.createPinkwindkis(520, 350).setAlpha(0).setScale(0.35).setDepth(16);
-      this.tweens.add({ targets: this.pinkwindkis, alpha: 1, y: 402, scale: 1, duration: 720, ease: "Bounce.out" });
-      audio.play("monkey");
-      this.playPinkwindkisIntroDialogue();
-      this.objectiveText.setText("🥽 CASQUE VR");
-      return;
-    }
-    if (!this.hasVrHeadset) {
-      this.showMessage("Pinkwindkis : non.\nJe répare seulement en immersion.", 2100);
-      return;
-    }
-    if (!this.boatInspected) {
-      this.showMessage("Pinkwindkis renifle le casque.\n« Pourquoi faire ? Va voir le bateau d’abord. »", 2600);
-      this.objectiveText.setText("⛵ BATEAU");
-      return;
-    }
-    this.giveVrToPinkwindkis();
-  }
-
-  private createPinkwindkis(x: number, y: number): Phaser.GameObjects.Container {
-    return createPinkwindkisSprite(this, x, y);
-  }
-
-  private playPinkwindkisIntroDialogue(): void {
-    const lines = [
-      "Toi : D’où viens-tu, petit bonhomme ?",
-      "Pinkwindkis : Moi ? Je viens de très, très loin.",
-      "Pinkwindkis : Je cherche mon amie Origine.",
-      "Pinkwindkis : Elle fait du SAV planétaire. Tu l’as vue ?",
-      "Pinkwindkis : Wouww… bouge pas.",
-      "Pinkwindkis : Il y a une image de mon skin.",
-      "Pinkwindkis : Ils ont ajouté un doigt. MDR.",
-      "Pinkwindkis : Ils sont fous, ces développeurs.",
-    ];
-    lines.forEach((line, index) => {
-      this.time.delayedCall(index * 2450, () => this.showMessage(line, 2250));
-    });
-  }
-
-  private giveVrToPinkwindkis(): void {
-    if (!this.pinkwindkis || this.boatRepaired) return;
-    this.hasVrHeadset = false;
-    audio.play("confirm");
-    this.showMessage("Le casque charge Pinkwindkis…\nMode pingouin en cours.", 2400);
-    this.transformPinkwindkisIntoPenguin();
-    this.time.delayedCall(1150, () => this.repairBoat());
-  }
-
-  private transformPinkwindkisIntoPenguin(): void {
-    if (!this.pinkwindkis || this.pinkwindkisPenguinMode) return;
-    this.pinkwindkisPenguinMode = true;
-    const x = this.pinkwindkis.x;
-    const y = this.pinkwindkis.y;
-    this.tweens.add({
-      targets: this.pinkwindkis,
-      scale: 0.15,
-      angle: 360,
-      alpha: 0.25,
-      duration: 430,
-      ease: "Back.in",
-      onComplete: () => {
-        this.pinkwindkis?.destroy();
-        this.pinkwindkis = this.createPinkwindkisPenguin(x, y).setScale(0.2).setAlpha(0).setDepth(18);
-        this.tweens.add({ targets: this.pinkwindkis, scale: 1, alpha: 1, angle: 0, duration: 520, ease: "Back.out" });
+    target("palm",575,420,100,138,()=>this.say("Un grand cocotier. Les noix sont bien mûres.\nQuelque chose remue entre les palmes…"));
+    target("coconuts",575,380,29,26,()=>{
+      if(this.helperFound&&this.headset.visible){
+        this.openDialogue(["Tu écartes les noix de coco. Derrière la grappe, le casque de Pinkwindkis est coincé entre deux palmes."],()=>this.takeBelonging(0));
+        return;
+      }
+      if(this.coconutTradeOffered&&!this.hasCoconut&&this.belongings[2].visible){
+        this.hasCoconut=true;
         audio.play("confirm");
-        this.showMessage("Pinkwindkis est chargé en pingouin.\nRéparation nautique en réalité virtuelle.", 2600);
-      },
+        this.say("Tu tires sur une noix de coco. Elle se décroche !\nRapporte-la à la girafe.");
+        return;
+      }
+      this.dropPinkwindkis();
     });
-  }
-
-  private createPinkwindkisPenguin(x: number, y: number): Phaser.GameObjects.Container {
-    return this.add.container(x, y, [createEntityImage(this, "pinkwindkisPenguin").setScale(0.9)]);
-  }
-
-  private repairBoat(): void {
-    if (!this.pinkwindkis) return;
-    audio.play("bridge");
-    this.tweens.add({
-      targets: this.pinkwindkis,
-      x: 1340,
-      y: 535,
-      duration: 900,
-      ease: "Sine.inOut",
-      onComplete: () => {
-        this.tweens.add({
-          targets: this.algae,
-          alpha: 0,
-          scale: 0.15,
-          angle: 180,
-          duration: 650,
-          ease: "Back.in",
-          onComplete: () => {
-            this.boatRepaired = true;
-            this.boatArt.setTexture("upless-entity-repaired-boat-comic").setScale(0.95);
-            this.tweens.add({ targets: this.boatArt, scale: 1.06, duration: 240, yoyo: true, repeat: 1, ease: "Back.out" });
-            this.sparkleBoat();
-            this.objectiveText.setText("🌅 DÉPART");
-            this.showMessage("Bateau tout neuf !\nTouche-le pour partir au large.", 2600);
-          },
-        });
-      },
+    target("helper",585,500,28,45,()=>this.talkToHelper());
+    this.belongings.forEach((object,index)=> {
+      if(index===0||index===2)return;
+      target(["vr","cloth","book","radio"][index],object.x,object.y,28,28,()=>this.takeBelonging(index));
     });
+    target("propeller",1558,426,30,30,()=>this.inspectPropeller());
+    target("boat",1670,448,165,118,()=>{if(this.repaired)this.depart();else this.inspectBoat();});
   }
 
-  private sparkleBoat(): void {
-    for (let i = 0; i < 14; i += 1) {
-      const spark = this.add.circle(
-        1220 + Phaser.Math.Between(-130, 130),
-        486 + Phaser.Math.Between(-70, 65),
-        Phaser.Math.Between(2, 5),
-        0xdffcff,
-        0.9,
-      ).setDepth(25);
-      this.tweens.add({
-        targets: spark,
-        y: spark.y - Phaser.Math.Between(14, 42),
-        alpha: 0,
-        scale: 1.8,
-        duration: Phaser.Math.Between(420, 780),
-        onComplete: () => spark.destroy(),
-      });
+  private handleTap(x:number,y:number):void {
+    if(this.phase==="dialogue"){this.advanceDialogue();return;}
+    if(this.phase!=="explore")return;
+    const p=this.cameras.main.getWorldPoint(x,y);
+    audio.play("tap");
+    const target=this.targets.filter(t=>(!["vr","cloth","book","radio"].includes(t.id)||this.belongings[["vr","cloth","book","radio"].indexOf(t.id)].visible)&&(this.helperFound||!["helper","vr","cloth","book","radio"].includes(t.id))&&Math.abs(p.x-t.x)<=t.rx&&Math.abs(p.y-t.y)<=t.ry)
+      .sort((a,b)=>Math.hypot(p.x-a.x,p.y-a.y)-Math.hypot(p.x-b.x,p.y-b.y))[0];
+    if(target){
+      if(Math.abs(this.player.sprite.x-target.x)>155){this.player.moveTo(Math.min(1800,target.x-70),525);this.say("Approche-toi, puis touche l’objet.");return;}
+      this.player.stop();target.action();return;
     }
+    if(Math.abs(p.x-this.monkey.x)<27&&Math.abs(p.y-this.monkey.y)<49){this.player.stop();this.say(this.repaired?"SINGE : Tout le monde à bord.\nPour une fois, personne ne vote.":this.propellerInspected?"SINGE : Des algues dans un propulseur.\nLa nature s’est mise à faire des barrages.":"SINGE : Regardons ce qui nous entoure.\nLes choses parlent. En général, pour se plaindre.");return;}
+    this.player.moveTo(Phaser.Math.Clamp(p.x,30,1800),525);
   }
 
-  private tryBoat(): void {
-    if (!this.boatRepaired) {
-      this.boatInspected = true;
-      this.objectiveText.setText("🌴 PINKWINDKIS");
-      this.showMessage("Le bateau ne marche pas.\nDes algues bloquent l’hélice.", 2200);
+  private handleDoubleTap(x:number,y:number):void {
+    const point=this.cameras.main.getWorldPoint(x,y);
+    if(this.phase!=="explore"||Math.abs(point.x-55)>45||Math.abs(point.y-450)>65){
+      this.handleTap(x,y);
       return;
     }
-    this.departAtSunset();
-  }
-
-  private inspectPropeller(): void {
-    this.boatInspected = true;
-    this.objectiveText.setText("🌴 PINKWINDKIS");
-    this.showMessage("Des algues sont coincées sur l’hélice.\nIl faut quelqu’un de très petit.", 2300);
-  }
-
-  private departAtSunset(): void {
-    if (this.departing || !this.boatRepaired) return;
-    this.departing = true;
+    this.phase="teleport";
     this.player.stop();
-    this.player.sprite.body!.enable = false;
     audio.play("portal");
-    this.showMessage("Au coucher du soleil,\nils partent tous au large.", 2600);
-    this.cameras.main.fade(2600, 255, 156, 105);
-    this.tweens.add({ targets: this.boat, x: 1620, y: 455, duration: 2600, ease: "Sine.inOut" });
-    if (this.pinkwindkis) this.tweens.add({ targets: this.pinkwindkis, x: 1240, y: 430, duration: 900, ease: "Sine.out" });
-    this.tweens.add({ targets: this.giraffe, x: 1180, y: 452, scale: 0.7, duration: 1200, ease: "Sine.inOut" });
-    this.tweens.add({ targets: this.player.sprite, x: 1140, y: 500, alpha: 0.25, duration: 1100, ease: "Sine.inOut" });
-    this.time.delayedCall(2700, () => {
-      const save = loadSave();
-      writeSave({ ...save, lastLevel: 4, unlockedLevel: Math.max(save.unlockedLevel, 5) });
-      this.scene.start("MoonScene");
-    });
+    this.cameras.main.fadeOut(450,83,163,218);
+    this.time.delayedCall(450,()=>this.scene.start("GameScene",{levelId:1,timeGateTrap:true}));
   }
 
-  private canMoveTo(fromX: number, targetX: number): boolean {
-    if (!this.boatRepaired && fromX < 1120 && targetX > 1140) {
-      this.boatInspected = true;
-      this.objectiveText.setText("🌴 PINKWINDKIS");
-      this.showMessage("Le bateau est bloqué.\nIl faut d’abord libérer l’hélice.", 1600);
-      return false;
+  private inspectBoat():void {
+    if(this.repaired){this.say("Le propulseur arrière est dégagé. Touche la cabine\npour embarquer avec toute l’équipe.");return;}
+    this.boatInspected=true;
+    this.refreshObjective();
+    this.openDialogue(this.propellerInspected
+      ? ["TOI : Le bateau est toujours là. Les algues aussi.","SINGE : Au moins, le diagnostic n’a pas changé."]
+      : ["Tu examines la coque et essaies le moteur. Il tousse, mais le bateau reste immobile.","TOI : Quelque chose le retient…", "Un bruit sourd vient de l’arrière. D’ici, tu ne vois pas ce qui bloque."]);
+  }
+
+  private inspectPropeller():void {
+    if(this.repaired){this.say("Le propulseur arrière est dégagé.");return;}
+    this.boatInspected=true;this.propellerInspected=true;this.refreshObjective();
+    this.openDialogue(["Tu te penches à l’arrière du bateau. Des lianes rouges enserrent la tuyère du propulseur arrière.","TOI : Voilà ce qui bloque. C’est trop profond pour les atteindre depuis la berge.","SINGE : Pas question de tirer au hasard. On finirait avec un moteur en souvenir."]);
+  }
+
+  private takeBelonging(index:number):void {
+    const object=this.belongings[index];
+    if(!this.helperFound||!object.visible)return;
+    object.setVisible(false);
+    audio.play("confirm");
+    this.allBelongingsFound=!this.belongings.some(item=>item.visible);
+    this.refreshObjective();
+    this.say(this.allBelongingsFound?"Tout est retrouvé ! Rapporte ses affaires à Pinkwindkis.":["Casque VR retrouvé !","Slip rose retrouvé !","Livre retrouvé !","Radio retrouvée !"][index]);
+  }
+
+  private dropPinkwindkis():void {
+    if(this.helperFallen){this.say("PINKWINDKIS : Les noix, c’est bon.\nMoi, j’ai déjà donné.");return;}
+    this.helperFallen=true;this.phase="falling";this.player.stop();
+    this.say("Tu tires sur une noix. Tout le cocotier bouge…",1900);
+    audio.play("rock");
+    this.tweens.add({targets:this.palm,angle:3,duration:90,yoyo:true,repeat:3});
+    this.helper=createBeachCharacter(this,575,373,"pinkwindkis").setDepth(19);
+    const coconut=this.add.rectangle(565,382,11,13,0x9d7958).setDepth(20);
+    this.tweens.add({targets:coconut,x:539,y:543,angle:130,duration:750,ease:"Bounce.out",onComplete:()=>coconut.destroy()});
+    this.belongings.forEach((object,index)=>{
+      if(index===0||index===2){
+        object.setVisible(true).setAlpha(0);
+        return;
+      }
+      const landingX=object.x,landingY=object.y;
+      object.setPosition(575,385).setVisible(true);
+      this.tweens.addCounter({from:0,to:1,delay:180+index*70,duration:650,onUpdate:t=>{
+        const progress=t.getValue()??0;
+        object.setPosition(575+(landingX-575)*progress,385+(landingY-385)*progress-Math.sin(progress*Math.PI)*65);
+      }});
+    });
+    this.tweens.add({targets:this.helper,x:585,y:507,angle:0,duration:1150,ease:"Bounce.out",onComplete:()=>{
+      audio.play("monkey");this.phase="explore";this.talkToHelper();
+    }});
+  }
+
+  private talkToHelper():void {
+    if(this.repaired){this.say("PINKWINDKIS : Mission accomplie.\nLe pingouin exige maintenant des vacances.");return;}
+    if(!this.helperFound){
+      if(!this.helperFallen)return;
+      this.helperFound=true;
+      this.refreshObjective();
+      const introduction = [
+        "Quelqu’un tombe du cocotier avec son sac. Un casque, un slip, un livre et une radio s’éparpillent sur le sable.",
+        "PINKWINDKIS : Aïe ! Je venais juste de m’installer. Mes affaires… Vous cherchiez une noix ou un accident ?",
+        "TOI : La même tête, les mêmes oreilles blanches… Tu ressembles beaucoup à notre singe.",
+        "PINKWINDKIS : Normal. Je suis lui, dans le futur. On m’appelle Pinkwindkis. Pas besoin de crier, il est déjà assez inquiet.",
+        "SINGE : Je deviens astronaute ? Et on me fournit cette combinaison ?",
+        "PINKWINDKIS : Explorateur indépendant. Le sac de survie est inclus. Pour la retraite, on cherche encore une planète habitable.",
+        "PINKWINDKIS : Je cherche Origine. Elle fait le service après-vente des mondes. En attendant, ce cocotier est mon bureau.",
+      ];
+      introduction.push("PINKWINDKIS : Je peux vous aider si vous m’aidez à retrouver mes affaires.");
+      this.refreshObjective();this.openDialogue(introduction);
+      return;
     }
-    return true;
+    if(this.transformed){
+      if(this.propellerInspected)this.repairBoat();
+      else this.say("PINKWINDKIS : En mode pingouin, je peux plonger. Montrez-moi le problème !");
+      return;
+    }
+    if(!this.allBelongingsFound){
+      this.say("PINKWINDKIS : Il me manque encore "+this.belongings.filter(item=>item.visible).length+" affaire(s).");
+      return;
+    }
+    this.openDialogue(["TOI : On a retrouvé toutes tes affaires !","PINKWINDKIS : Merci ! Je remets mon casque. Mode pingouin… activation !"],()=>this.transformHelper());
   }
 
-  private showMessage(message: string, duration: number): void {
-    this.messageTimer?.remove(false);
-    this.messagePanel.setAlpha(1);
-    this.messageText.setText(message).setAlpha(1);
-    this.messageTimer = this.time.delayedCall(duration, () => {
-      this.tweens.add({ targets: [this.messageText, this.messagePanel], alpha: 0, duration: 220 });
+  private refreshObjective():void {
+    this.objective.setText(this.repaired?"BATEAU PRÊT":this.helperFound&&!this.transformed?(this.allBelongingsFound?"RETOURNER VOIR PINKWINDKIS":"AFFAIRES RETROUVÉES : "+this.belongings.filter(item=>!item.visible).length+"/4"):this.propellerInspected?"PROPULSEUR OBSTRUÉ":this.boatInspected?"LE BATEAU RESTE IMMOBILE":"EXPLORER LA PLAGE");
+  }
+
+  private openDialogue(lines:string[],done?:()=>void):void {
+    this.phase="dialogue";this.player.stop();this.message.setAlpha(0);this.messageTimer?.remove(false);
+    this.dialogueLines=lines;this.dialogueIndex=0;this.dialogueDone=done;
+    const panel=this.add.rectangle(180,205,336,220,0x203845,0.99).setStrokeStyle(2,0xb6c9ad);
+    this.dialogueText=this.add.text(27,112,"",{fontFamily:"monospace",fontSize:"12px",color:"#f2e4c8",wordWrap:{width:303},lineSpacing:7});
+    const next=this.add.text(27,293,"[ TOUCHER POUR LA SUITE ]",{fontFamily:"monospace",fontSize:"10px",color:"#a9cfc2"});
+    this.dialoguePanel=this.add.container(0,0,[panel,this.dialogueText,next]).setScrollFactor(0,0,true).setDepth(150);
+    this.showDialogueLine();
+  }
+  private showDialogueLine():void {
+    this.stopWhispers?.();const text=this.dialogueLines[this.dialogueIndex];this.dialogueText.setText(text);
+    this.stopWhispers=audio.whisper(Math.min(7,text.length*0.045),this.dialogueIndex%2?1.15:0.85);
+  }
+  private advanceDialogue():void {
+    this.stopWhispers?.();
+    this.dialogueIndex++;
+    if(this.dialogueIndex<this.dialogueLines.length){this.showDialogueLine();return;}
+    this.dialoguePanel?.destroy(true);this.phase="explore";const done=this.dialogueDone;this.dialogueDone=undefined;done?.();
+  }
+
+  private transformHelper():void {
+    if(!this.helper||!this.allBelongingsFound||this.transformed)return;
+    this.phase="repair";this.player.stop();audio.play("confirm");
+    this.say("MODE PINGOUIN GUERRIER ACTIVÉ",3000);
+    this.tweens.add({targets:this.helper,scale:0.1,alpha:0,duration:650,onComplete:()=>{
+      this.helper?.destroy(true);
+      this.helper=createBeachCharacter(this,585,507,"penguin").setDepth(19);
+      this.transformed=true;
+      this.phase="explore";
+      this.refreshObjective();
+      if(this.propellerInspected)this.repairBoat();
+    }});
+  }
+
+  private repairBoat():void {
+    if(this.phase!=="explore"||this.repaired||!this.helper||!this.transformed||!this.propellerInspected)return;
+    this.phase="repair";this.player.stop();
+      this.cameras.main.stopFollow();this.cameras.main.pan(1670,320,1200,Phaser.Math.Easing.Sine.InOut);
+      this.tweens.addCounter({from:0,to:1,duration:1800,onUpdate:t=>{
+        const progress=t.getValue()??0;this.helper!.setPosition(585+973*progress,507-81*progress-Math.sin(progress*Math.PI)*95);
+      },onComplete:()=>{
+        audio.play("bridge");
+        this.say("Pinkwindkis dégage le propulseur arrière.\nLes algues n’avaient pas signé pour ça.",3300);
+        this.tweens.add({targets:this.algae,y:-36,x:this.algae.x-38,alpha:0,duration:850,onComplete:()=>{
+          this.repaired=true;this.phase="explore";this.helper!.setPosition(1558,460);
+          this.refreshObjective();this.cameras.main.startFollow(this.player.sprite,true,0.08,0.08,-55,0).setDeadzone(90,180);
+          this.say("Le propulseur fonctionne. Le bateau est prêt.\nTouche sa cabine pour embarquer tout le monde.",4000);
+        }});
+      }});
+
+  }
+
+  private depart():void {
+    if(!this.repaired||this.phase!=="explore")return;
+    this.phase="boarding";this.player.stop();this.player.sprite.body!.enable=false;
+    // The beached diagonal yacht levels out only as the crew prepares to sail.
+    this.tweens.add({targets:this.boat,angle:0,y:489,duration:700,ease:"Sine.inOut"});
+    this.cameras.main.stopFollow();this.cameras.main.pan(1670,320,800,Phaser.Math.Easing.Sine.InOut);
+    this.say("Embarquement. Même la girafe a une place.\nSINGE : Enfin une politique de transport inclusive.",4000);
+    const passengers=[this.player.sprite,this.monkey,this.giraffe,this.helper!];
+    const seats=[-60,-22,20,65];
+    passengers.forEach((person,index)=>{
+      this.tweens.killTweensOf(person);
+      this.tweens.add({targets:person,x:1670+seats[index]*1.12,y:467,duration:1300+index*220,ease:"Sine.inOut",onComplete:()=>{
+        person.setScale(index===2?0.65:0.75);person.setPosition(seats[index],-13);this.boat.add(person);
+      }});
     });
+    this.time.delayedCall(2200,()=>{
+      this.phase="sailing";this.tweens.killTweensOf(this.boat);audio.play("portal");
+      this.say("GIRAFE : Cap sur Origine.\nLa mer est vaste. Notre plan tient dans une bouée.",3500);
+      this.tweens.add({targets:this.boat,x:2070,y:434,scale:0.65,duration:3300,ease:"Sine.inOut",onComplete:()=>{
+        const save=loadSave();writeSave({...save,lastLevel:4,unlockedLevel:Math.max(save.unlockedLevel,5)});
+        this.cameras.main.fadeOut(600,28,47,69);this.time.delayedCall(650,()=>this.scene.start("MoonScene"));
+      }});
+    });
+  }
+
+  private say(text:string,duration=2900):void {
+    this.messageTimer?.remove(false);this.message.setText(text).setAlpha(1);
+    this.messageTimer=this.time.delayedCall(duration,()=>this.message.setAlpha(0));
   }
 }
+

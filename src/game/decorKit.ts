@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { isolateStatuePieces } from "./statueMask";
 
 type LibertyPiece = "head" | "bust" | "torch" | "foot";
 
@@ -28,23 +29,27 @@ const generatedPieceSources: Record<LibertyPiece, { x: number; y: number; width:
 export function createBrokenLibertyStatue(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Container {
   if (scene.textures.exists(generatedBrokenLibertyKey)) {
     ensureGeneratedBrokenLibertyPieces(scene);
+    ensurePixelLibertyPieces(scene);
     const layout = [
       { piece: "foot" as const, x: -178, y: 52, angle: -3, shadowWidth: 155 },
-      { piece: "torch" as const, x: -34, y: 4, angle: -18, shadowWidth: 92 },
       { piece: "bust" as const, x: 108, y: 38, angle: 7, shadowWidth: 150 },
       { piece: "head" as const, x: -94, y: -98, angle: -8, shadowWidth: 122 },
     ];
     const children: Phaser.GameObjects.GameObject[] = [
       scene.add.ellipse(0, 96, 430, 38, 0x3f2530, 0.17),
     ];
-    layout.forEach(({ piece, x: px, y: py, angle, shadowWidth }) => {
+    layout.forEach(({ piece, x: px, y: py, shadowWidth }) => {
       children.push(scene.add.ellipse(px + 4, py + 56, shadowWidth, 18, 0x1e1423, 0.22));
-      children.push(scene.add.image(px, py, generatedPieceKeys[piece]).setAngle(angle));
+      children.push(scene.add.image(px, py, `${generatedPieceKeys[piece]}-pixel`));
     });
+    // Draw the detached arm last: its grounded base pivots the torch down to the right.
+    children.push(scene.add.ellipse(50, 66, 188, 17, 0x1e1423, 0.24));
+    children.push(scene.add.image(-28, 42, `${generatedPieceKeys.torch}-pixel`)
+      .setOrigin(0.5, 0.94).setAngle(65).setScale(0.88));
     return scene.add
       .container(x, y, children)
       .setDepth(7)
-      .setData("renderMode", "generated-separate-sticker-piece-textures")
+      .setData("renderMode", "original-design-pixel-copper-textures")
       .setData("decorKind", "complete-liberty-sticker-broken-into-ground-pieces");
   }
 
@@ -81,7 +86,51 @@ export function createBrokenLibertyStatue(scene: Phaser.Scene, x: number, y: num
     .setData("decorKind", "complete-liberty-sticker-broken-into-ground-pieces");
 }
 
+// Preserve the original sculpted shapes and piece layout; only rebuild their material on a pixel grid.
+function ensurePixelLibertyPieces(scene: Phaser.Scene): void {
+  const palette = [
+    [36, 51, 62], [53, 75, 80], [70, 98, 96], [83, 119, 111],
+    [106, 146, 130], [132, 166, 144], [163, 190, 161], [195, 209, 175],
+    [107, 81, 71], [150, 105, 76], [190, 145, 98], [225, 185, 128], [236, 216, 174],
+  ];
+  (Object.keys(generatedPieceKeys) as LibertyPiece[]).forEach((piece) => {
+    const key = `${generatedPieceKeys[piece]}-pixel`;
+    if (scene.textures.exists(key)) return;
+    const {targetWidth: width, targetHeight: height} = generatedPieceSources[piece];
+    const low = document.createElement("canvas");
+    low.width = Math.ceil(width / 3);
+    low.height = Math.ceil(height / 3);
+    const ctx = low.getContext("2d", {willReadFrequently: true});
+    const texture = scene.textures.createCanvas(key, width, height);
+    if (!ctx || !texture) return;
+    ctx.drawImage(scene.textures.get(generatedPieceKeys[piece]).getSourceImage() as CanvasImageSource, 0, 0, low.width, low.height);
+    const pixels = ctx.getImageData(0, 0, low.width, low.height);
+    const data = pixels.data;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 120) { data[i + 3] = 0; continue; }
+      let best = palette[0], distance = Infinity;
+      for (const color of palette) {
+        const d = (data[i] - color[0]) ** 2 + (data[i + 1] - color[1]) ** 2 + (data[i + 2] - color[2]) ** 2;
+        if (d < distance) { distance = d; best = color; }
+      }
+      data[i] = best[0]; data[i + 1] = best[1]; data[i + 2] = best[2]; data[i + 3] = 255;
+    }
+    ctx.putImageData(pixels, 0, 0);
+    texture.context.imageSmoothingEnabled = false;
+    texture.context.drawImage(low, 0, 0, width, height);
+    texture.refresh();
+  });
+}
+
 function ensureGeneratedBrokenLibertyPieces(scene: Phaser.Scene): void {
+  if (Object.values(generatedPieceKeys).every((key) => scene.textures.exists(key))) return;
+  const image = scene.textures.get(generatedBrokenLibertyKey).getSourceImage() as HTMLImageElement;
+  const sheet = document.createElement("canvas");
+  sheet.width = image.width; sheet.height = image.height;
+  const sheetContext = sheet.getContext("2d", {willReadFrequently: true});
+  if (!sheetContext) return;
+  sheetContext.drawImage(image, 0, 0);
+  const pieces = isolateStatuePieces(sheetContext.getImageData(0, 0, sheet.width, sheet.height).data, sheet.width, sheet.height);
   (Object.keys(generatedPieceKeys) as LibertyPiece[]).forEach((piece) => {
     if (scene.textures.exists(generatedPieceKeys[piece])) return;
     const source = generatedPieceSources[piece];
@@ -92,16 +141,23 @@ function ensureGeneratedBrokenLibertyPieces(scene: Phaser.Scene): void {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const image = scene.textures.get(generatedBrokenLibertyKey).getSourceImage() as CanvasImageSource;
+    const pieceArt = pieces[piece];
+    const isolated = document.createElement("canvas");
+    isolated.width = pieceArt.width; isolated.height = pieceArt.height;
+    const isolatedContext = isolated.getContext("2d");
+    if (!isolatedContext) return;
+    const piecePixels = isolatedContext.createImageData(pieceArt.width, pieceArt.height);
+    piecePixels.data.set(pieceArt.pixels);
+    isolatedContext.putImageData(piecePixels, 0, 0);
     ctx.clearRect(0, 0, source.targetWidth, source.targetHeight);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    const scale = Math.min(source.targetWidth / source.width, source.targetHeight / source.height) * 0.98;
-    const drawWidth = source.width * scale;
-    const drawHeight = source.height * scale;
+    const scale = Math.min(source.targetWidth / pieceArt.width, source.targetHeight / pieceArt.height) * 0.96;
+    const drawWidth = pieceArt.width * scale;
+    const drawHeight = pieceArt.height * scale;
     const dx = (source.targetWidth - drawWidth) / 2;
     const dy = (source.targetHeight - drawHeight) / 2;
-    ctx.drawImage(image, source.x, source.y, source.width, source.height, dx, dy, drawWidth, drawHeight);
+    ctx.drawImage(isolated, dx, dy, drawWidth, drawHeight);
     removeMagentaKey(ctx, source.targetWidth, source.targetHeight);
     texture.refresh();
   });

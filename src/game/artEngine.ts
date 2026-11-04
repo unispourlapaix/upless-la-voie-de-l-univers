@@ -91,22 +91,16 @@ function makeNoiseTexture(scene: Phaser.Scene, key: string, size: number, base: 
 
   context.fillStyle = colorToCss(base, 0.72);
   context.fillRect(0, 0, size, size);
-  for (let i = 0; i < size * size * density; i += 1) {
-    const x = Math.random() * size;
-    const y = Math.random() * size;
-    const r = Math.random() * 1.8 + 0.35;
-    context.fillStyle = Math.random() > 0.5 ? colorToCss(fleck, Math.random() * 0.28) : colorToCss(0xffffff, Math.random() * 0.18);
-    context.beginPath();
-    context.arc(x, y, r, 0, Math.PI * 2);
-    context.fill();
-  }
-  for (let i = 0; i < 12; i += 1) {
-    context.strokeStyle = colorToCss(0xffffff, 0.06);
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(Math.random() * size, Math.random() * size);
-    context.lineTo(Math.random() * size, Math.random() * size);
-    context.stroke();
+  // Seeded clusters tile consistently, without blurry subpixel noise.
+  let seed = base >>> 0;
+  const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  for (let i = 0; i < size * size * density / 4; i += 1) {
+    const x = Math.floor(random() * size / 2) * 2;
+    const y = Math.floor(random() * size / 2) * 2;
+    context.fillStyle = colorToCss(fleck, 0.15 + random() * 0.16);
+    context.fillRect(x, y, 2 + Math.floor(random() * 2) * 2, 2);
+    context.fillStyle = colorToCss(0xffffff, 0.12);
+    context.fillRect(x, (y + 2) % size, 2, 1);
   }
   texture.refresh();
 }
@@ -117,3 +111,4 @@ function colorToCss(color: number, alpha: number): string {
   const b = color & 255;
   return `rgba(${r},${g},${b},${alpha})`;
 }
+
