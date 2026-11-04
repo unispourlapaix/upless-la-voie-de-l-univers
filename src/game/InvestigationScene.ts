@@ -148,7 +148,7 @@ export class InvestigationScene extends Phaser.Scene {
       art.lineStyle(4,0x0b1118).lineBetween(x-3,307,x-30,274);
       art.lineBetween(x-3,335,x+24,293);
     }
-    const wood=this.add.graphics();
+    const wood=this.add.graphics().setDepth(8);
     wood.fillStyle(0x30242b);
     wood.beginPath();wood.moveTo(74,460);wood.lineTo(283,427);
     wood.lineTo(295,448);wood.lineTo(82,489);wood.closePath();wood.fillPath();
@@ -164,6 +164,8 @@ export class InvestigationScene extends Phaser.Scene {
     }
     wood.lineStyle(1,0x282128).strokeEllipse(222,448,12,5);
     wood.fillStyle(0x591e2c).fillEllipse(175,496,7,4).fillEllipse(195,503,4,3);
+    wood.setScale(1,0.55).setY(250);
+    this.add.ellipse(186,519,219,13,0x080f16,0.45).setDepth(7);
     this.add.text(24,35,"ALPHA — GOLGOTHA",{
       fontFamily:"monospace",fontSize:"18px",color:"#d4c4c3",
     });
@@ -171,13 +173,14 @@ export class InvestigationScene extends Phaser.Scene {
       fontFamily:"monospace",fontSize:"13px",color:"#dccbca",lineSpacing:5,
       wordWrap:{width:310},
     });
-    const evidence=this.add.rectangle(183,459,238,75,0xffffff,0.001)
+    const evidence=this.add.rectangle(183,503,238,51,0xffffff,0.001)
       .setInteractive({useHandCursor:true});
     const thorn=this.add.graphics().setVisible(false);
     thorn.fillStyle(0xc6ac7f).fillTriangle(192,451,209,423,201,452);
     thorn.lineStyle(1,0x594438).lineBetween(196,449,209,423);
     thorn.fillStyle(0x6b2534).fillEllipse(198,449,6,3);
-    const thornHit=this.add.rectangle(201,439,48,54,0xffffff,0.001)
+    thorn.setScale(1,0.55).setY(250).setDepth(9);
+    const thornHit=this.add.rectangle(201,491,48,35,0xffffff,0.001)
       .setVisible(false);
     const purse=this.add.graphics().setVisible(false);
     purse.fillStyle(0x624936).fillEllipse(281,506,29,29);
@@ -247,7 +250,7 @@ export class InvestigationScene extends Phaser.Scene {
     this.add.text(24,35,"ALPHA — GAT SHEMANIM",{
       fontFamily:"monospace",fontSize:"18px",color:"#d6d8c5",
     });
-    const hero=this.add.image(45,453,"hero");
+    const hero=this.add.image(45,453,"hero").setDepth(12);
     this.tweens.add({targets:hero,x:117,duration:1800,ease:"Sine.inOut"});
     const message=this.add.text(24,542,"Le jardin de Gat Shemanim. Deux hommes dorment profondément. Des pas ont piétiné le chemin.",{
       fontFamily:"monospace",fontSize:"13px",color:"#e2decb",
@@ -267,7 +270,7 @@ export class InvestigationScene extends Phaser.Scene {
       });
     };
     for(const [index,x] of [85,269].entries()){
-      const sleeper=this.add.graphics();
+      const sleeper=this.add.graphics().setDepth(8);
       sleeper.fillStyle(index?0x6a6059:0x626c79).fillRoundedRect(x-30,464,64,22,9);
       sleeper.fillStyle(0xba967d).fillCircle(x-34,466,10);
       sleeper.lineStyle(2,0x443c3b).lineBetween(x-40,465,x-34,466);
@@ -280,7 +283,7 @@ export class InvestigationScene extends Phaser.Scene {
           unlock();
         });
     }
-    const ear=this.add.graphics();
+    const ear=this.add.graphics().setDepth(8);
     ear.fillStyle(0x662b36).fillEllipse(185,488,20,7);
     ear.fillStyle(0xc29c83).fillEllipse(183,481,9,14);
     ear.lineStyle(2,0x805b53).strokeEllipse(184,481,4,8);
@@ -309,24 +312,24 @@ export class InvestigationScene extends Phaser.Scene {
       room.fillStyle(0x776d65).fillRect(x+17,183,5,311);
     }
     room.fillStyle(0x642b39).fillRect(119,182,25,204).fillRect(217,182,25,204);
-    const pilate=this.add.graphics();
+    const pilate=this.add.graphics().setDepth(8);
     pilate.fillStyle(0xd3b18f).fillCircle(181,328,16);
     pilate.fillStyle(0x423c3d).fillEllipse(181,316,33,14);
     pilate.fillStyle(0xe1d7bf).fillTriangle(181,344,149,452,211,452);
     pilate.lineStyle(9,0xbfa890).lineBetween(166,362,180,397);
     pilate.lineBetween(197,362,188,397);
     pilate.lineStyle(4,0x824451).lineBetween(166,349,197,446);
-    const basin=this.add.graphics();
+    const basin=this.add.graphics().setDepth(8);
     basin.fillStyle(0x807f82).fillRect(166,413,32,53);
     basin.fillStyle(0xbcb9ad).fillEllipse(183,407,75,24);
     basin.fillStyle(0x80a8b4).fillEllipse(183,402,58,13);
     detailFigure(pilate,"governor");
     detailBasin(basin);
-    const washing=this.add.graphics();
+    const washing=this.add.graphics().setDepth(8);
     washing.lineStyle(2,0xc7e6e9,0.8).lineBetween(181,394,177,404);
     washing.lineBetween(188,394,192,405);
     this.tweens.add({targets:washing,alpha:0.15,y:3,duration:450,yoyo:true,repeat:-1});
-    this.add.image(83,475,"hero");
+    this.add.image(83,475,"hero").setDepth(12);
     this.add.text(24,35,"LA DEMEURE DU GOUVERNEUR",{
       fontFamily:"monospace",fontSize:"17px",color:"#e9d1a6",
     });
@@ -397,7 +400,7 @@ export class InvestigationScene extends Phaser.Scene {
       temple.fillStyle(0xbc987c).fillCircle(x,y,9);
       temple.fillStyle(0x3c3334).fillEllipse(x,y-7,20,9);
     }
-    this.add.image(31,518,"hero");
+    this.add.image(31,518,"hero").setDepth(12);
     this.add.text(24,32,"DEVANT LE TEMPLE",{
       fontFamily:"monospace",fontSize:"18px",color:"#e0c7a4",
     });
@@ -579,7 +582,7 @@ export class InvestigationScene extends Phaser.Scene {
     tomb.fillStyle(0x4e5a53).fillRect(0,521,360,119);
     tomb.fillStyle(0x92998a).fillCircle(270,480,47);
     tomb.lineStyle(3,0x697266).strokeCircle(270,480,37);
-    this.add.image(94,506,"hero");
+    this.add.image(94,506,"hero").setDepth(12);
     createFutureMonkey(this,133,481).setScale(0.65);
     createBeachCharacter(this,308,492,"penguin").setScale(0.7);
     this.add.text(24,35,"LE CHEMIN DU TOMBEAU",{
@@ -616,7 +619,7 @@ export class InvestigationScene extends Phaser.Scene {
     shroud.lineTo(180,409);shroud.lineTo(152,423);shroud.closePath();shroud.fillPath();
     shroud.lineStyle(2,0xa4afb0).lineBetween(174,387,166,409);
     shroud.lineBetween(213,391,203,410);shroud.lineBetween(251,387,245,405);
-    this.add.image(64,472,"hero");
+    this.add.image(64,472,"hero").setDepth(12);
     this.add.text(24,35,"LE TOMBEAU VIDE",{
       fontFamily:"monospace",fontSize:"18px",color:"#d5d9d4",
     });
@@ -668,10 +671,10 @@ export class InvestigationScene extends Phaser.Scene {
     for(let i=0;i<12;i++){
       sky.fillStyle(0xffffff,0.65).fillEllipse((i*91)%400-20,255+(i%4)*64,145,43);
     }
-    this.add.image(74,420,"hero");
+    this.add.image(74,420,"hero").setDepth(12);
     createFutureMonkey(this,297,413).setScale(0.7);
     this.add.ellipse(297,333,31,9).setStrokeStyle(3,0xf3d77f);
-    const jesus=this.add.graphics().setVisible(false);
+    const jesus=this.add.graphics().setDepth(8).setVisible(false);
     jesus.fillStyle(0xf4eee1).fillTriangle(200,342,163,438,238,438);
     jesus.fillStyle(0xcba27f).fillCircle(200,326,15);
     jesus.fillStyle(0x59483d).fillEllipse(200,317,32,16);
@@ -796,7 +799,7 @@ export class InvestigationScene extends Phaser.Scene {
     beach.fillStyle(0xe0cca0).fillRect(0,490,360,150);
     beach.fillStyle(0xf3ecce).fillRect(0,490,360,5);
     this.add.circle(275,100,35,0xffe3a4);
-    const hero=this.add.image(92,510,"hero");
+    const hero=this.add.image(92,510,"hero").setDepth(12);
     const bag=this.add.graphics();
     bag.fillStyle(0xe9f0e7,0.8).fillRect(200,515,18,21);
     bag.lineStyle(2,0xf8fff3,0.8).strokeRoundedRect(201,509,15,13,4);

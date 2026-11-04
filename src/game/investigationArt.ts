@@ -2,150 +2,75 @@ import Phaser from "phaser";
 
 type Setting="forest"|"garden"|"palace"|"temple"|"hill"|"tomb"|"chamber"|"heaven"|"beach";
 
-/** Small, deterministic marks keep each scene's materials readable at native size. */
+/** Material details are limited to the actual surfaces, behind actors and clues. */
 export function detailInvestigation(scene:Phaser.Scene,setting:Setting):void {
-  const marks=scene.add.graphics().setDepth(18);
+  const marks=scene.add.graphics().setDepth(0.5);
   let seed=431;
   const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  const heaven=setting==="heaven";
-  const dark=["forest","garden","chamber"].includes(setting);
-  const ground=setting==="chamber"?490:setting==="hill"?505:480;
-  const shadow=dark?0x0b1720:0x37493e;
-  const light=heaven?0xfff5d5:dark?0x879585:0xc4b79a;
-  const atmosphere=scene.add.graphics().setDepth(17);
-  const cloudColor=heaven?0xf4f1e5:dark?0x343445:0xb8c5c5;
   if(["forest","garden","hill","tomb","heaven","beach"].includes(setting)){
-    for(let band=0;band<4;band++){
-      const x=-25+band*109,y=154+(band%2)*33;
-      atmosphere.fillStyle(cloudColor,dark?0.5:0.35);
-      atmosphere.fillRect(x,y,87,5).fillRect(x+13,y-5,58,5).fillRect(x+28,y-10,29,5);
-      atmosphere.fillStyle(dark?0x535166:0xf4ebd8,0.22).fillRect(x+28,y-10,26,1);
+    const clouds=scene.add.graphics().setDepth(0.4);
+    const dark=setting==="forest"||setting==="garden";
+    const palette=setting==="heaven"?[0xc3cedf,0xdce3ed,0xf2f1e9,0xfff7db]:
+      dark?[0x222736,0x343748,0x45485a,0x626071]:
+      [0x8399aa,0xa5b8c3,0xd2dce0,0xeee8d8];
+    for(const cloud of [{x:-25,y:179,w:142},{x:125,y:224,w:119},{x:239,y:168,w:151}]){
+      const {x,y,w}=cloud;
+      clouds.fillStyle(palette[0]).fillRect(x+12,y+15,w-15,8);
+      clouds.fillStyle(palette[1]).fillRect(x,y+8,w,9).fillRect(x+9,y,w-17,9);
+      clouds.fillStyle(palette[2]).fillRect(x+20,y-8,w-47,12);
+      clouds.fillRect(x+39,y-17,28,12).fillRect(x+w-49,y-10,22,13);
+      clouds.fillStyle(palette[3]).fillRect(x+41,y-17,23,2);
+      clouds.fillRect(x+23,y-8,16,2).fillRect(x+w-47,y-10,16,2);
+      clouds.fillStyle(palette[0]).fillRect(x+20,y+13,24,2).fillRect(x+66,y+15,31,2);
+      clouds.fillStyle(palette[2]).fillRect(x+4,y+8,12,2).fillRect(x+w-13,y+9,9,2);
+      clouds.fillStyle(palette[1]);
+      for(let i=0;i<8;i++)clouds.fillRect(x+27+i*8,y+3+i%3,3,1);
     }
   }
-  if(setting==="forest"||setting==="garden"){
-    // Clustered leaf silhouettes and broken rim light at the edges.
-    for(const side of [0,1]){
-      for(let row=0;row<14;row++){
-        const x=side?321+(row%3)*8:3+(row%3)*9,y=240+row*17;
-        marks.fillStyle(0x182a29).fillRect(x,y,21,10).fillRect(x+5,y-4,11,4);
-        marks.fillStyle(0x405a49).fillRect(x+2,y,11,2);
-        marks.fillStyle(0x68745b,0.65).fillRect(x+5,y-4,4,1);
-        marks.fillStyle(0x0b1a22).fillRect(x+8,y+7,13,3);
-      }
-    }
-  }
-  if(setting==="palace"||setting==="temple"){
-    for(let row=0;row<3;row++){
-      for(let tile=0;tile<8;tile++){
-        const x=tile*49+(row%2)*23,y=503+row*11;
-        marks.fillStyle(0x292c34,0.4).fillRect(x,y,43,1).fillRect(x,y,1,9);
-        marks.fillStyle(0xb1a58b,0.3).fillRect(x+2,y+1,37,1);
-      }
-    }
-    for(let x=35;x<330;x+=14){
-      marks.fillStyle(0xd6bc86,0.5).fillRect(x,172,4,3);
-      marks.fillStyle(0x4b3942,0.5).fillRect(x+4,175,4,2);
-    }
-  }
-  if(setting==="chamber"){
-    // Stone ledge facets, chipped corners and the shadow beneath the slab.
-    marks.fillStyle(0x303a3d).fillRect(118,440,198,6);
-    marks.fillStyle(0xb1b5a5,0.65).fillRect(124,405,180,2);
-    for(let i=0;i<20;i++){
-      marks.fillStyle(i%2?0xb2b4a7:0x414c50,0.45)
-        .fillRect(121+i*9,417+(i%3)*7,4,1);
-    }
-    marks.fillStyle(0x1b292e).fillRect(115,437,5,6).fillRect(311,410,7,4);
-  }
-  if(heaven){
-    for(let band=0;band<5;band++){
-      const x=17+band*75,y=425+(band%2)*13;
-      atmosphere.fillStyle(0xd8dfec,0.6).fillRect(x,y+9,90,11);
-      atmosphere.fillStyle(0xffffff,0.75).fillRect(x+7,y,65,12);
-      atmosphere.fillStyle(0xfff5d4,0.6).fillRect(x+23,y-5,30,6);
-    }
-  }
-  // Sparse light motes use hard-edged pixels and discrete twinkles.
-  const motes=scene.add.graphics().setDepth(19);
-  for(let i=0;i<16;i++){
-    const x=Math.floor(18+random()*324),y=Math.floor(215+random()*280);
-    motes.fillStyle(heaven?0xffedb2:0xc6d5cb,heaven?0.7:0.25).fillRect(x,y,1,2);
-    if(heaven&&i%4===0)motes.fillRect(x-1,y+1,3,1);
-  }
-  scene.tweens.add({targets:motes,alpha:0.3,duration:1800,yoyo:true,repeat:-1,ease:"Stepped",easeParams:[4]});
-
-  if(!heaven){
-    for(let i=0;i<230;i++){
-      const x=Math.floor(random()*360),y=ground+Math.floor(random()*(537-ground));
-      marks.fillStyle(i%4?shadow:light,i%4?0.15:0.22)
-        .fillRect(x,y,1+Math.floor(random()*4),1);
-    }
-    for(let i=0;i<18;i++){
-      const x=Math.floor(random()*350),y=ground+10+Math.floor(random()*25);
-      marks.fillStyle(shadow,0.5).fillRect(x,y,6,3);
-      marks.fillStyle(light,0.4).fillRect(x+1,y,3,1);
-    }
-  }
-  if(setting==="forest"||setting==="garden"){
-    if(setting==="forest"){
-      for(let i=0;i<20;i++){
-        const x=84+i*9,y=472-(x-84)*0.17;
-        marks.fillStyle(i%3?0x9d7954:0x201e25,0.35).fillRect(x,y+(i%3)*3,5,1);
-      }
-    }
-    for(let i=0;i<170;i++){
-      const side=i%2===0;
-      const x=side?random()*72:290+random()*70;
-      const y=210+random()*280;
-      marks.fillStyle(i%3?0x405747:0x708066,0.35).fillRect(x,y,3,2);
-    }
-    for(let i=0;i<26;i++){
-      const x=random()*360,y=490+random()*35;
-      marks.fillStyle(0x506647,0.65).fillRect(x,y,1,5).fillRect(x+2,y+2,1,3);
-    }
-    for(let i=0;i<28;i++){
-      const x=5+random()*350,y=280+random()*245;
-      marks.fillStyle(0xc4d3bc,0.22).fillRect(x,y,1,1);
+  const groundTop={forest:490,garden:500,palace:511,temple:515,hill:522,tomb:522,chamber:491,heaven:540,beach:496}[setting];
+  if(setting!=="heaven"){
+    for(let i=0;i<150;i++){
+      const x=Math.floor(random()*360),y=groundTop+Math.floor(random()*(537-groundTop));
+      marks.fillStyle(i%4?0x27332f:0xc5b999,i%4?0.18:0.25).fillRect(x,y,1+i%3,1);
     }
   }
   if(setting==="palace"||setting==="temple"){
-    const top=setting==="palace"?185:175;
-    for(let row=0;row<8;row++){
-      const y=top+row*30;
-      for(let column=0;column<5;column++){
-        const x=24+column*64-(row%2)*26;
-        if(x>130&&x<231)continue;
-        marks.lineStyle(1,0x352e35,0.22).lineBetween(x,y,x+56,y);
-        marks.lineBetween(x,y,x,y+28);
-        marks.fillStyle(0xe4d4b5,0.15).fillRect(x+2,y+2,48,1);
+    const columns=setting==="palace"?[31,304]:[43,99,239,295];
+    const isWall=(x:number,y:number)=>{
+      const inWall=setting==="palace"?x>=0&&x<360&&y>=185&&y<490:x>=24&&x<336&&y>=194&&y<415;
+      const inDoor=setting==="palace"?x>112&&x<248:x>139&&x<221&&y>235;
+      return inWall&&!inDoor&&!columns.some(column=>x>=column-7&&x<=column+31);
+    };
+    for(let row=0;row<10;row++){
+      const y=194+row*28;
+      for(let x=0;x<360;x++){
+        if(!isWall(x,y))continue;
+        marks.fillStyle(0x342c31,0.35).fillRect(x,y,1,1);
+        if((x+(row%2)*27)%55===0){
+          for(let h=1;h<27;h++){
+            if(isWall(x,y+h))marks.fillStyle(0x342c31,0.25).fillRect(x,y+h,1,1);
+          }
+        }
+        if(isWall(x,y+2))marks.fillStyle(0xd6c7a8,0.22).fillRect(x,y+2,1,1);
       }
     }
-    for(const x of [48,105,244,301]){
-      marks.fillStyle(0xf4dfbb,0.18).fillRect(x,194,2,208);
-      marks.fillStyle(0x392f30,0.2).fillRect(x+8,194,1,208);
-    }
-    for(const x of [83,273]){
-      marks.fillStyle(0x342a2d).fillRect(x,271,5,39);
-      marks.fillStyle(0xe6a358).fillRect(x-2,259,9,13);
-      marks.fillStyle(0xffdca0).fillRect(x,255,4,12);
-      marks.fillStyle(0xffb861,0.07).fillRect(x-15,242,34,45);
+    for(const x of columns){
+      marks.fillStyle(0xf0dec1,0.3).fillRect(x+3,195,2,208);
+      marks.fillStyle(0x49403d,0.3).fillRect(x+18,195,2,208);
     }
   }
   if(setting==="tomb"||setting==="chamber"){
-    if(setting==="chamber"){
-      for(let i=0;i<8;i++){
-        marks.fillStyle(0xffffff,0.2).fillRect(155+i*17,393+(i%3)*4,8,1);
-      }
+    for(let i=0;i<210;i++){
+      const x=Math.floor(25+random()*310),y=Math.floor(160+random()*330);
+      const inRock=setting==="tomb"
+        ? ((x-190)/183)**2+((y-430)/143)**2<1&&!(x>153&&x<233&&y>394)
+        : false;
+      // The chamber uses its outer wall only, leaving the ledge and shroud clear.
+      const inChamberWall=setting==="chamber"&&x>=22&&x<=338&&y>=160&&y<490&&
+        (x<44||x>316||y<175);
+      if(!(setting==="tomb"?inRock:inChamberWall))continue;
+      marks.fillStyle(i%3?0x27343a:0xd0cbbc,0.3).fillRect(x,y,2+i%4,1);
     }
-    const top=setting==="chamber"?161:330;
-    for(let i=0;i<120;i++){
-      const x=30+random()*302,y=top+random()*(480-top);
-      if(setting==="chamber"&&x>80&&x<297&&y<451)continue;
-      if(setting==="tomb"&&x>152&&x<234&&y>391)continue;
-      marks.fillStyle(i%3?0x242f35:0xd0cbbc,0.24).fillRect(x,y,2+random()*8,1);
-    }
-    marks.lineStyle(1,0x202c31,0.4).lineBetween(87,380,101,400);
-    marks.lineBetween(101,400,96,419);
   }
   if(setting==="hill"){
     // Metal highlights, armour joints and cloth folds on the two guards.
@@ -169,23 +94,5 @@ export function detailInvestigation(scene:Phaser.Scene,setting:Setting):void {
       }
       guardLayer.add(armour);
     }
-    for(let i=0;i<35;i++){
-      const x=random()*360,y=376+random()*138;
-      // Keep the centre clear for the cross, guards and evidence.
-      if(x>112&&x<323)continue;
-      marks.fillStyle(0x5c6757,0.6).fillRect(x,y,3,2);
-      marks.fillStyle(0xc4b593,0.4).fillRect(x,y,2,1);
-    }
-  }
-  if(heaven){
-    for(let i=0;i<70;i++){
-      const x=random()*360,y=180+random()*255;
-      marks.fillStyle(0xfff7d3,0.28).fillRect(x,y,1,2);
-    }
-  }
-  // A fine film of pixel grain unifies vector shapes and character sprites.
-  for(let i=0;i<850;i++){
-    const x=Math.floor(random()*360),y=70+Math.floor(random()*465);
-    marks.fillStyle(i%2?0xffffff:0x10121e,0.025).fillRect(x,y,1,1);
   }
 }
