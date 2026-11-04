@@ -12,6 +12,67 @@ export function detailInvestigation(scene:Phaser.Scene,setting:Setting):void {
   const ground=setting==="chamber"?490:setting==="hill"?505:480;
   const shadow=dark?0x0b1720:0x37493e;
   const light=heaven?0xfff5d5:dark?0x879585:0xc4b79a;
+  const atmosphere=scene.add.graphics().setDepth(17);
+  const cloudColor=heaven?0xf4f1e5:dark?0x343445:0xb8c5c5;
+  if(["forest","garden","hill","tomb","heaven","beach"].includes(setting)){
+    for(let band=0;band<4;band++){
+      const x=-25+band*109,y=154+(band%2)*33;
+      atmosphere.fillStyle(cloudColor,dark?0.5:0.35);
+      atmosphere.fillRect(x,y,87,5).fillRect(x+13,y-5,58,5).fillRect(x+28,y-10,29,5);
+      atmosphere.fillStyle(dark?0x535166:0xf4ebd8,0.22).fillRect(x+28,y-10,26,1);
+    }
+  }
+  if(setting==="forest"||setting==="garden"){
+    // Clustered leaf silhouettes and broken rim light at the edges.
+    for(const side of [0,1]){
+      for(let row=0;row<14;row++){
+        const x=side?321+(row%3)*8:3+(row%3)*9,y=240+row*17;
+        marks.fillStyle(0x182a29).fillRect(x,y,21,10).fillRect(x+5,y-4,11,4);
+        marks.fillStyle(0x405a49).fillRect(x+2,y,11,2);
+        marks.fillStyle(0x68745b,0.65).fillRect(x+5,y-4,4,1);
+        marks.fillStyle(0x0b1a22).fillRect(x+8,y+7,13,3);
+      }
+    }
+  }
+  if(setting==="palace"||setting==="temple"){
+    for(let row=0;row<3;row++){
+      for(let tile=0;tile<8;tile++){
+        const x=tile*49+(row%2)*23,y=503+row*11;
+        marks.fillStyle(0x292c34,0.4).fillRect(x,y,43,1).fillRect(x,y,1,9);
+        marks.fillStyle(0xb1a58b,0.3).fillRect(x+2,y+1,37,1);
+      }
+    }
+    for(let x=35;x<330;x+=14){
+      marks.fillStyle(0xd6bc86,0.5).fillRect(x,172,4,3);
+      marks.fillStyle(0x4b3942,0.5).fillRect(x+4,175,4,2);
+    }
+  }
+  if(setting==="chamber"){
+    // Stone ledge facets, chipped corners and the shadow beneath the slab.
+    marks.fillStyle(0x303a3d).fillRect(118,440,198,6);
+    marks.fillStyle(0xb1b5a5,0.65).fillRect(124,405,180,2);
+    for(let i=0;i<20;i++){
+      marks.fillStyle(i%2?0xb2b4a7:0x414c50,0.45)
+        .fillRect(121+i*9,417+(i%3)*7,4,1);
+    }
+    marks.fillStyle(0x1b292e).fillRect(115,437,5,6).fillRect(311,410,7,4);
+  }
+  if(heaven){
+    for(let band=0;band<5;band++){
+      const x=17+band*75,y=425+(band%2)*13;
+      atmosphere.fillStyle(0xd8dfec,0.6).fillRect(x,y+9,90,11);
+      atmosphere.fillStyle(0xffffff,0.75).fillRect(x+7,y,65,12);
+      atmosphere.fillStyle(0xfff5d4,0.6).fillRect(x+23,y-5,30,6);
+    }
+  }
+  // Sparse light motes use hard-edged pixels and discrete twinkles.
+  const motes=scene.add.graphics().setDepth(19);
+  for(let i=0;i<16;i++){
+    const x=Math.floor(18+random()*324),y=Math.floor(215+random()*280);
+    motes.fillStyle(heaven?0xffedb2:0xc6d5cb,heaven?0.7:0.25).fillRect(x,y,1,2);
+    if(heaven&&i%4===0)motes.fillRect(x-1,y+1,3,1);
+  }
+  scene.tweens.add({targets:motes,alpha:0.3,duration:1800,yoyo:true,repeat:-1,ease:"Stepped",easeParams:[4]});
 
   if(!heaven){
     for(let i=0;i<230;i++){
