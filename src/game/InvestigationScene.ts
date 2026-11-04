@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { detailFigure, detailBasin, detailCross } from "./investigationProps";
 import { detailInvestigation } from "./investigationArt";
 import { audio } from "./audio";
 import { createBeachCharacter } from "./beachArt";
@@ -157,6 +158,11 @@ export class InvestigationScene extends Phaser.Scene {
       wood.fillStyle(0x591e2c).fillEllipse(stain.x,stain.y,stain.w,10);
       wood.fillStyle(0x833043,0.7).fillEllipse(stain.x-3,stain.y-2,stain.w*0.5,3);
     }
+    for(let i=0;i<29;i++){
+      const x=83+i*7,y=466-(x-83)*0.17;
+      wood.fillStyle(i%3?0x997750:0x201c23,0.65).fillRect(x,y+i%3*4,4,1);
+    }
+    wood.lineStyle(1,0x282128).strokeEllipse(222,448,12,5);
     wood.fillStyle(0x591e2c).fillEllipse(175,496,7,4).fillEllipse(195,503,4,3);
     this.add.text(24,35,"ALPHA — GOLGOTHA",{
       fontFamily:"monospace",fontSize:"18px",color:"#d4c4c3",
@@ -314,6 +320,8 @@ export class InvestigationScene extends Phaser.Scene {
     basin.fillStyle(0x807f82).fillRect(166,413,32,53);
     basin.fillStyle(0xbcb9ad).fillEllipse(183,407,75,24);
     basin.fillStyle(0x80a8b4).fillEllipse(183,402,58,13);
+    detailFigure(pilate,"governor");
+    detailBasin(basin);
     const washing=this.add.graphics();
     washing.lineStyle(2,0xc7e6e9,0.8).lineBetween(181,394,177,404);
     washing.lineBetween(188,394,192,405);
@@ -461,6 +469,7 @@ export class InvestigationScene extends Phaser.Scene {
     wood.lineBetween(-59,-176,58,-176);
     wood.fillStyle(0x241e20).fillCircle(-48,-171,4).fillCircle(48,-171,4).fillCircle(0,-37,4);
     wood.fillStyle(0x702d37).fillEllipse(-48,-165,9,16).fillEllipse(48,-165,9,16).fillEllipse(0,-31,9,18);
+    detailCross(wood);
     const cross=this.add.container(162,510,[wood]).setDepth(8);
     const sign=this.add.text(162,285,"LE ROI DES JUIFS",{
       fontFamily:"monospace",fontSize:"10px",color:"#302b28",
@@ -672,6 +681,7 @@ export class InvestigationScene extends Phaser.Scene {
     jesus.fillStyle(0x814550).fillCircle(160,378,2).fillCircle(241,378,2);
     jesus.fillStyle(0xcba27f).fillEllipse(218,383,11,15);
     jesus.lineStyle(2,0x814550).lineBetween(216,380,220,385);
+    detailFigure(jesus,"jesus");
     this.add.text(180,35,"LE RAPPORT AU PARADIS",{
       fontFamily:"monospace",fontSize:"17px",color:"#37465c",
     }).setOrigin(0.5);
@@ -801,9 +811,60 @@ export class InvestigationScene extends Phaser.Scene {
           audio.play("confirm");
           text.setText("Useless ramasse le sachet.\n\nUSELESS : Cette fois, tu viens avec moi.\n\nUne petite chose de mieux.");
           this.evidence.add("Sachet ramassé");
+          const halo=this.add.ellipse(0,-32,29,8).setStrokeStyle(3,0xffe19b);
+          hero.setPosition(0,0);
+          const dancer=this.add.container(182,510,[hero,halo]).setDepth(25);
+          this.tweens.add({targets:dancer,y:502,angle:8,duration:280,yoyo:true,repeat:9});
+          this.tweens.add({targets:hero,scaleX:0.92,scaleY:1.06,duration:280,yoyo:true,repeat:9});
+          this.time.delayedCall(1800,()=>this.showEncouragementCredits(dancer));
         }});
       });
     detailInvestigation(this,"beach");
+  }
+
+  private showEncouragementCredits(dancer:Phaser.GameObjects.Container):void {
+    this.notebook?.destroy(true);
+    this.notebookButton?.setVisible(false);
+    // Keep the final dance in view while the credits rise beside it.
+    this.add.rectangle(180,320,360,640,0x101b2b,0.94).setDepth(20);
+    this.tweens.killTweensOf(dancer);
+    dancer.setPosition(180,540).setDepth(25);
+    this.tweens.add({targets:dancer,y:532,angle:-9,duration:330,yoyo:true,repeat:-1});
+    const credits=this.add.container(180,660).setDepth(24);
+    const blocks=[
+      ["UPLESS","ALPHA — LE CHEMIN RETROUVÉ"],
+      ["Avec","Useless\nLa girafe\nLe singe\nLes deux Pinkwindkis"],
+      ["Psaume 22 (23), 1","« Le Seigneur est mon berger :\nje ne manque de rien. »"],
+      ["Psaume 26 (27), 1","« Le Seigneur est ma lumière\net mon salut »"],
+      ["Psaume 26 (27), 14","« sois fort et prends courage »"],
+      ["Matthieu 5, 9","« Heureux les artisans de paix »"],
+      ["Romains 12, 21","« Ne te laisse pas vaincre par le mal,\nmais sois vainqueur du mal par le bien. »"],
+      ["Merci d’avoir joué","Et d’avoir ramassé le sachet."],
+      ["Textes bibliques","Courts extraits de la traduction AELF\nRéférences des Psaumes\nnumérotation liturgique (hébraïque)"],
+    ];
+    blocks.forEach(([heading,body],index)=>{
+      credits.add(this.add.text(0,index*205,heading,{
+        fontFamily:"monospace",fontSize:"17px",color:"#f1d798",
+        align:"center",wordWrap:{width:320},
+      }).setOrigin(0.5,0));
+      credits.add(this.add.text(0,index*205+48,body,{
+        fontFamily:"monospace",fontSize:"13px",color:"#d7e6e3",
+        align:"center",lineSpacing:8,wordWrap:{width:314},
+      }).setOrigin(0.5,0));
+    });
+    this.tweens.add({targets:credits,y:-blocks.length*205,duration:65000,ease:"Linear",
+      onComplete:()=>{
+        credits.destroy(true);
+        this.add.text(180,245,"PAIX SUR TON CHEMIN",{
+          fontFamily:"monospace",fontSize:"18px",color:"#f1d798",
+        }).setOrigin(0.5).setDepth(26);
+        const menu=this.add.text(180,335,"RETOUR AU MENU",{
+          fontFamily:"monospace",fontSize:"13px",color:"#d7e6e3",
+          backgroundColor:"#344558",padding:{x:14,y:12},
+        }).setOrigin(0.5).setDepth(26).setInteractive({useHandCursor:true});
+        menu.once("pointerdown",()=>{this.tweens.killAll();this.scene.start("MenuScene");});
+      },
+    });
   }
 
   private button(y:number,label:string,action:()=>void):void {
