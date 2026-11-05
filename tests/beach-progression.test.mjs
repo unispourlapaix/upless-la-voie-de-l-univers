@@ -7,7 +7,7 @@ const Sine=require('../node_modules/phaser/src/math/easing/sine');
 const actors=[];
 function actor(){const a={x:0,y:0,visible:true,parent:null,body:{enable:true},setAlpha(){return a;},setScale(){return a;},setDepth(){return a;},setVisible(v){a.visible=v;return a;},setPosition(x,y){a.x=x;a.y=y;return a;},destroy(){a.destroyed=true;},add(child){child.parent=a;return a;}};actors.push(a);return a;}
 let saves=0,sceneStarted;
-const e={};new Function('require','exports',ts.transpileModule(fs.readFileSync(new URL('../src/game/BeachScene.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText)(n=>n==='phaser'?{Scene:class{},Math:{Easing:{Sine}}}:n==='./audio'?{audio:{play(){},whisper(){return()=>{};}}}:n==='./beachArt'?{createBeachCharacter:()=>actor()}:n==='./types'?{loadSave:()=>({unlockedLevel:4}),writeSave(){saves++;}}:{},e);
+const e={};new Function('require','exports',ts.transpileModule(fs.readFileSync(new URL('../src/game/BeachScene.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText)(n=>n==='phaser'?{Scene:class{},Math:{Easing:{Sine}}}:n==='./trophies'?{collectTrophy(){}}:n==='./audio'?{audio:{play(){},whisper(){return()=>{};}}}:n==='./beachArt'?{createBeachCharacter:()=>actor()}:n==='./types'?{loadSave:()=>({unlockedLevel:4}),writeSave(){saves++;}}:{},e);
 const s=new e.BeachScene();let now=0;const events=[];
 const schedule=(delay,fn)=>events.push({at:now+delay,fn});
 s.tweens={killTweensOf(){},add(o){if(o.onComplete)schedule(o.duration??0,o.onComplete);},addCounter(o){o.onUpdate({getValue:()=>1});if(o.onComplete)schedule(o.duration,o.onComplete);}};

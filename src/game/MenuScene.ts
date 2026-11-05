@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { audio } from "./audio";
 import { addPixelVista } from "./pixelArt";
-import { getLanguage, icon, toggleLanguage } from "./language";
+import { getLanguage, icon, languages, setLanguage } from "./language";
 import { loadSave } from "./types";
 
 export class MenuScene extends Phaser.Scene {
@@ -30,7 +30,7 @@ export class MenuScene extends Phaser.Scene {
         letterSpacing: 2,
       })
       .setOrigin(0.5);
-    const musicLabel = this.add
+    this.add
       .text(180, 278, icon("♫", "POP POLYPHONIQUE SYNTHÉTISÉE", "SYNTH POP POLYPHONY"), {
         fontFamily: "monospace",
         fontSize: "10px",
@@ -79,13 +79,34 @@ export class MenuScene extends Phaser.Scene {
 
     this.tweens.add({ targets: start, scale: 1.04, duration: 900, yoyo: true, repeat: -1 });
     languageButton.on("pointerdown", () => {
-      const next = toggleLanguage();
-      languageButton.setText(next.toUpperCase());
-      musicLabel.setText(icon("♫", "POP POLYPHONIQUE SYNTHÉTISÉE", "SYNTH POP POLYPHONY"));
-      start.setText(icon("▶", "TOUCHER POUR COMMENCER", "TOUCH TO START"));
-      audio.play("tap");
+      const panel=this.add.container(0,0).setDepth(300);
+      panel.add(this.add.rectangle(180,320,350,620,0x172330,0.99).setInteractive());
+      const names=["Français","English","Español","Português","Deutsch","Italiano","Русский","العربية","中文","日本語","한국어","हिन्दी"];
+      languages.forEach((language,index)=>{
+        const choice=this.add.text(30+(index%2)*155,92+Math.floor(index/2)*72,names[index],{
+          fontFamily:"Arial, sans-serif",fontSize:"18px",color:"#f1e5ce",
+          backgroundColor:language===getLanguage()?"#527567":"#344558",
+          padding:{x:12,y:14},
+        }).setInteractive({useHandCursor:true});
+        panel.add(choice);
+        choice.on("pointerdown",()=>{
+          setLanguage(language);
+          audio.play("tap");
+          this.scene.restart();
+        });
+      });
+      const close=this.add.text(180,555,"×",{
+        fontFamily:"Arial",fontSize:"28px",color:"#f1e5ce",padding:{x:25,y:10},
+      }).setOrigin(0.5).setInteractive({useHandCursor:true});
+      panel.add(close);
+      close.once("pointerdown",()=>panel.destroy(true));
     });
 
+    this.add.text(180,565,"TROPHÉES ET SAGESSE",{
+      fontFamily:"monospace",fontSize:"12px",color:"#dce7ce",
+      backgroundColor:"#293955",padding:{x:14,y:12},
+    }).setOrigin(0.5).setInteractive({useHandCursor:true})
+      .on("pointerdown",()=>this.scene.start("TrophyScene"));
     start.on("pointerdown", () => {
       void audio.start();
       audio.play("confirm");

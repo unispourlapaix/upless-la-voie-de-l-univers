@@ -65,9 +65,10 @@ export type SaveData = {
   vibration: boolean;
   sound: boolean;
   language: Language;
+  trophies?:import("./trophies").TrophyId[];
 };
 
-export type Language = "fr" | "en";
+export type Language = "fr" | "en" | "es" | "pt" | "de" | "it" | "ru" | "ar" | "zh" | "ja" | "ko" | "hi";
 
 export const defaultSave: SaveData = {
   unlockedLevel: 1,

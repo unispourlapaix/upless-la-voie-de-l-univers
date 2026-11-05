@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { collectTrophy } from "./trophies";
 import { detailFigure, detailBasin, detailCross } from "./investigationProps";
 import { detailInvestigation } from "./investigationArt";
 import { audio } from "./audio";
@@ -190,6 +191,7 @@ export class InvestigationScene extends Phaser.Scene {
     const purseHit=this.add.rectangle(281,507,52,50,0xffffff,0.001).setVisible(false);
     evidence.once("pointerdown",()=>{
       this.evidence.add("Bois ensanglanté");
+      collectTrophy("cross");
       audio.play("tap");
       text.setText("USELESS : Qui a subi une telle atrocité… et perdu tout ce sang ?");
       this.time.delayedCall(4500,()=>{
@@ -201,6 +203,7 @@ export class InvestigationScene extends Phaser.Scene {
     });
     thornHit.once("pointerdown",()=>{
       this.evidence.add("Épine");
+      collectTrophy("thorn");
       thornHit.disableInteractive();
       audio.play("confirm");
       text.setText("USELESS : Une épine… Elle était coincée dans le bois.\n\nNouvel indice recueilli.");
@@ -212,6 +215,7 @@ export class InvestigationScene extends Phaser.Scene {
     });
     purseHit.once("pointerdown",()=>{
       this.evidence.add("Trente pièces");
+      collectTrophy("coins");
       purseHit.disableInteractive();
       audio.play("confirm");
       text.setText("USELESS : Trente pièces d’argent…\nAucun nom. À qui appartenait cette bourse ?");
@@ -291,6 +295,7 @@ export class InvestigationScene extends Phaser.Scene {
       .once("pointerdown",()=>{
         foundEar=true;
         this.evidence.add("Oreille");
+      collectTrophy("ear");
         ear.setVisible(false);
         audio.play("confirm");
         message.setText("USELESS : Une oreille… ensanglantée.\nÀ qui appartient-elle ?\nDes hommes sont venus chercher quelqu’un ici. Qui ont-ils emmené ?");
@@ -361,6 +366,7 @@ export class InvestigationScene extends Phaser.Scene {
       if(basinCollected)return;
       basinCollected=true;
       this.evidence.add("Lave-mains");
+      collectTrophy("basin");
       basinHit.disableInteractive();
       this.tweens.killTweensOf(washing);
       basin.setVisible(false);
@@ -520,6 +526,7 @@ export class InvestigationScene extends Phaser.Scene {
         return;
       }
       this.evidence.add("Tunique pourpre");
+      collectTrophy("robe");
       garmentHit.disableInteractive();
       tunic.setVisible(false);
       audio.play("confirm");
@@ -635,6 +642,7 @@ export class InvestigationScene extends Phaser.Scene {
     });
     shroudHit.once("pointerdown",()=>{
         this.evidence.add("Linceul blanc");
+      collectTrophy("shroud");
         audio.play("confirm");
         message.setText("USELESS : Le tombeau est vide…\nEt ce linceul blanc ?\nOù est passé le corps ?");
         const next=this.add.text(180,120,"SORTIR DU TOMBEAU →",{
@@ -814,6 +822,7 @@ export class InvestigationScene extends Phaser.Scene {
           audio.play("confirm");
           text.setText("Useless ramasse le sachet.\n\nUSELESS : Cette fois, tu viens avec moi.\n\nUne petite chose de mieux.");
           this.evidence.add("Sachet ramassé");
+      collectTrophy("bag");
           const halo=this.add.ellipse(0,-32,29,8).setStrokeStyle(3,0xffe19b);
           hero.setPosition(0,0);
           const dancer=this.add.container(182,510,[hero,halo]).setDepth(25);

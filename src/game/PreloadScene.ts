@@ -37,8 +37,9 @@ export class PreloadScene extends Phaser.Scene {
     graphics.generateTexture("rock", 26, 26);
     graphics.destroy();
 
-    const chapter=new URLSearchParams(window.location.search).get("chapter");
-    this.scene.start(chapter==="alpha"?"InvestigationScene":"MenuScene");
+    const params=new URLSearchParams(window.location.search);
+    const chapter=params.get("chapter");
+    this.scene.start(params.get("view")==="trophies"?"TrophyScene":chapter==="alpha"?"InvestigationScene":"MenuScene");
   }
 }
 

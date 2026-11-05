@@ -1,9 +1,11 @@
 import Phaser from "phaser";
+import { installLocalization } from "./game/localization";
 import "./style.css";
 import { BeachScene } from "./game/BeachScene";
 import { DesertScene } from "./game/DesertScene";
 import { GameScene } from "./game/GameScene";
 import { LevelCompleteScene } from "./game/LevelCompleteScene";
+import { TrophyScene } from "./game/TrophyScene";
 import { MenuScene } from "./game/MenuScene";
 import { InvestigationScene } from "./game/InvestigationScene";
 import { OmegaScene } from "./game/OmegaScene";
@@ -28,6 +30,7 @@ if ("serviceWorker" in navigator) {
 }
 
 try {
+  installLocalization();
   const game = new Phaser.Game({
     // Canvas is deliberately used for wider compatibility on mobile browsers.
     type: Phaser.CANVAS,
@@ -48,7 +51,7 @@ try {
       width: 360,
       height: 640,
     },
-    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, DesertScene, BeachScene, MoonScene, OmegaScene, InvestigationScene, LevelCompleteScene],
+    scene: [PreloadScene, MenuScene, GameScene, OfficeScene, DesertScene, BeachScene, MoonScene, OmegaScene, InvestigationScene, TrophyScene, LevelCompleteScene],
     render: {
       antialias: false,
       pixelArt: true,

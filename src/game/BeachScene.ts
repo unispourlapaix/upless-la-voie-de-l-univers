@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { collectTrophy, type TrophyId } from "./trophies";
 import {audio} from "./audio";
 import {TouchInput} from "./input";
 import {PlayerController} from "./player";
@@ -199,6 +200,7 @@ export class BeachScene extends Phaser.Scene {
     const object=this.belongings[index];
     if(!this.helperFound||!object.visible)return;
     object.setVisible(false);
+    collectTrophy((["headset","slip","book","radio"] as TrophyId[])[index]);
     audio.play("confirm");
     this.allBelongingsFound=!this.belongings.some(item=>item.visible);
     this.refreshObjective();
